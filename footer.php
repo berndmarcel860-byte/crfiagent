@@ -3,7 +3,7 @@
     <div class="footer-content">
         <p class="m-b-0">Copyright © <?php echo date('Y'); ?> Scam Recovery. All rights reserved.</p>
         <span>
-            <a href="terms.php" class="text-gray m-r-15">Term &amp; Conditions</a>
+            <a href="terms.php" class="text-gray m-r-15">Term &amp; Condition</a>
             <a href="privacy.php" class="text-gray">Privacy &amp; Policy</a>
         </span>
     </div>
