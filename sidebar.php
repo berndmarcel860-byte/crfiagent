@@ -34,16 +34,6 @@
                     </a>
                 </li>
 
-                <!-- Documents -->
-                <li class="nav-item">
-                    <a href="packages.php">
-                        <span class="icon-holder">
-                            <i class="anticon anticon-folder"></i>
-                        </span>
-                        <span class="title">Packages</span>
-                    </a>
-                </li>
-
                 <!-- KYC Verification -->
                 <li class="nav-item">
                     <a href="kyc.php">
