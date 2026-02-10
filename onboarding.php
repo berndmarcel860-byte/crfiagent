@@ -357,17 +357,4 @@ if (!empty($_SESSION['error'])) {
 </style>
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-$(function() {
-
-// File input label
-$('#proofPayment').on('change', function() {
-    let f = $(this).val().split('\\').pop();
-    $(this).next('.custom-file-label').html(f);
-});
-
-});
-</script>
-
 <?php require_once __DIR__ . '/footer.php'; ?>
