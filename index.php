@@ -614,23 +614,7 @@ body{background:var(--bg);font-family: "Inter", system-ui, -apple-system, "Segoe
 .small-muted{color:var(--muted)}
 .tooltip-inner{max-width:280px}
 </style>
-<?php
-// --- Trial Countdown Fetch ---
-$trialInfo = null;
-if (!empty($userId)) {
-    $trialStmt = $pdo->prepare("
-        SELECT end_date
-        FROM user_packages
-        WHERE user_id = ? AND status = 'active'
-          AND end_date > NOW()
-          AND package_id IN (SELECT id FROM packages WHERE price = 0)
-        ORDER BY end_date DESC
-        LIMIT 1
-    ");
-    $trialStmt->execute([$userId]);
-    $trialInfo = $trialStmt->fetch(PDO::FETCH_ASSOC);
-}
-?>
+
 
 <div class="main-content">
     <div class="container-fluid">
@@ -670,97 +654,6 @@ if (!empty($userId)) {
                 </div>
             </div>
         </div>
-<?php
-$pkgStmt = $pdo->prepare("
-    SELECT up.*, p.name AS package_name, p.price
-    FROM user_packages up
-    JOIN packages p ON up.package_id = p.id
-    WHERE up.user_id = ?
-    ORDER BY up.start_date DESC
-    LIMIT 1
-");
-
-
-
-$pkgStmt->execute([$userId]);
-$userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
-?>
-
-<?php if ($userPackage): ?>
-    <?php
-    $isTrial = ($userPackage['price'] == 0);
-    $isActive = ($userPackage['status'] === 'active');
-    $isPending = ($userPackage['status'] === 'pending');
-    $isExpired = (strtotime($userPackage['end_date']) < time());
-    ?>
-
-    <?php if ($isTrial && $isActive && !$isExpired): ?>
-        <!-- Trial countdown -->
-        <div id="trialCountdownBar" class="alert alert-info text-center shadow-sm mb-4" style="font-weight:500;">
-            <i class="anticon anticon-clock-circle"></i>
-            Your <strong>48H Test Access</strong> expires in
-            <span id="trialCountdown" data-end="<?= htmlspecialchars($userPackage['end_date'], ENT_QUOTES) ?>"></span>.
-            <a href="packages.php" class="btn btn-sm btn-outline-light ml-2">Upgrade Now</a>
-        </div>
-
-        <script>
-        (function(){
-            var el = document.getElementById('trialCountdown');
-            if (!el) return;
-            var endTime = new Date(el.dataset.end).getTime();
-
-            function updateCountdown() {
-                var now = new Date().getTime();
-                var diff = endTime - now;
-                if (diff <= 0) {
-                    el.textContent = 'Expired';
-                    el.parentElement.classList.remove('alert-info');
-                    el.parentElement.classList.add('alert-danger');
-                    return;
-                }
-                var hours = Math.floor(diff / (1000 * 60 * 60));
-                var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                var seconds = Math.floor((diff % (1000 * 60)) / 1000);
-                el.textContent = `${hours}h ${minutes}m ${seconds}s`;
-            }
-            updateCountdown();
-            setInterval(updateCountdown, 1000);
-        })();
-        </script>
-
-    <?php elseif ($isPending): ?>
-        <!-- Pending package -->
-        <div class="alert alert-warning text-center shadow-sm mb-4">
-            <i class="anticon anticon-hourglass"></i>
-            Your <strong><?= htmlspecialchars($userPackage['package_name']) ?></strong> package is currently <strong>pending approval</strong>.<br>
-            Once verified, your access will be activated automatically.
-        </div>
-
-    <?php elseif ($isActive && !$isExpired): ?>
-        <!-- Active paid package -->
-        <div class="alert alert-success text-center shadow-sm mb-4">
-            <i class="anticon anticon-check-circle"></i>
-            Active Subscription: <strong><?= htmlspecialchars($userPackage['package_name']) ?></strong><br>
-            Valid until <?= date('M d, Y H:i', strtotime($userPackage['end_date'])) ?>.
-            <a href="subscription_status.php" class="btn btn-sm btn-outline-light ml-2">View Details</a>
-        </div>
-
-    <?php else: ?>
-        <!-- Expired -->
-        <div class="alert alert-danger text-center shadow-sm mb-4">
-            <i class="anticon anticon-warning"></i>
-            Your subscription has expired.
-            <a href="packages.php" class="btn btn-sm btn-outline-light ml-2">Renew Now</a>
-        </div>
-    <?php endif; ?>
-<?php else: ?>
-    <!-- No package yet -->
-    <div class="alert alert-info text-center shadow-sm mb-4">
-        <i class="anticon anticon-info-circle"></i>
-        You have no active package.
-        <a href="packages.php" class="btn btn-sm btn-outline-light ml-2">Choose a Plan</a>
-    </div>
-<?php endif; ?>
 
 
         <!-- AI INSIGHT CARD -->
