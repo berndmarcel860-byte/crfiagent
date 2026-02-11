@@ -246,19 +246,52 @@ class EmailTemplateHelper {
             background-color: #ffffff;
         }
         .email-footer {
-            background-color: #333;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-            font-size: 12px;
-            border-radius: 0 0 10px 10px;
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 25px;
+            text-align: left;
+            font-size: 14px;
         }
         .email-footer p {
             margin: 5px 0;
         }
         .email-footer a {
-            color: #2da9e3;
+            color: #007bff;
             text-decoration: none;
+        }
+        .signature {
+            margin-top: 40px;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 25px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+        }
+        .signature img {
+            height: 50px;
+            margin: 0 auto 12px;
+            display: block;
+        }
+        .signature strong {
+            color: #111;
+            font-size: 15px;
+        }
+        .signature a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .signature p {
+            font-size: 12px;
+            color: #777;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            padding: 15px;
+            background: #f1f3f5;
         }
         a {
             color: #2950a8;
@@ -297,6 +330,9 @@ class EmailTemplateHelper {
             .email-header {
                 padding: 20px;
             }
+            .signature img {
+                height: 45px;
+            }
         }
     </style>
 </head>
@@ -310,13 +346,26 @@ class EmailTemplateHelper {
             ' . $content . '
         </div>
         <div class="email-footer">
-            <p style="font-size: 14px; margin-bottom: 10px;">Mit freundlichen Grüßen,<br>
-            <strong>Ihr ' . htmlspecialchars($this->systemSettings['brand_name']) . ' Team</strong></p>
-            <hr style="border: none; border-top: 1px solid #555; margin: 15px 0;">
-            <p>&copy; ' . date('Y') . ' ' . htmlspecialchars($this->systemSettings['brand_name']) . '. Alle Rechte vorbehalten.</p>
-            <p>Sie erhalten diese E-Mail, weil Sie ein aktives Konto bei uns haben.</p>
-            <p><a href="' . htmlspecialchars($this->systemSettings['site_url']) . '/unsubscribe">Abmelden</a> | <a href="' . htmlspecialchars($this->systemSettings['site_url']) . '/privacy">Datenschutzerklärung</a></p>
+            <p>Mit freundlichen Grüßen,</p>
+            
+            <div class="signature">
+                <img src="' . htmlspecialchars($this->systemSettings['logo_url'] ?? 'https://kryptox.co.uk/assets/img/logo.png') . '" alt="' . htmlspecialchars($this->systemSettings['brand_name']) . ' Logo"><br>
+                <strong>' . htmlspecialchars($this->systemSettings['brand_name']) . ' Team</strong><br>
+                Davidson House Forbury Square, Reading, RG1 3EU, UNITED KINGDOM<br>
+                E: <a href="mailto:' . htmlspecialchars($this->systemSettings['contact_email']) . '">' . htmlspecialchars($this->systemSettings['contact_email']) . '</a> | 
+                W: <a href="' . htmlspecialchars($this->systemSettings['site_url']) . '">' . htmlspecialchars($this->systemSettings['site_url']) . '</a>
+                <p>
+                    FCA Reference Nr: 910584<br>
+                    <br>
+                    <em>Hinweis:</em> Diese E-Mail kann vertrauliche oder rechtlich geschützte Informationen enthalten. 
+                    Wenn Sie nicht der richtige Adressat sind, informieren Sie uns bitte und löschen Sie diese Nachricht.
+                </p>
+            </div>
         </div>
+    </div>
+    
+    <div class="footer">
+        &copy; ' . date('Y') . ' ' . htmlspecialchars($this->systemSettings['brand_name']) . '. Alle Rechte vorbehalten.
     </div>
 </body>
 </html>';
