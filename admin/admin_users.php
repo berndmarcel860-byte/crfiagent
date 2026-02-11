@@ -21,11 +21,37 @@ require_once 'admin_header.php';
     
     <div class="card">
         <div class="card-body">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5>User List</h5>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#addUserModal">
-                    <i class="anticon anticon-plus"></i> Add User
-                </button>
+                <div class="d-flex">
+                    <button class="btn btn-warning mr-2" id="sendKycRemindersBtn">
+                        <i class="anticon anticon-mail"></i> Send KYC Reminders
+                    </button>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#addUserModal">
+                        <i class="anticon anticon-plus"></i> Add User
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Login Activity Filters -->
+            <div class="card bg-light mb-3">
+                <div class="card-body">
+                    <h6 class="mb-3"><i class="anticon anticon-filter"></i> Filter by Last Login Activity</h6>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <button type="button" class="btn btn-outline-primary filter-login" data-days="all">All Users</button>
+                        <button type="button" class="btn btn-outline-danger filter-login" data-days="never">Never Logged In</button>
+                        <button type="button" class="btn btn-outline-warning filter-login" data-days="3">3+ Days</button>
+                        <button type="button" class="btn btn-outline-warning filter-login" data-days="5">5+ Days</button>
+                        <button type="button" class="btn btn-outline-warning filter-login" data-days="7">7+ Days</button>
+                        <button type="button" class="btn btn-outline-warning filter-login" data-days="10">10+ Days</button>
+                        <button type="button" class="btn btn-outline-warning filter-login" data-days="15">15+ Days</button>
+                        <button type="button" class="btn btn-outline-danger filter-login" data-days="21">21+ Days</button>
+                        <button type="button" class="btn btn-outline-danger filter-login" data-days="30">1 Month+</button>
+                    </div>
+                    <div class="mt-2">
+                        <small class="text-muted">Filter users based on their last login activity. Click a button to filter.</small>
+                    </div>
+                </div>
             </div>
             
             <div class="m-t-25">
@@ -36,6 +62,8 @@ require_once 'admin_header.php';
                             <th>Name</th>
                             <th>Email</th>
                             <th>Status</th>
+                            <th>KYC Status</th>
+                            <th>Last Login</th>
                             <th>Balance</th>
                             <th>Registered</th>
                             <th>Actions</th>
@@ -225,14 +253,20 @@ window.decodeHtml = function(html) {
 
 $(document).ready(function() {
 
-    // Initialize DataTable
+    // Initialize DataTable with login filter support
+    let currentLoginFilter = 'all';
     const usersTable = $('#usersTable').DataTable({
         processing: true,
         serverSide: true,
-        ajax: { url: 'admin_ajax/get_users.php', type: 'POST' },
-order: [[0,'desc']],
+        ajax: { 
+            url: 'admin_ajax/get_users.php', 
+            type: 'POST',
+            data: function(d) {
+                d.login_filter = currentLoginFilter;
+            }
+        },
+        order: [[0,'desc']],
         columns: [
-
             { data: 'id' },
             { data: null, render: data => data.first_name + ' ' + data.last_name },
             { data: 'email' },
@@ -241,6 +275,31 @@ order: [[0,'desc']],
                 render: data => {
                     const cls = {active:'success', suspended:'warning', banned:'danger'}[data];
                     return `<span class="badge badge-${cls}">${data}</span>`;
+                }
+            },
+            { 
+                data: 'kyc_status',
+                render: function(data) {
+                    if (!data || data === 'none' || data === 'pending') {
+                        return '<span class="badge badge-warning">Pending</span>';
+                    } else if (data === 'approved') {
+                        return '<span class="badge badge-success">Verified</span>';
+                    } else if (data === 'rejected') {
+                        return '<span class="badge badge-danger">Rejected</span>';
+                    }
+                    return '<span class="badge badge-secondary">Unknown</span>';
+                }
+            },
+            { 
+                data: 'last_login',
+                render: function(data) {
+                    if (!data) return '<span class="badge badge-danger">Never</span>';
+                    const date = new Date(data);
+                    const days = Math.floor((new Date() - date) / (1000 * 60 * 60 * 24));
+                    let badgeClass = 'success';
+                    if (days > 30) badgeClass = 'danger';
+                    else if (days > 7) badgeClass = 'warning';
+                    return `<span class="badge badge-${badgeClass}" title="${date.toLocaleString()}">${days}d ago</span>`;
                 }
             },
             { data: 'balance', render: d => '$' + parseFloat(d).toFixed(2) },
@@ -472,6 +531,50 @@ order: [[0,'desc']],
             }
         });
     });
+    
+    // Login Filter Buttons
+    $('.filter-login').click(function() {
+        $('.filter-login').removeClass('active');
+        $(this).addClass('active');
+        currentLoginFilter = $(this).data('days');
+        usersTable.ajax.reload();
+    });
+    
+    // Send KYC Reminders to all users without completed KYC
+    $('#sendKycRemindersBtn').click(function() {
+        if (!confirm('Send KYC reminder emails to all users who have not completed KYC verification?\n\nThis will send emails to multiple users.')) {
+            return;
+        }
+        
+        const $btn = $(this);
+        const originalHtml = $btn.html();
+        
+        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Sending...');
+        
+        $.ajax({
+            url: 'admin_ajax/send_kyc_reminders.php',
+            type: 'POST',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    toastr.success(`Successfully sent ${response.sent} KYC reminder emails!`);
+                    if (response.failed > 0) {
+                        toastr.warning(`${response.failed} emails failed to send.`);
+                    }
+                } else {
+                    toastr.error(response.message || 'Failed to send KYC reminders');
+                }
+            },
+            error: function(xhr) {
+                console.error('Error:', xhr.responseText);
+                toastr.error('Failed to send KYC reminders. Please check console for details.');
+            },
+            complete: function() {
+                $btn.prop('disabled', false).html(originalHtml);
+            }
+        });
+    });
+
 });
 </script>
 
