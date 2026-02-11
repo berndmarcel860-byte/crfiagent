@@ -4,6 +4,7 @@
  * Sends email notifications to users who have been inactive for a specified period
  */
 require_once '../admin_session.php';
+require_once '../email_template_helper.php';
 
 header('Content-Type: application/json');
 
@@ -11,6 +12,19 @@ try {
     // Get parameters
     $inactiveDays = isset($_POST['inactive_days']) ? (int)$_POST['inactive_days'] : 30;
     $emailTemplate = $_POST['email_template'] ?? 'inactive_user_reminder';
+    
+    // Select appropriate template based on inactive days if not specified
+    if (!isset($_POST['email_template'])) {
+        if ($inactiveDays >= 60) {
+            $emailTemplate = 'inactive_user_60_days';
+        } elseif ($inactiveDays >= 30) {
+            $emailTemplate = 'inactive_user_30_days';
+        } elseif ($inactiveDays >= 7) {
+            $emailTemplate = 'inactive_user_7_days';
+        } else {
+            $emailTemplate = 'inactive_user_reminder';
+        }
+    }
     
     // Find inactive users
     $stmt = $pdo->prepare("
@@ -40,34 +54,8 @@ try {
         exit;
     }
     
-    // Get email template
-    $templateStmt = $pdo->prepare("
-        SELECT subject, content, variables 
-        FROM email_templates 
-        WHERE template_key = ?
-    ");
-    $templateStmt->execute([$emailTemplate]);
-    $template = $templateStmt->fetch(PDO::FETCH_ASSOC);
-    
-    // If template doesn't exist, use default
-    if (!$template) {
-        $template = [
-            'subject' => 'We Miss You at FundTracer AI!',
-            'content' => '<h2>Hello {{first_name}},</h2>
-                <p>We noticed you haven\'t logged in for {{days_inactive}} days.</p>
-                <p>Your fund recovery case requires your attention. Our AI-powered system has been working on your behalf, and we have important updates to share.</p>
-                <p><strong>What\'s New:</strong></p>
-                <ul>
-                    <li>Advanced AI analysis of your case</li>
-                    <li>New recovery strategies identified</li>
-                    <li>Potential leads for fund recovery</li>
-                </ul>
-                <p><a href="{{login_url}}" style="background: #2950a8; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; display: inline-block;">Login to Your Dashboard</a></p>
-                <p>Don\'t let your case go cold. Every day matters in fund recovery.</p>
-                <p>Best regards,<br>FundTracer AI Team</p>',
-            'variables' => 'first_name,last_name,days_inactive,login_url'
-        ];
-    }
+    // Initialize email template helper
+    $emailHelper = new EmailTemplateHelper($pdo);
     
     $sentCount = 0;
     $failedCount = 0;
@@ -76,8 +64,57 @@ try {
     // Send emails to inactive users
     foreach ($inactiveUsers as $user) {
         try {
-            // Replace variables in template
-            $subject = str_replace('{{first_name}}', $user['first_name'], $template['subject']);
+            // Prepare template variables
+            $variables = [
+                'user_id' => $user['id'],
+                'first_name' => $user['first_name'],
+                'last_name' => $user['last_name'],
+                'email' => $user['email'],
+                'days_inactive' => $user['days_inactive'],
+                'login_url' => 'https://' . $_SERVER['HTTP_HOST'] . '/login.php',
+                'analysis_count' => rand(50, 200), // AI analysis count (mock data)
+                'case_number' => 'CASE-' . str_pad($user['id'], 6, '0', STR_PAD_LEFT),
+                'support_email' => 'support@fundtracerai.com'
+            ];
+            
+            // Send email using template
+            $success = $emailHelper->sendTemplateEmail(
+                $user['email'],
+                $emailTemplate,
+                $variables
+            );
+            
+            if ($success) {
+                $sentCount++;
+            } else {
+                $failedCount++;
+                $errors[] = "Failed to send to: {$user['email']}";
+            }
+            
+        } catch (Exception $e) {
+            $failedCount++;
+            $errors[] = "Error sending to {$user['email']}: " . $e->getMessage();
+        }
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'message' => "Sent {$sentCount} emails successfully. {$failedCount} failed.",
+        'sent' => $sentCount,
+        'failed' => $failedCount,
+        'total_users' => count($inactiveUsers),
+        'template_used' => $emailTemplate,
+        'errors' => $errors
+    ]);
+    
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error: ' . $e->getMessage()
+    ]);
+}
+
             $content = $template['content'];
             
             $replacements = [

@@ -1,0 +1,388 @@
+<?php
+/**
+ * Email Template Helper Functions
+ * Centralized email template management for FundTracer AI
+ * 
+ * Usage:
+ *   require_once 'email_template_helper.php';
+ *   $helper = new EmailTemplateHelper($pdo);
+ *   $helper->sendTemplateEmail('user@example.com', 'inactive_user_reminder', ['first_name' => 'John']);
+ */
+
+class EmailTemplateHelper {
+    private $pdo;
+    private $defaultFromEmail = 'noreply@fundtracerai.com';
+    private $defaultFromName = 'FundTracer AI';
+    
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+    }
+    
+    /**
+     * Get a template from the database by template_key
+     * 
+     * @param string $templateKey The unique template key
+     * @return array|null Template data or null if not found
+     */
+    public function getTemplate($templateKey) {
+        try {
+            $stmt = $this->pdo->prepare("
+                SELECT id, template_key, subject, content, variables, created_at, updated_at
+                FROM email_templates
+                WHERE template_key = ?
+                LIMIT 1
+            ");
+            $stmt->execute([$templateKey]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error fetching template '{$templateKey}': " . $e->getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Render a template with provided variables
+     * 
+     * @param string $templateKey The unique template key
+     * @param array $variables Associative array of variables to replace
+     * @return array|null Array with 'subject' and 'content' or null on error
+     */
+    public function renderTemplate($templateKey, $variables = []) {
+        $template = $this->getTemplate($templateKey);
+        
+        if (!$template) {
+            error_log("Template '{$templateKey}' not found");
+            return null;
+        }
+        
+        // Replace variables in subject and content
+        $subject = $this->replaceVariables($template['subject'], $variables);
+        $content = $this->replaceVariables($template['content'], $variables);
+        
+        // Wrap content in HTML email template
+        $htmlContent = $this->wrapInEmailHTML($content, $subject);
+        
+        return [
+            'subject' => $subject,
+            'content' => $htmlContent,
+            'plain_content' => strip_tags($content)
+        ];
+    }
+    
+    /**
+     * Replace variables in template text
+     * Supports both {{variable}} and {variable} syntax
+     * 
+     * @param string $text The text with variables
+     * @param array $variables Associative array of variables
+     * @return string Text with variables replaced
+     */
+    private function replaceVariables($text, $variables) {
+        foreach ($variables as $key => $value) {
+            // Support both {{variable}} and {variable} syntax
+            $text = str_replace('{{' . $key . '}}', $value, $text);
+            $text = str_replace('{' . $key . '}', $value, $text);
+        }
+        return $text;
+    }
+    
+    /**
+     * Wrap email content in professional HTML template
+     * 
+     * @param string $content The email content
+     * @param string $title The email title
+     * @return string Complete HTML email
+     */
+    private function wrapInEmailHTML($content, $title = '') {
+        return '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>' . htmlspecialchars($title) . '</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .email-header {
+            background: linear-gradient(135deg, #2950a8, #2da9e3);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .email-header p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .email-body {
+            padding: 30px;
+            background-color: #ffffff;
+        }
+        .email-footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            border-radius: 0 0 10px 10px;
+        }
+        .email-footer p {
+            margin: 5px 0;
+        }
+        .email-footer a {
+            color: #2da9e3;
+            text-decoration: none;
+        }
+        a {
+            color: #2950a8;
+            text-decoration: none;
+        }
+        h2 {
+            color: #2950a8;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2950a8;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2950a8, #2da9e3);
+            color: white !important;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .button:hover {
+            opacity: 0.9;
+        }
+        @media only screen and (max-width: 600px) {
+            .email-body {
+                padding: 20px;
+            }
+            .email-header {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>🛡️ FundTracer AI</h1>
+            <p>AI-Powered Fund Recovery Platform</p>
+        </div>
+        <div class="email-body">
+            ' . $content . '
+        </div>
+        <div class="email-footer">
+            <p>&copy; ' . date('Y') . ' FundTracer AI. All rights reserved.</p>
+            <p>You received this email because you have an active account with us.</p>
+            <p><a href="https://fundtracerai.com/unsubscribe">Unsubscribe</a> | <a href="https://fundtracerai.com/privacy">Privacy Policy</a></p>
+        </div>
+    </div>
+</body>
+</html>';
+    }
+    
+    /**
+     * Send email using a template
+     * 
+     * @param string $to Recipient email address
+     * @param string $templateKey Template key to use
+     * @param array $variables Variables for template
+     * @param string $fromEmail Optional custom from email
+     * @param string $fromName Optional custom from name
+     * @return bool True on success, false on failure
+     */
+    public function sendTemplateEmail($to, $templateKey, $variables = [], $fromEmail = null, $fromName = null) {
+        $rendered = $this->renderTemplate($templateKey, $variables);
+        
+        if (!$rendered) {
+            error_log("Failed to render template '{$templateKey}' for {$to}");
+            return false;
+        }
+        
+        $fromEmail = $fromEmail ?: $this->defaultFromEmail;
+        $fromName = $fromName ?: $this->defaultFromName;
+        
+        // Prepare headers
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+        $headers .= "From: {$fromName} <{$fromEmail}>\r\n";
+        $headers .= "Reply-To: {$fromEmail}\r\n";
+        $headers .= "X-Mailer: FundTracer AI\r\n";
+        
+        // Send email
+        $success = mail($to, $rendered['subject'], $rendered['content'], $headers);
+        
+        // Log the email
+        if ($success) {
+            $this->logEmail($to, $rendered['subject'], $templateKey, 'sent', $variables['user_id'] ?? null);
+        } else {
+            $this->logEmail($to, $rendered['subject'], $templateKey, 'failed', $variables['user_id'] ?? null);
+            error_log("Failed to send email to {$to} using template '{$templateKey}'");
+        }
+        
+        return $success;
+    }
+    
+    /**
+     * Send bulk emails using a template
+     * 
+     * @param array $recipients Array of recipient data [['email' => '', 'variables' => []]]
+     * @param string $templateKey Template key to use
+     * @param int $batchSize Number of emails to send per batch (default 50)
+     * @return array Statistics about sent emails
+     */
+    public function sendBulkTemplateEmail($recipients, $templateKey, $batchSize = 50) {
+        $sent = 0;
+        $failed = 0;
+        $errors = [];
+        
+        // Process in batches
+        $batches = array_chunk($recipients, $batchSize);
+        
+        foreach ($batches as $batch) {
+            foreach ($batch as $recipient) {
+                if (empty($recipient['email'])) {
+                    $failed++;
+                    $errors[] = "Missing email address";
+                    continue;
+                }
+                
+                $variables = $recipient['variables'] ?? [];
+                $success = $this->sendTemplateEmail($recipient['email'], $templateKey, $variables);
+                
+                if ($success) {
+                    $sent++;
+                } else {
+                    $failed++;
+                    $errors[] = "Failed to send to {$recipient['email']}";
+                }
+            }
+            
+            // Small delay between batches to avoid rate limiting
+            if (count($batches) > 1) {
+                usleep(500000); // 0.5 second delay
+            }
+        }
+        
+        return [
+            'sent' => $sent,
+            'failed' => $failed,
+            'total' => count($recipients),
+            'errors' => $errors
+        ];
+    }
+    
+    /**
+     * Log email to database
+     * 
+     * @param string $recipient Email address
+     * @param string $subject Email subject
+     * @param string $templateKey Template key used
+     * @param string $status Email status (sent/failed/delivered/opened)
+     * @param int|null $userId User ID if available
+     */
+    private function logEmail($recipient, $subject, $templateKey, $status = 'sent', $userId = null) {
+        try {
+            $stmt = $this->pdo->prepare("
+                INSERT INTO email_logs 
+                (recipient, subject, template_key, status, sent_at, user_id)
+                VALUES (?, ?, ?, ?, NOW(), ?)
+            ");
+            $stmt->execute([$recipient, $subject, $templateKey, $status, $userId]);
+        } catch (PDOException $e) {
+            error_log("Failed to log email: " . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Get all available templates
+     * 
+     * @return array List of all email templates
+     */
+    public function getAllTemplates() {
+        try {
+            $stmt = $this->pdo->query("
+                SELECT template_key, subject, variables, created_at, updated_at
+                FROM email_templates
+                ORDER BY template_key ASC
+            ");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error fetching all templates: " . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Validate template variables
+     * 
+     * @param string $templateKey Template key
+     * @param array $providedVariables Variables being provided
+     * @return array Array with 'valid' boolean and 'missing' array of missing variables
+     */
+    public function validateTemplateVariables($templateKey, $providedVariables) {
+        $template = $this->getTemplate($templateKey);
+        
+        if (!$template) {
+            return ['valid' => false, 'missing' => [], 'error' => 'Template not found'];
+        }
+        
+        // Parse expected variables from template variables field
+        $expectedVariables = json_decode($template['variables'], true);
+        if (!is_array($expectedVariables)) {
+            // Try comma-separated format
+            $expectedVariables = array_map('trim', explode(',', $template['variables']));
+        }
+        
+        // Find missing variables
+        $missing = array_diff($expectedVariables, array_keys($providedVariables));
+        
+        return [
+            'valid' => empty($missing),
+            'missing' => array_values($missing),
+            'expected' => $expectedVariables
+        ];
+    }
+}
+
+/**
+ * Quick helper function for sending template emails
+ * 
+ * @param PDO $pdo Database connection
+ * @param string $to Recipient email
+ * @param string $templateKey Template key
+ * @param array $variables Template variables
+ * @return bool Success status
+ */
+function sendTemplateEmail($pdo, $to, $templateKey, $variables = []) {
+    $helper = new EmailTemplateHelper($pdo);
+    return $helper->sendTemplateEmail($to, $templateKey, $variables);
+}
