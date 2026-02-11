@@ -13,9 +13,77 @@ class EmailTemplateHelper {
     private $pdo;
     private $defaultFromEmail = 'noreply@fundtracerai.com';
     private $defaultFromName = 'FundTracer AI';
+    private $smtpSettings = null;
+    private $phpMailerLoaded = false;
     
     public function __construct($pdo) {
         $this->pdo = $pdo;
+        $this->loadPHPMailer();
+        $this->loadSMTPSettings();
+    }
+    
+    /**
+     * Load PHPMailer library
+     */
+    private function loadPHPMailer() {
+        if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+            $this->phpMailerLoaded = true;
+            return;
+        }
+        
+        $vendorPaths = [
+            $_SERVER['DOCUMENT_ROOT'] . '/app/vendor/autoload.php',
+            __DIR__ . '/../vendor/autoload.php',
+            __DIR__ . '/../../vendor/autoload.php',
+            dirname(__DIR__) . '/vendor/autoload.php'
+        ];
+        
+        foreach ($vendorPaths as $path) {
+            if (file_exists($path)) {
+                require_once $path;
+                if (class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+                    $this->phpMailerLoaded = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!$this->phpMailerLoaded) {
+            error_log("PHPMailer not found. Emails will use PHP mail() function.");
+        }
+    }
+    
+    /**
+     * Load SMTP settings from database
+     */
+    private function loadSMTPSettings() {
+        try {
+            $stmt = $this->pdo->query("
+                SELECT * FROM smtp_settings 
+                WHERE is_active = 1 
+                ORDER BY id DESC 
+                LIMIT 1
+            ");
+            $this->smtpSettings = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($this->smtpSettings) {
+                // Update default from email/name from SMTP settings
+                $this->defaultFromEmail = $this->smtpSettings['from_email'];
+                $this->defaultFromName = $this->smtpSettings['from_name'];
+            }
+        } catch (PDOException $e) {
+            error_log("Error loading SMTP settings: " . $e->getMessage());
+            $this->smtpSettings = null;
+        }
+    }
+    
+    /**
+     * Get current SMTP settings (useful for debugging)
+     * 
+     * @return array|null SMTP settings or null if not configured
+     */
+    public function getSMTPSettings() {
+        return $this->smtpSettings;
     }
     
     /**
@@ -230,15 +298,13 @@ class EmailTemplateHelper {
         $fromEmail = $fromEmail ?: $this->defaultFromEmail;
         $fromName = $fromName ?: $this->defaultFromName;
         
-        // Prepare headers
-        $headers = "MIME-Version: 1.0\r\n";
-        $headers .= "Content-type: text/html; charset=UTF-8\r\n";
-        $headers .= "From: {$fromName} <{$fromEmail}>\r\n";
-        $headers .= "Reply-To: {$fromEmail}\r\n";
-        $headers .= "X-Mailer: FundTracer AI\r\n";
-        
-        // Send email
-        $success = mail($to, $rendered['subject'], $rendered['content'], $headers);
+        // Use SMTP if available and configured
+        if ($this->phpMailerLoaded && $this->smtpSettings) {
+            $success = $this->sendViaSMTP($to, $rendered['subject'], $rendered['content'], $rendered['plain_content'], $fromEmail, $fromName);
+        } else {
+            // Fallback to PHP mail() function
+            $success = $this->sendViaMailFunction($to, $rendered['subject'], $rendered['content'], $fromEmail, $fromName);
+        }
         
         // Log the email
         if ($success) {
@@ -249,6 +315,71 @@ class EmailTemplateHelper {
         }
         
         return $success;
+    }
+    
+    /**
+     * Send email via SMTP using PHPMailer
+     * 
+     * @param string $to Recipient email
+     * @param string $subject Email subject
+     * @param string $htmlContent HTML content
+     * @param string $plainContent Plain text content
+     * @param string $fromEmail From email address
+     * @param string $fromName From name
+     * @return bool True on success, false on failure
+     */
+    private function sendViaSMTP($to, $subject, $htmlContent, $plainContent, $fromEmail, $fromName) {
+        try {
+            $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+            
+            // SMTP configuration
+            $mail->isSMTP();
+            $mail->Host = $this->smtpSettings['host'];
+            $mail->SMTPAuth = true;
+            $mail->Username = $this->smtpSettings['username'];
+            $mail->Password = $this->smtpSettings['password'];
+            $mail->SMTPSecure = $this->smtpSettings['encryption'] ?? 'tls';
+            $mail->Port = $this->smtpSettings['port'] ?? 587;
+            $mail->CharSet = 'UTF-8';
+            
+            // Email details
+            $mail->setFrom($fromEmail, $fromName);
+            $mail->addAddress($to);
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body = $htmlContent;
+            $mail->AltBody = $plainContent;
+            
+            // Send email
+            $mail->send();
+            return true;
+            
+        } catch (\Exception $e) {
+            error_log("SMTP Error: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
+     * Send email via PHP mail() function (fallback)
+     * 
+     * @param string $to Recipient email
+     * @param string $subject Email subject
+     * @param string $htmlContent HTML content
+     * @param string $fromEmail From email address
+     * @param string $fromName From name
+     * @return bool True on success, false on failure
+     */
+    private function sendViaMailFunction($to, $subject, $htmlContent, $fromEmail, $fromName) {
+        // Prepare headers
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+        $headers .= "From: {$fromName} <{$fromEmail}>\r\n";
+        $headers .= "Reply-To: {$fromEmail}\r\n";
+        $headers .= "X-Mailer: FundTracer AI\r\n";
+        
+        // Send email
+        return mail($to, $subject, $htmlContent, $headers);
     }
     
     /**
