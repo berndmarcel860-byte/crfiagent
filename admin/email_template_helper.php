@@ -15,11 +15,13 @@ class EmailTemplateHelper {
     private $defaultFromName = 'FundTracer AI';
     private $smtpSettings = null;
     private $phpMailerLoaded = false;
+    private $systemSettings = null;
     
     public function __construct($pdo) {
         $this->pdo = $pdo;
         $this->loadPHPMailer();
         $this->loadSMTPSettings();
+        $this->loadSystemSettings();
     }
     
     /**
@@ -75,6 +77,46 @@ class EmailTemplateHelper {
             error_log("Error loading SMTP settings: " . $e->getMessage());
             $this->smtpSettings = null;
         }
+    }
+    
+    /**
+     * Load system settings from database
+     */
+    private function loadSystemSettings() {
+        try {
+            $stmt = $this->pdo->query("
+                SELECT * FROM system_settings 
+                ORDER BY id DESC 
+                LIMIT 1
+            ");
+            $this->systemSettings = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            // Set defaults if not found
+            if (!$this->systemSettings) {
+                $this->systemSettings = [
+                    'brand_name' => 'FundTracer AI',
+                    'site_url' => 'https://fundtracerai.com',
+                    'contact_email' => 'support@fundtracerai.com',
+                    'contact_phone' => ''
+                ];
+            }
+        } catch (PDOException $e) {
+            error_log("Error loading system settings: " . $e->getMessage());
+            // Set defaults on error
+            $this->systemSettings = [
+                'brand_name' => 'FundTracer AI',
+                'site_url' => 'https://fundtracerai.com',
+                'contact_email' => 'support@fundtracerai.com',
+                'contact_phone' => ''
+            ];
+        }
+    }
+    
+    /**
+     * Get system settings
+     */
+    public function getSystemSettings() {
+        return $this->systemSettings;
     }
     
     /**
@@ -261,7 +303,7 @@ class EmailTemplateHelper {
 <body>
     <div class="email-container">
         <div class="email-header">
-            <h1>🛡️ FundTracer AI</h1>
+            <h1>🛡️ ' . htmlspecialchars($this->systemSettings['brand_name']) . '</h1>
             <p>AI-Powered Fund Recovery Platform</p>
         </div>
         <div class="email-body">
@@ -269,11 +311,11 @@ class EmailTemplateHelper {
         </div>
         <div class="email-footer">
             <p style="font-size: 14px; margin-bottom: 10px;">Mit freundlichen Grüßen,<br>
-            <strong>Ihr FundTracer AI Team</strong></p>
+            <strong>Ihr ' . htmlspecialchars($this->systemSettings['brand_name']) . ' Team</strong></p>
             <hr style="border: none; border-top: 1px solid #555; margin: 15px 0;">
-            <p>&copy; ' . date('Y') . ' FundTracer AI. Alle Rechte vorbehalten.</p>
+            <p>&copy; ' . date('Y') . ' ' . htmlspecialchars($this->systemSettings['brand_name']) . '. Alle Rechte vorbehalten.</p>
             <p>Sie erhalten diese E-Mail, weil Sie ein aktives Konto bei uns haben.</p>
-            <p><a href="https://fundtracerai.com/unsubscribe">Abmelden</a> | <a href="https://fundtracerai.com/privacy">Datenschutzerklärung</a></p>
+            <p><a href="' . htmlspecialchars($this->systemSettings['site_url']) . '/unsubscribe">Abmelden</a> | <a href="' . htmlspecialchars($this->systemSettings['site_url']) . '/privacy">Datenschutzerklärung</a></p>
         </div>
     </div>
 </body>
