@@ -9,7 +9,23 @@ require_once __DIR__ . '/header.php';
 
                 <i class="anticon anticon-check-circle text-success" style="font-size: 56px;"></i>
 
-                <?php if (isset($_GET['trial']) && $_GET['trial'] == '1'): ?>
+                <?php if (isset($_GET['satoshi']) && $_GET['satoshi'] == '1'): ?>
+                    <!-- ✅ SATOSHI TEST COMPLETION MESSAGE -->
+                    <h3 class="m-t-20 text-success">Onboarding Abgeschlossen!</h3>
+                    <p class="text-muted mt-3">
+                        Herzlichen Glückwunsch! Ihr Profil wurde erfolgreich erstellt.<br>
+                        Sie haben nun Zugriff auf Ihr Recovery-Dashboard.
+                    </p>
+                    <div class="alert alert-warning text-left mt-4" style="max-width: 600px; margin: 0 auto;">
+                        <i class="anticon anticon-experiment"></i>
+                        <strong>Wichtig:</strong> Um Auszahlungen vornehmen zu können, müssen Sie den <strong>Satoshi-Test</strong> durchführen.<br>
+                        Weitere Informationen finden Sie in Ihrem Dashboard unter "Satoshi-Test Prozess".
+                    </div>
+                    <a href="index.php" class="btn btn-primary mt-4">
+                        <i class="anticon anticon-dashboard mr-2"></i>Zum Dashboard
+                    </a>
+
+                <?php elseif (isset($_GET['trial']) && $_GET['trial'] == '1'): ?>
                     <!-- ✅ TRIAL COMPLETION MESSAGE -->
                     <h3 class="m-t-20 text-success">48H Test Access Activated!</h3>
                     <p class="text-muted mt-3">

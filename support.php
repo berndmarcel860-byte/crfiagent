@@ -38,80 +38,123 @@ try {
 ?>
 
 <div class="main-content">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body">
-                    <h4>Contact Support</h4>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5>Support Information</h5>
-                                    <ul class="list-unstyled">
-                                        <li><i class="anticon anticon-mail"></i> Email: support@scamrecovery.com</li>
-                                        <li><i class="anticon anticon-phone"></i> Phone: +1 (555) 123-4567</li>
-                                        <li><i class="anticon anticon-clock-circle"></i> Hours: Mon-Fri, 9AM-5PM EST</li>
-                                    </ul>
-                                    <p>For urgent matters, please create a ticket with "Urgent" priority.</p>
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #2950a8 0%, #2da9e3 100%); color: #fff;">
+                    <div class="card-body py-4">
+                        <h2 class="mb-2 text-white" style="font-weight: 700;">
+                            <i class="anticon anticon-customer-service mr-2"></i>Support Center
+                        </h2>
+                        <p class="mb-0" style="color: rgba(255,255,255,0.9); font-size: 15px;">
+                            Get help from our dedicated support team
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                            <i class="anticon anticon-info-circle mr-2" style="color: var(--brand);"></i>Support Information
+                        </h5>
+                        <ul class="list-unstyled" style="line-height: 2.2;">
+                            <li class="d-flex align-items-center mb-2">
+                                <div class="mr-3" style="width: 40px; height: 40px; background: rgba(41, 80, 168, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="anticon anticon-mail" style="color: var(--brand); font-size: 18px;"></i>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5>Create New Ticket</h5>
-                                    <form method="POST" id="ticketForm">
-                                        <div class="form-group">
-                                            <label>Subject</label>
-                                            <input type="text" class="form-control" name="subject" required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Category</label>
-                                            <select class="form-control" name="category" required>
-                                                <option value="">Select category</option>
-                                                <option value="Case Inquiry">Case Inquiry</option>
-                                                <option value="Document Submission">Document Submission</option>
-                                                <option value="Payment Issue">Payment Issue</option>
-                                                <option value="Technical Problem">Technical Problem</option>
-                                                <option value="Other">Other</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Priority</label>
-                                            <select class="form-control" name="priority">
-                                                <option value="low">Low</option>
-                                                <option value="medium" selected>Medium</option>
-                                                <option value="high">High</option>
-                                                <option value="critical">Critical</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label>Message</label>
-                                            <textarea class="form-control" rows="5" name="message" required></textarea>
-                                        </div>
-                                        <button type="submit" name="submit_ticket" class="btn btn-primary">
-                                            <i class="anticon anticon-plus"></i> Submit Ticket
-                                        </button>
-                                    </form>
+                                <div>
+                                    <div class="text-muted" style="font-size: 12px;">Email</div>
+                                    <strong>support@kryptox.co.uk</strong>
                                 </div>
-                            </div>
+                            </li>
+                            <li class="d-flex align-items-center mb-2">
+                                <div class="mr-3" style="width: 40px; height: 40px; background: rgba(41, 80, 168, 0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="anticon anticon-clock-circle" style="color: var(--brand); font-size: 18px;"></i>
+                                </div>
+                                <div>
+                                    <div class="text-muted" style="font-size: 12px;">Hours</div>
+                                    <strong>Mon-Fri 24/7</strong>
+                                </div>
+                            </li>
+                        </ul>
+                        <div class="alert alert-info border-0 mt-4" style="border-radius: 10px;">
+                            <i class="anticon anticon-exclamation-circle mr-2"></i>
+                            For urgent matters, please create a ticket with <strong>"Critical"</strong> priority.
                         </div>
                     </div>
-                    
-                    <div class="m-t-30">
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                            <i class="anticon anticon-plus-circle mr-2" style="color: var(--brand);"></i>Create New Ticket
+                        </h5>
+                        <form method="POST" id="ticketForm">
+                            <div class="form-group">
+                                <label class="font-weight-500">Subject</label>
+                                <input type="text" class="form-control" name="subject" required placeholder="Brief description of your issue" style="border-radius: 8px;">
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-500">Category</label>
+                                <select class="form-control" name="category" required style="border-radius: 8px;">
+                                    <option value="">Select category</option>
+                                    <option value="Case Inquiry">📁 Case Inquiry</option>
+                                    <option value="Document Submission">📄 Document Submission</option>
+                                    <option value="Payment Issue">💳 Payment Issue</option>
+                                    <option value="Technical Problem">⚙️ Technical Problem</option>
+                                    <option value="Other">💬 Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-500">Priority</label>
+                                <select class="form-control" name="priority" style="border-radius: 8px;">
+                                    <option value="low">Low</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="high">High</option>
+                                    <option value="critical">Critical</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-500">Message</label>
+                                <textarea class="form-control" rows="5" name="message" required placeholder="Describe your issue in detail..." style="border-radius: 8px;"></textarea>
+                            </div>
+                            <button type="submit" name="submit_ticket" class="btn btn-primary btn-block" style="border-radius: 8px;">
+                                <i class="anticon anticon-plus-circle mr-1"></i> Submit Ticket
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tickets Section -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5>Your Support Tickets</h5>
-                            <button class="btn btn-info" id="refreshTickets">
-                                <i class="anticon anticon-reload"></i> Refresh
+                            <h5 class="mb-0" style="color: #2c3e50; font-weight: 600;">
+                                <i class="anticon anticon-file-text mr-2" style="color: var(--brand);"></i>Your Support Tickets
+                            </h5>
+                            <button class="btn btn-outline-primary btn-sm" id="refreshTickets">
+                                <i class="anticon anticon-reload mr-1"></i> Refresh
                             </button>
                         </div>
                         
                         <?php if (empty($tickets)): ?>
-                            <div class="alert alert-info">No support tickets found.</div>
+                            <div class="alert alert-info border-0 d-flex align-items-center" style="border-radius: 10px;">
+                                <i class="anticon anticon-info-circle mr-2" style="font-size: 20px;"></i>
+                                <span>No support tickets found. Create your first ticket above!</span>
+                            </div>
                         <?php else: ?>
                             <div class="table-responsive">
-                                <table class="table table-hover" id="ticketsTable">
+                                <table class="table table-hover mb-0" id="ticketsTable">
                                     <thead>
                                         <tr>
                                             <th>Ticket #</th>
@@ -127,7 +170,7 @@ try {
                                     <tbody>
                                         <?php foreach ($tickets as $ticket): ?>
                                         <tr>
-                                            <td><?= htmlspecialchars($ticket['ticket_number']) ?></td>
+                                            <td><strong><?= htmlspecialchars($ticket['ticket_number']) ?></strong></td>
                                             <td><?= htmlspecialchars($ticket['subject']) ?></td>
                                             <td><?= htmlspecialchars($ticket['category']) ?></td>
                                             <td>
@@ -135,7 +178,7 @@ try {
                                                     $ticket['priority'] == 'low' ? 'info' : 
                                                     ($ticket['priority'] == 'medium' ? 'warning' : 
                                                     ($ticket['priority'] == 'high' ? 'danger' : 'dark')) 
-                                                ?>">
+                                                ?>" style="font-size: 11px;">
                                                     <?= ucfirst($ticket['priority']) ?>
                                                 </span>
                                             </td>
@@ -144,24 +187,26 @@ try {
                                                     $ticket['status'] == 'open' ? 'primary' : 
                                                     ($ticket['status'] == 'in_progress' ? 'warning' :
                                                     ($ticket['status'] == 'resolved' ? 'success' : 'secondary'))
-                                                ?>">
+                                                ?>" style="font-size: 11px;">
                                                     <?= ucfirst(str_replace('_', ' ', $ticket['status'])) ?>
                                                 </span>
                                             </td>
                                             <td><?= $ticket['last_reply_at'] ? date('M d, Y H:i', strtotime($ticket['last_reply_at'])) : '-' ?></td>
                                             <td><?= date('M d, Y H:i', strtotime($ticket['created_at'])) ?></td>
                                             <td>
-                                                <div class="btn-group">
-                                                    <button class="btn btn-sm btn-info view-ticket" 
+                                                <div class="d-flex" style="gap: 5px;">
+                                                    <button class="btn btn-sm btn-outline-info view-ticket" 
                                                             data-id="<?= $ticket['id'] ?>" 
-                                                            data-ticket="<?= htmlspecialchars($ticket['ticket_number']) ?>">
-                                                        <i class="anticon anticon-eye"></i> View
+                                                            data-ticket="<?= htmlspecialchars($ticket['ticket_number']) ?>"
+                                                            title="View ticket">
+                                                        <i class="anticon anticon-eye"></i>
                                                     </button>
                                                     <?php if ($ticket['status'] != 'closed'): ?>
-                                                    <button class="btn btn-sm btn-primary reply-ticket" 
+                                                    <button class="btn btn-sm btn-outline-primary reply-ticket" 
                                                             data-id="<?= $ticket['id'] ?>"
-                                                            data-ticket="<?= htmlspecialchars($ticket['ticket_number']) ?>">
-                                                        <i class="anticon anticon-message"></i> Reply
+                                                            data-ticket="<?= htmlspecialchars($ticket['ticket_number']) ?>"
+                                                            title="Reply to ticket">
+                                                        <i class="anticon anticon-message"></i>
                                                     </button>
                                                     <?php endif; ?>
                                                 </div>

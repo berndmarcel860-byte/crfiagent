@@ -1,10 +1,22 @@
+<?php
+$userName  = $_SESSION['user_name']  ?? '';
+$userEmail = $_SESSION['user_email'] ?? '';
+?>
+
 <!-- Footer START -->
 <footer class="footer">
     <div class="footer-content">
-        <p class="m-b-0">Copyright © <?php echo date('Y'); ?> Scam Recovery. All rights reserved.</p>
+        <p class="m-b-0" style="color:#6c757d;font-size:14px;">
+            <i class="anticon anticon-copyright mr-1"></i>
+            <?= date('Y') ?> KryptoX AI. All rights reserved.
+        </p>
         <span>
-            <a href="terms.php" class="text-gray m-r-15">Term &amp; Condition</a>
-            <a href="privacy.php" class="text-gray">Privacy &amp; Policy</a>
+            <a href="terms.php" class="text-gray m-r-15" style="color:#6c757d;text-decoration:none;font-size:14px;">
+                <i class="anticon anticon-file-text mr-1"></i>Terms &amp; Conditions
+            </a>
+            <a href="privacy.php" class="text-gray" style="color:#6c757d;text-decoration:none;font-size:14px;">
+                <i class="anticon anticon-lock mr-1"></i>Privacy Policy
+            </a>
         </span>
     </div>
 </footer>
@@ -13,34 +25,15 @@
 </div>
 <!-- Page Container END -->
 
-<!-- Core Vendors JS -->
+<!-- ================= CORE JS ================= -->
 <script src="assets/js/vendors.min.js"></script>
-
-<!-- DataTables JS -->
-<script type="text/javascript" src="https://cdn.datatables.net/v/bs4/dt-1.11.3/datatables.min.js"></script>
-
-<!-- Toastr JS -->
+<script src="https://cdn.datatables.net/v/bs4/dt-1.11.3/datatables.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-<!-- Chart JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Page JS -->
 <script src="assets/js/pages/dashboard-default.js"></script>
-
-<!-- Page JS 
-<script src="assets/js/pages/dashboard-crm.js"></script>-->
-
-<!-- Page JS 
-<script src="assets/js/pages/dashboard-e-commerce.js"></script>-->
-
-<!-- Page JS 
-<script src="assets/js/pages/dashboard-project.js"></script>-->
-
-<!-- Core JS -->
 <script src="assets/js/app.min.js"></script>
 
-<!-- Custom JS Files -->
+<!-- ================= CUSTOM JS ================= -->
 <script src="assets/js/config.js"></script>
 <script src="assets/js/sidebar.js"></script>
 <script src="assets/js/charts.js"></script>
@@ -50,4 +43,116 @@
 <script src="assets/js/ky1c.js"></script>
 <script src="assets/js/withdrawals1.js"></script>
 <script src="assets/js/deposits.js"></script>
+
+<!-- ================= NOTIFICATIONS ================= -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const notifList  = document.getElementById("notifList");
+    const notifCount = document.getElementById("notifCount");
+
+    function loadNotifications() {
+        fetch("ajax/get_notifications.php")
+            .then(r => r.json())
+            .then(res => {
+                if (!res.success) return;
+                notifList.innerHTML = "";
+                const data = res.data;
+
+                if (!data.length) {
+                    notifList.innerHTML = '<div class="notif-empty">No notifications</div>';
+                    notifCount.style.display = 'none';
+                    return;
+                }
+
+                let unread = 0;
+                data.forEach(n => {
+                    if (n.is_read == 0) unread++;
+                    const typeColor =
+                        n.type === 'success' ? 'text-success' :
+                        n.type === 'warning' ? 'text-warning' :
+                        n.type === 'danger'  ? 'text-danger'  :
+                        'text-info';
+                    notifList.insertAdjacentHTML('beforeend', `
+                        <div class="notif-item ${n.is_read == 0 ? 'unread' : ''}" data-id="${n.id}">
+                            <div class="${typeColor}">${n.title}</div>
+                            <small>${n.message}</small><br>
+                            <small>${new Date(n.created_at).toLocaleString()}</small>
+                        </div>
+                    `);
+                });
+
+                notifCount.textContent = unread;
+                notifCount.style.display = unread ? 'inline-block' : 'none';
+            });
+    }
+
+    loadNotifications();
+    setInterval(loadNotifications, 15000);
+
+    notifList.addEventListener('click', e => {
+        const item = e.target.closest('.notif-item');
+        if (!item) return;
+        fetch("ajax/mark_notification_read.php", {
+            method: "POST",
+            headers: {"Content-Type":"application/x-www-form-urlencoded"},
+            body: "id=" + item.dataset.id
+        }).then(loadNotifications);
+    });
+
+    document.getElementById('markAllRead').addEventListener('click', () => {
+        fetch("ajax/mark_notification_read.php", {
+            method: "POST",
+            headers: {"Content-Type":"application/x-www-form-urlencoded"},
+            body: "id=0"
+        }).then(loadNotifications);
+    });
+});
+</script>
+
+<!-- ================= GOOGLE TRANSLATE ================= -->
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script>
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'en,de,no,sv',
+        autoDisplay: false
+    }, 'google_translate_element');
+
+    setTimeout(() => {
+        document.querySelectorAll('.goog-te-gadget-simple span')
+            .forEach(el => { if (!el.querySelector('img')) el.style.display = 'none'; });
+    }, 1000);
+}
+</script>
+
+<!-- ================= TAWK.TO ================= -->
+<?php if (!empty($userEmail)): ?>
+<script type="text/javascript">
+var Tawk_API = Tawk_API || {};
+var Tawk_LoadStart = new Date();
+
+Tawk_API.onLoad = function () {
+    if(typeof Tawk_API.setAttributes === "function"){
+        Tawk_API.setAttributes({
+            name: "<?php echo htmlspecialchars($userName, ENT_QUOTES); ?>",
+            email: "<?php echo htmlspecialchars($userEmail, ENT_QUOTES); ?>"
+            // nur Name + Email, keine Custom Fields => KEINE Errors
+        }, function(err){
+            if(err) console.error("Tawk setAttributes error:", err);
+        });
+    }
+};
+
+(function(){
+    var s1 = document.createElement("script"),
+        s0 = document.getElementsByTagName("script")[0];
+    s1.async = true;
+    s1.src = "https://embed.tawk.to/697a6c6b435d921c378e8d0f/1jg33f154";
+    s1.charset = "UTF-8";
+    s1.setAttribute("crossorigin","*");
+    s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<?php endif; ?>
 

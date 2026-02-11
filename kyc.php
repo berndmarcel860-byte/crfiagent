@@ -29,74 +29,98 @@ try {
 
 <style>
 /* KYC Specific Styles */
+:root {
+    --brand: #2950a8;
+    --brand-light: #2da9e3;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --card-radius: 12px;
+}
+
 .kyc-header {
-    background: linear-gradient(90deg, #2950a8 0%, #2da9e3 100%);
+    background: linear-gradient(135deg, #2950a8 0%, #2da9e3 100%);
     color: white;
-    padding: 30px;
-    border-radius: 15px;
+    padding: 2rem;
+    border-radius: var(--card-radius);
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-md);
 }
 
 .kyc-header h1 {
     margin: 0;
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
 }
 
 .kyc-header .subtitle {
-    font-size: 1.1rem;
-    opacity: 0.9;
+    font-size: 1rem;
+    opacity: 0.95;
     margin-top: 10px;
 }
 
 .status-pending {
-    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
-    border: 2px solid #ff9500;
-    border-radius: 15px;
-    padding: 30px;
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
+    border: 2px solid #ffc107;
+    border-radius: var(--card-radius);
+    padding: 2rem;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
 }
 
 .status-approved {
-    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
     border: 2px solid #28a745;
-    border-radius: 15px;
-    padding: 30px;
+    border-radius: var(--card-radius);
+    padding: 2rem;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
 }
 
 .status-rejected {
-    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
     border: 2px solid #dc3545;
-    border-radius: 15px;
-    padding: 30px;
+    border-radius: var(--card-radius);
+    padding: 2rem;
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
 }
 
 .form-control, .form-select {
-    border-radius: 10px;
-    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
     padding: 12px 15px;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .form-control:focus, .form-select:focus {
-    border-color: #2950a8;
-    box-shadow: 0 0 0 0.2rem rgba(41, 80, 168, 0.25);
+    border-color: var(--brand);
+    box-shadow: 0 0 0 0.2rem rgba(41, 80, 168, 0.15);
 }
 
 .btn-primary {
-    background: linear-gradient(45deg, #2950a8, #2da9e3);
+    background: linear-gradient(135deg, var(--brand), var(--brand-light));
     border: none;
-    border-radius: 25px;
-    padding: 15px 40px;
+    border-radius: 8px;
+    padding: 12px 30px;
     font-weight: 600;
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(41, 80, 168, 0.3);
+}
+
+.card {
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-sm);
+    border: none;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
 }
 
 .btn-primary:hover {

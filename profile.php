@@ -46,60 +46,92 @@ try {
 
 <!--<div class="page-container">-->
     <div class="main-content">
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h4>My Profile</h4>
-                            <a href="settings.php" class="btn btn-primary">Edit Profile</a>
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #2950a8 0%, #2da9e3 100%); color: #fff;">
+                        <div class="card-body py-4">
+                            <h2 class="mb-2 text-white" style="font-weight: 700;">
+                                <i class="anticon anticon-user mr-2"></i>My Profile
+                            </h2>
+                            <p class="mb-0" style="color: rgba(255,255,255,0.9); font-size: 15px;">
+                                View and manage your account information
+                            </p>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="d-flex justify-content-end mb-3">
+                        <a href="settings.php" class="btn btn-primary" style="border-radius: 8px; background: linear-gradient(135deg, #2950a8, #2da9e3); border: none;">
+                            <i class="anticon anticon-edit mr-1"></i>Edit Profile
+                        </a>
+                    </div>
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
                         
-                        <div class="row m-t-30">
+                        <div class="row">
                             <div class="col-md-4">
-                                <div class="card">
-                                    <div class="card-body text-center">
-                                        <div class="avatar avatar-image" style="width: 150px; height: 150px; margin: 0 auto;">
-                                            <img src="<?= htmlspecialchars($avatar) ?>" alt="Profile">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body text-center p-4">
+                                        <div class="avatar avatar-image mx-auto mb-3" style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                            <img src="<?= htmlspecialchars($avatar) ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
                                         </div>
-                                        <h4 class="m-t-20"><?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></h4>
-                                        <p class="text-muted">Member Since: <?= date('M Y', strtotime($user['created_at'])) ?></p>
+                                        <h4 class="mb-2 font-weight-bold" style="color: #2c3e50;"><?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></h4>
+                                        <p class="text-muted mb-4"><i class="anticon anticon-calendar mr-1"></i>Member Since: <?= date('M Y', strtotime($user['created_at'])) ?></p>
                                         
-                                        <div class="m-t-20">
-                                            <p><strong>Email:</strong> <?= htmlspecialchars($user['email']) ?>
-                                                <?php if ($user['is_verified']): ?>
-                                                    <span class="badge badge-success">Verified</span>
-                                                <?php else: ?>
-                                                    <span class="badge badge-warning">Unverified</span>
-                                                    <form method="POST" class="m-t-10">
-                                                        <button type="submit" name="resend_verification" class="btn btn-sm btn-primary">
-                                                            Resend Verification Email
-                                                        </button>
-                                                    </form>
-                                                <?php endif; ?>
-                                            </p>
+                                        <div class="text-left">
+                                            <div class="mb-3">
+                                                <label class="text-muted mb-1" style="font-size: 13px;">Email Address</label>
+                                                <p class="mb-0"><strong><?= htmlspecialchars($user['email']) ?></strong>
+                                                    <?php if ($user['is_verified']): ?>
+                                                        <span class="badge badge-success ml-2"><i class="anticon anticon-check-circle mr-1"></i>Verified</span>
+                                                    <?php else: ?>
+                                                        <span class="badge badge-warning ml-2">Unverified</span>
+                                                        <form method="POST" class="mt-2">
+                                                            <button type="submit" name="resend_verification" class="btn btn-sm btn-primary" style="border-radius: 6px;">
+                                                                <i class="anticon anticon-mail mr-1"></i>Resend Verification
+                                                            </button>
+                                                        </form>
+                                                    <?php endif; ?>
+                                                </p>
+                                            </div>
                                             
                                             <?php if ($user['phone']): ?>
-                                            <p><strong>Phone:</strong> <?= htmlspecialchars($user['phone']) ?>
-                                                <?= $user['phone_verified'] ? '<span class="badge badge-success">Verified</span>' : '' ?>
-                                            </p>
+                                            <div class="mb-3">
+                                                <label class="text-muted mb-1" style="font-size: 13px;">Phone Number</label>
+                                                <p class="mb-0"><strong><?= htmlspecialchars($user['phone']) ?></strong>
+                                                    <?= $user['phone_verified'] ? '<span class="badge badge-success ml-2"><i class="anticon anticon-check-circle mr-1"></i>Verified</span>' : '' ?>
+                                                </p>
+                                            </div>
                                             <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                <div class="card m-t-20">
+                                <div class="card border-0 shadow-sm mt-3">
                                     <div class="card-body">
-                                        <h5>KYC Verification</h5>
+                                        <h5 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                                            <i class="anticon anticon-safety-certificate mr-2" style="color: var(--brand);"></i>KYC Verification
+                                        </h5>
                                         <?php if ($kyc): ?>
-                                            <p>Status: 
-                                                <span class="badge badge-<?= 
-                                                    $kyc['status'] == 'approved' ? 'success' : 
-                                                    ($kyc['status'] == 'rejected' ? 'danger' : 'warning') 
-                                                ?>">
-                                                    <?= ucfirst($kyc['status']) ?>
-                                                </span>
-                                            </p>
+                                            <div class="mb-2">
+                                                <label class="text-muted mb-1" style="font-size: 13px;">Verification Status</label>
+                                                <div>
+                                                    <span class="badge badge-<?= 
+                                                        $kyc['status'] == 'approved' ? 'success' : 
+                                                        ($kyc['status'] == 'rejected' ? 'danger' : 'warning') 
+                                                    ?> px-3 py-2">
+                                                        <i class="anticon anticon-<?= 
+                                                            $kyc['status'] == 'approved' ? 'check-circle' : 
+                                                            ($kyc['status'] == 'rejected' ? 'close-circle' : 'clock-circle') 
+                                                        ?> mr-1"></i><?= ucfirst($kyc['status']) ?>
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <?php if ($kyc['status'] == 'rejected' && $kyc['rejection_reason']): ?>
                                                 <p class="text-danger">Reason: <?= htmlspecialchars($kyc['rejection_reason']) ?></p>
                                             <?php endif; ?>
