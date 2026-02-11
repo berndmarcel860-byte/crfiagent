@@ -45,7 +45,7 @@ INSERT INTO email_templates (template_key, subject, content, variables) VALUES
 <p><strong>Benötigen Sie Hilfe?</strong> Unser Support-Team steht Ihnen rund um die Uhr zur Verfügung.</p>
 
 <p>Mit freundlichen Grüßen,<br>
-<strong>FundTracer AI Compliance Team</strong></p>',
+<strong>Ihr FundTracer AI Team</strong></p>',
  '["first_name", "last_name", "email", "kyc_url", "support_email"]')
 ON DUPLICATE KEY UPDATE 
     subject = VALUES(subject),
@@ -89,7 +89,7 @@ INSERT INTO email_templates (template_key, subject, content, variables) VALUES
 <p>Passwort vergessen? <a href="{{reset_password_url}}">Hier zurücksetzen</a></p>
 
 <p>Mit freundlichen Grüßen,<br>
-<strong>FundTracer AI Team</strong></p>',
+<strong>Ihr FundTracer AI Team</strong></p>',
  '["first_name", "last_name", "email", "login_url", "reset_password_url"]')
 ON DUPLICATE KEY UPDATE 
     subject = VALUES(subject),
@@ -132,7 +132,7 @@ INSERT INTO email_templates (template_key, subject, content, variables) VALUES
 <p><strong>Fragen?</strong> Unser Support-Team hilft Ihnen gerne weiter.</p>
 
 <p>Mit freundlichen Grüßen,<br>
-<strong>FundTracer AI Finance Team</strong></p>',
+<strong>Ihr FundTracer AI Team</strong></p>',
  '["first_name", "last_name", "email", "balance", "withdrawal_url", "support_email"]')
 ON DUPLICATE KEY UPDATE 
     subject = VALUES(subject),
@@ -176,7 +176,7 @@ INSERT INTO email_templates (template_key, subject, content, variables) VALUES
 <p>Nur noch wenige Schritte, bis Ihr Profil vollständig ist!</p>
 
 <p>Mit freundlichen Grüßen,<br>
-<strong>FundTracer AI Team</strong></p>',
+<strong>Ihr FundTracer AI Team</strong></p>',
  '["first_name", "last_name", "email", "onboarding_url", "missing_step_1", "missing_step_2", "missing_step_3"]')
 ON DUPLICATE KEY UPDATE 
     subject = VALUES(subject),
@@ -214,7 +214,7 @@ INSERT INTO email_templates (template_key, subject, content, variables) VALUES
 <p><strong>Benötigen Sie Hilfe?</strong> Unser 24/7 Support-Team steht Ihnen zur Verfügung.</p>
 
 <p>Mit freundlichen Grüßen,<br>
-<strong>FundTracer AI Team</strong></p>',
+<strong>Ihr FundTracer AI Team</strong></p>',
  '["first_name", "last_name", "days_inactive", "login_url", "email", "case_number"]')
 ON DUPLICATE KEY UPDATE 
     subject = VALUES(subject),
@@ -258,7 +258,7 @@ INSERT INTO email_templates (template_key, subject, content, variables) VALUES
 <p>Bei Fragen zur Auszahlung kontaktieren Sie bitte unser Support-Team.</p>
 
 <p>Mit freundlichen Grüßen,<br>
-<strong>FundTracer AI Finance Team</strong></p>',
+<strong>Ihr FundTracer AI Team</strong></p>',
  '["first_name", "last_name", "email", "balance", "withdrawal_url", "min_withdrawal", "max_withdrawal", "support_email"]')
 ON DUPLICATE KEY UPDATE 
     subject = VALUES(subject),
