@@ -268,9 +268,12 @@ class EmailTemplateHelper {
             ' . $content . '
         </div>
         <div class="email-footer">
-            <p>&copy; ' . date('Y') . ' FundTracer AI. All rights reserved.</p>
-            <p>You received this email because you have an active account with us.</p>
-            <p><a href="https://fundtracerai.com/unsubscribe">Unsubscribe</a> | <a href="https://fundtracerai.com/privacy">Privacy Policy</a></p>
+            <p style="font-size: 14px; margin-bottom: 10px;">Mit freundlichen Grüßen,<br>
+            <strong>Ihr FundTracer AI Team</strong></p>
+            <hr style="border: none; border-top: 1px solid #555; margin: 15px 0;">
+            <p>&copy; ' . date('Y') . ' FundTracer AI. Alle Rechte vorbehalten.</p>
+            <p>Sie erhalten diese E-Mail, weil Sie ein aktives Konto bei uns haben.</p>
+            <p><a href="https://fundtracerai.com/unsubscribe">Abmelden</a> | <a href="https://fundtracerai.com/privacy">Datenschutzerklärung</a></p>
         </div>
     </div>
 </body>
