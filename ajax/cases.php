@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
 if (!isset($_SESSION['user_id'])) {
     http_response_code(401);
     die(json_encode([
-        'error' => 'Unauthorized',
+        'error' => 'Unauthorized Please login to access this resource',
         'message' => 'Please login to access this resource',
         'redirect' => 'login.php'
     ]));
