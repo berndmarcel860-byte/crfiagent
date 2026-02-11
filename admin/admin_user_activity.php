@@ -72,6 +72,48 @@ require_once 'admin_header.php';
         </div>
     </div>
     
+    <!-- Inactive Users Section -->
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="mb-1">🤖 AI-Powered Inactive User Management</h5>
+                    <p class="text-muted mb-0">Automatically notify users who haven't logged in for a specified period</p>
+                </div>
+                <button class="btn btn-primary" data-toggle="modal" data-target="#notifyInactiveUsersModal">
+                    <i class="anticon anticon-mail"></i> Notify Inactive Users
+                </button>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h3 id="inactiveUsers30Days" class="text-warning">...</h3>
+                            <p class="mb-0">Inactive 30+ Days</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h3 id="inactiveUsers60Days" class="text-danger">...</h3>
+                            <p class="mb-0">Inactive 60+ Days</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h3 id="emailsSentToday" class="text-success">...</h3>
+                            <p class="mb-0">Emails Sent Today</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="card">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -272,6 +314,53 @@ $(document).ready(function() {
     $('#refreshActivityLogs').click(function() {
         userActivityTable.ajax.reload();
         loadActivityStats();
+        loadInactiveUsersStats();
+    });
+    
+    // Load inactive users statistics
+    function loadInactiveUsersStats() {
+        $.get('admin_ajax/get_activity_stats.php?type=inactive', function(data) {
+            if (data.success) {
+                $('#inactiveUsers30Days').text(data.inactive_30_days || 0);
+                $('#inactiveUsers60Days').text(data.inactive_60_days || 0);
+                $('#emailsSentToday').text(data.emails_sent_today || 0);
+            }
+        });
+    }
+    
+    // Handle notify inactive users form submission
+    $('#notifyInactiveUsersForm').submit(function(e) {
+        e.preventDefault();
+        
+        const inactiveDays = $('#inactiveDays').val();
+        const emailTemplate = $('#emailTemplate').val();
+        const $btn = $(this).find('button[type="submit"]');
+        const originalText = $btn.html();
+        
+        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Sending...');
+        
+        $.post('admin_ajax/notify_inactive_users.php', {
+            inactive_days: inactiveDays,
+            email_template: emailTemplate
+        })
+        .done(function(response) {
+            if (response.success) {
+                toastr.success(`${response.sent} emails sent successfully!`, 'Success');
+                if (response.failed > 0) {
+                    toastr.warning(`${response.failed} emails failed to send`, 'Warning');
+                }
+                $('#notifyInactiveUsersModal').modal('hide');
+                loadInactiveUsersStats();
+            } else {
+                toastr.error(response.message, 'Error');
+            }
+        })
+        .fail(function() {
+            toastr.error('Failed to send notifications', 'Error');
+        })
+        .always(function() {
+            $btn.prop('disabled', false).html(originalText);
+        });
     });
 
     // Helper function to get browser info
@@ -286,5 +375,72 @@ $(document).ready(function() {
 
     // Initial load
     loadActivityStats();
+    loadInactiveUsersStats();
 });
 </script>
+
+<!-- Notify Inactive Users Modal -->
+<div class="modal fade" id="notifyInactiveUsersModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="anticon anticon-mail"></i> Notify Inactive Users
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <i class="anticon anticon-close"></i>
+                </button>
+            </div>
+            <form id="notifyInactiveUsersForm">
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <i class="anticon anticon-info-circle"></i>
+                        <strong>AI-Powered Engagement</strong><br>
+                        This feature uses AI to identify inactive users and send personalized reminder emails to bring them back to their fund recovery cases.
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Inactive Period (Days)</label>
+                        <select class="form-control" id="inactiveDays" required>
+                            <option value="7">7 days</option>
+                            <option value="14">14 days</option>
+                            <option value="30" selected>30 days</option>
+                            <option value="60">60 days</option>
+                            <option value="90">90 days</option>
+                        </select>
+                        <small class="text-muted">Users who haven't logged in for this period will receive notifications</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email Template</label>
+                        <select class="form-control" id="emailTemplate" required>
+                            <option value="inactive_user_reminder" selected>Inactive User Reminder</option>
+                            <option value="case_update_notification">Case Update Notification</option>
+                            <option value="ai_recovery_update">AI Recovery Progress Update</option>
+                        </select>
+                        <small class="text-muted">Choose the email template to use for notifications</small>
+                    </div>
+                    
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6>Preview:</h6>
+                            <p class="mb-0 small">Inactive users will receive an AI-personalized email encouraging them to return, highlighting:</p>
+                            <ul class="small mb-0">
+                                <li>Their current case status</li>
+                                <li>AI analysis updates</li>
+                                <li>New recovery strategies</li>
+                                <li>Direct login link</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="anticon anticon-send"></i> Send Notifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

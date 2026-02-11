@@ -1,7 +1,6 @@
 <?php
-// Use absolute path based on server document root
-$rootPath = $_SERVER['DOCUMENT_ROOT'] . '/app1';
-require_once $rootPath . '/config.php';
+// Admin configuration - use relative path to main config
+require_once __DIR__ . '/../config.php';
 
 // Only start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
