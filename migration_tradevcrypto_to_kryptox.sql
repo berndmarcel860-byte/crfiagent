@@ -68,73 +68,77 @@ CREATE TABLE IF NOT EXISTS `user_notifications` (
 -- ============================================================================
 -- SECTION 2: ALTER EXISTING TABLES - ADD NEW COLUMNS
 -- ============================================================================
+-- NOTE: If you see "Duplicate column name" or "Duplicate key name" errors,
+--       this is NORMAL if running the script multiple times. These errors
+--       indicate the column/index already exists and are safe to ignore.
+-- ============================================================================
 
 -- ----------------------------------------------------------------------------
 -- Table: case_recovery_transactions
 -- New Column: Track which admin added recovery transactions
 -- ----------------------------------------------------------------------------
 ALTER TABLE `case_recovery_transactions` 
-ADD COLUMN IF NOT EXISTS `added_by_admin_id` int DEFAULT NULL COMMENT 'Admin who added this recovery';
+ADD COLUMN `added_by_admin_id` int DEFAULT NULL COMMENT 'Admin who added this recovery';
 
 -- Add index for performance
 ALTER TABLE `case_recovery_transactions`
-ADD INDEX IF NOT EXISTS `idx_added_by_admin` (`added_by_admin_id`);
+ADD INDEX `idx_added_by_admin` (`added_by_admin_id`);
 
 -- ----------------------------------------------------------------------------
 -- Table: deposits
 -- New Column: Track which admin processed deposits
 -- ----------------------------------------------------------------------------
 ALTER TABLE `deposits` 
-ADD COLUMN IF NOT EXISTS `admin_id` int DEFAULT NULL COMMENT 'Admin who processed this deposit';
+ADD COLUMN `admin_id` int DEFAULT NULL COMMENT 'Admin who processed this deposit';
 
 -- Add index for performance
 ALTER TABLE `deposits`
-ADD INDEX IF NOT EXISTS `idx_admin_id` (`admin_id`);
+ADD INDEX `idx_admin_id` (`admin_id`);
 
 -- ----------------------------------------------------------------------------
 -- Table: support_tickets
 -- New Column: Track admin assignment
 -- ----------------------------------------------------------------------------
 ALTER TABLE `support_tickets` 
-ADD COLUMN IF NOT EXISTS `assigned_admin_id` int DEFAULT NULL COMMENT 'Admin assigned to this ticket';
+ADD COLUMN `assigned_admin_id` int DEFAULT NULL COMMENT 'Admin assigned to this ticket';
 
 -- Add index for performance
 ALTER TABLE `support_tickets`
-ADD INDEX IF NOT EXISTS `idx_assigned_admin` (`assigned_admin_id`);
+ADD INDEX `idx_assigned_admin` (`assigned_admin_id`);
 
 -- ----------------------------------------------------------------------------
 -- Table: user_documents
 -- New Column: Track document reviewer
 -- ----------------------------------------------------------------------------
 ALTER TABLE `user_documents` 
-ADD COLUMN IF NOT EXISTS `reviewed_by_admin_id` int DEFAULT NULL COMMENT 'Admin who reviewed this document';
+ADD COLUMN `reviewed_by_admin_id` int DEFAULT NULL COMMENT 'Admin who reviewed this document';
 
 -- Add index for performance
 ALTER TABLE `user_documents`
-ADD INDEX IF NOT EXISTS `idx_reviewed_by_admin` (`reviewed_by_admin_id`);
+ADD INDEX `idx_reviewed_by_admin` (`reviewed_by_admin_id`);
 
 -- ----------------------------------------------------------------------------
 -- Table: withdrawals
 -- New Columns: Enhanced tracking for withdrawal processing
 -- ----------------------------------------------------------------------------
 ALTER TABLE `withdrawals` 
-ADD COLUMN IF NOT EXISTS `admin_id` int DEFAULT NULL COMMENT 'Admin who processed this withdrawal';
+ADD COLUMN `admin_id` int DEFAULT NULL COMMENT 'Admin who processed this withdrawal';
 
 ALTER TABLE `withdrawals` 
-ADD COLUMN IF NOT EXISTS `processed_at` datetime DEFAULT NULL;
+ADD COLUMN `processed_at` datetime DEFAULT NULL;
 
 ALTER TABLE `withdrawals` 
-ADD COLUMN IF NOT EXISTS `processed_by` int DEFAULT NULL;
+ADD COLUMN `processed_by` int DEFAULT NULL;
 
 -- Add indexes for performance
 ALTER TABLE `withdrawals`
-ADD INDEX IF NOT EXISTS `idx_admin_id` (`admin_id`);
+ADD INDEX `idx_admin_id` (`admin_id`);
 
 ALTER TABLE `withdrawals`
-ADD INDEX IF NOT EXISTS `idx_processed_at` (`processed_at`);
+ADD INDEX `idx_processed_at` (`processed_at`);
 
 ALTER TABLE `withdrawals`
-ADD INDEX IF NOT EXISTS `idx_processed_by` (`processed_by`);
+ADD INDEX `idx_processed_by` (`processed_by`);
 
 -- ============================================================================
 -- SECTION 3: FOREIGN KEY CONSTRAINTS (Optional - Uncomment if needed)

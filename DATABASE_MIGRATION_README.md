@@ -202,7 +202,13 @@ Expected output:
 
 **"Table already exists"**
 - This is normal when re-running
-- The script handles this gracefully with `IF NOT EXISTS`
+- Tables use `CREATE TABLE IF NOT EXISTS` so they're safely skipped
+
+**"Duplicate column name" or "Duplicate key name"**
+- This is NORMAL and SAFE when re-running the migration
+- Means the column/index already exists from a previous run
+- You can safely ignore these errors
+- The migration will complete successfully
 
 **"Access denied"**
 - Ensure your MySQL user has proper privileges

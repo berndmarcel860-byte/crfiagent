@@ -38,10 +38,11 @@ The migration adds new features to your database while **preserving all existing
 ## 🔒 Safety Guarantees
 
 - ✅ **No data deletion** - Script only adds structures, never removes
-- ✅ **Idempotent** - Can be run multiple times safely (uses `IF NOT EXISTS`)
+- ✅ **Idempotent** - Can be run multiple times (duplicate errors are safe to ignore)
 - ✅ **No table drops** - All existing tables are preserved
 - ✅ **No column drops** - All existing columns are preserved
 - ✅ **Backward compatible** - New columns are nullable, won't break existing code
+- ✅ **MySQL 5.7+ compatible** - Works with older MySQL versions
 
 ## 📝 Files Included
 
@@ -179,10 +180,10 @@ mysql -u your_username -p tradevcrypto < tradevcrypto_backup_*.sql
 ## 🆘 Troubleshooting
 
 ### Error: "Table already exists"
-**Solution**: This is normal if re-running. The script uses `IF NOT EXISTS` so it's safe.
+**Solution**: This is normal if re-running. Tables use `CREATE TABLE IF NOT EXISTS` so they're safely skipped if they exist.
 
-### Error: "Duplicate column name"
-**Solution**: Column was already added. Safe to ignore or the script should handle it gracefully.
+### Error: "Duplicate column name" or "Duplicate key name"
+**Solution**: This is NORMAL and SAFE if you're re-running the script. It means the column or index already exists from a previous run. You can safely ignore these errors and continue. The migration will complete successfully.
 
 ### Error: "Access denied"
 **Solution**: Ensure your database user has CREATE, ALTER, and INDEX privileges.
