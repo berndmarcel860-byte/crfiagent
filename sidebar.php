@@ -6,7 +6,7 @@
 
                 <!-- Dashboard -->
                 <li class="nav-item">
-                    <a href="index.php">
+                    <a href="index.php" title="Dashboard Overview">
                         <span class="icon-holder">
                             <i class="anticon anticon-dashboard"></i>
                         </span>
@@ -16,9 +16,9 @@
 
                 <!-- My Cases -->
                 <li class="nav-item">
-                    <a href="cases.php">
+                    <a href="cases.php" title="Manage Your Cases">
                         <span class="icon-holder">
-                            <i class="anticon anticon-file"></i>
+                            <i class="anticon anticon-folder-open"></i>
                         </span>
                         <span class="title">My Cases</span>
                     </a>
@@ -26,9 +26,9 @@
 
                 <!-- Transactions -->
                 <li class="nav-item">
-                    <a href="transactions.php">
+                    <a href="transactions.php" title="View Transaction History">
                         <span class="icon-holder">
-                            <i class="anticon anticon-transaction"></i>
+                            <i class="anticon anticon-wallet"></i>
                         </span>
                         <span class="title">Transactions</span>
                     </a>
@@ -36,9 +36,9 @@
 
                 <!-- KYC Verification -->
                 <li class="nav-item">
-                    <a href="kyc.php">
+                    <a href="kyc.php" title="Identity Verification">
                         <span class="icon-holder">
-                            <i class="anticon anticon-safety"></i>
+                            <i class="anticon anticon-safety-certificate"></i>
                         </span>
                         <span class="title">KYC Verification</span>
                         <?php 
@@ -46,14 +46,14 @@
                         $stmt->execute([$_SESSION['user_id']]);
                         $kycStatus = $stmt->fetch();
                         if ($kycStatus && $kycStatus['status'] === 'pending'): ?>
-                            <span class="badge badge-warning float-right">Pending</span>
+                            <span class="badge badge-warning ml-auto">Pending</span>
                         <?php endif; ?>
                     </a>
                 </li>
 
                 <!-- Account -->
                 <li class="nav-item dropdown">
-                    <a class="dropdown-toggle" href="javascript:void(0);">
+                    <a class="dropdown-toggle" href="javascript:void(0);" title="Account Settings">
                         <span class="icon-holder">
                             <i class="anticon anticon-user"></i>
                         </span>
@@ -64,19 +64,19 @@
                     </a>
                     <ul class="dropdown-menu">
                         <li>
-                            <a href="profile.php">
-                                <i class="anticon anticon-profile m-r-10"></i>
+                            <a href="profile.php" title="View and Edit Profile">
+                                <i class="anticon anticon-user m-r-10"></i>
                                 My Profile
                             </a>
                         </li>
                         <li>
-                            <a href="settings.php">
+                            <a href="settings.php" title="Account Settings">
                                 <i class="anticon anticon-setting m-r-10"></i>
                                 Settings
                             </a>
                         </li>
                         <li>
-                            <a href="logout.php">
+                            <a href="logout.php" title="Sign Out">
                                 <i class="anticon anticon-logout m-r-10"></i>
                                 Logout
                             </a>
@@ -86,7 +86,7 @@
 
                 <!-- Support -->
                 <li class="nav-item">
-                    <a href="support.php">
+                    <a href="support.php" title="Get Help & Support">
                         <span class="icon-holder">
                             <i class="anticon anticon-customer-service"></i>
                         </span>
