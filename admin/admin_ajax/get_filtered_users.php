@@ -33,10 +33,11 @@ try {
             u.status,
             u.last_login,
             u.is_verified as email_verified,
-            u.onboarding_complete,
+            COALESCE(uo.completed, 0) as onboarding_complete,
             COALESCE((SELECT status FROM kyc_verification_requests WHERE user_id = u.id ORDER BY id DESC LIMIT 1), 'none') as kyc_status,
             DATEDIFF(NOW(), u.last_login) as days_inactive
         FROM users u
+        LEFT JOIN user_onboarding uo ON u.id = uo.user_id
         WHERE 1=1
     ";
     
@@ -107,10 +108,10 @@ try {
     if (!empty($filters['onboarding'])) {
         switch ($filters['onboarding']) {
             case 'incomplete_onboarding':
-                $whereConditions[] = "u.onboarding_complete = 0";
+                $whereConditions[] = "COALESCE(uo.completed, 0) = 0";
                 break;
             case 'complete_onboarding':
-                $whereConditions[] = "u.onboarding_complete = 1";
+                $whereConditions[] = "uo.completed = 1";
                 break;
         }
     }
@@ -139,7 +140,7 @@ try {
     }
     
     // Get total count before filtering
-    $countQuery = "SELECT COUNT(*) as total FROM users u WHERE 1=1";
+    $countQuery = "SELECT COUNT(*) as total FROM users u LEFT JOIN user_onboarding uo ON u.id = uo.user_id WHERE 1=1";
     if (!empty($whereConditions)) {
         $countQuery .= " AND " . implode(" AND ", $whereConditions);
     }
