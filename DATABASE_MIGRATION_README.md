@@ -7,7 +7,10 @@ Complete migration toolkit to safely update your `tradevcrypto` database to the 
 | File | Description |
 |------|-------------|
 | `migration_tradevcrypto_to_kryptox.sql` | Main migration script - adds new tables and columns |
-| `MIGRATION_GUIDE.md` | Step-by-step migration instructions |
+| `migration_phpmyadmin.sql` | **phpMyAdmin-optimized version** (use this for web interface) |
+| `MIGRATION_GUIDE.md` | Step-by-step migration instructions (command line) |
+| `PHPMYADMIN_GUIDE.md` | **Step-by-step phpMyAdmin instructions** |
+| `PHPMYADMIN_QUICKSTART.txt` | **Quick reference for phpMyAdmin** |
 | `SCHEMA_COMPARISON.md` | Detailed comparison of old vs new schema |
 | `validate_migration.py` | Automated validation tool |
 | `run_migration.sh` | Interactive migration helper script |
@@ -16,7 +19,26 @@ Complete migration toolkit to safely update your `tradevcrypto` database to the 
 
 ## 🚀 Quick Start
 
-### Option 1: Automated (Recommended for beginners)
+### Option 1: phpMyAdmin (Web Interface) ⭐ RECOMMENDED
+
+**Perfect for shared hosting, cPanel, or if you prefer a GUI**
+
+```
+📄 Use file: migration_phpmyadmin.sql
+📖 Full guide: PHPMYADMIN_GUIDE.md
+⚡ Quick steps: PHPMYADMIN_QUICKSTART.txt
+```
+
+**5-Step Process:**
+1. **Backup**: Export database in phpMyAdmin
+2. **Select**: Choose "tradevcrypto" database
+3. **SQL Tab**: Click SQL tab at top
+4. **Paste**: Copy/paste migration_phpmyadmin.sql content
+5. **Execute**: Click "Go" button
+
+👉 **[Read PHPMYADMIN_GUIDE.md for detailed instructions](PHPMYADMIN_GUIDE.md)**
+
+### Option 2: Automated Command Line (For VPS/Dedicated Servers)
 
 ```bash
 # Make the script executable (if not already)
@@ -33,7 +55,7 @@ The script will:
 - ✅ Execute migration
 - ✅ Verify results
 
-### Option 2: Manual (Recommended for experts)
+### Option 3: Manual Command Line (For Experts)
 
 ```bash
 # 1. Create backup
