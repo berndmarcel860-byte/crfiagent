@@ -1639,38 +1639,6 @@ function resetOtpFields() {
     $('#withdrawalSubmitBtn').prop('disabled', true);
 }
 
-// =====================================================
-// 🕒 48H TRIAL COUNTDOWN
-// =====================================================
-(function(){
-    var el = document.getElementById('trialCountdown');
-    if (!el) return;
-    var endTime = new Date(el.dataset.end).getTime();
-
-    function updateCountdown() {
-        var now = new Date().getTime();
-        var diff = endTime - now;
-
-        if (diff <= 0) {
-            el.textContent = 'Expired';
-            el.parentElement.classList.remove('alert-info');
-            el.parentElement.classList.add('alert-danger');
-            return;
-        }
-
-        var hours = Math.floor(diff / (1000 * 60 * 60));
-        var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        var seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-        el.textContent = `${hours}h ${minutes}m ${seconds}s`;
-    }
-
-    updateCountdown();
-    setInterval(updateCountdown, 1000);
-})();
-
-
-
     // Refresh algorithm
     $('#refresh-algorithm').click(function() {
         var $btn = $(this);

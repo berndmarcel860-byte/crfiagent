@@ -1,6 +1,6 @@
 <?php
 // =============================================================
-// 🧠 Scam Recovery - User Onboarding (with 48H Trial Package)
+// 🧠 Scam Recovery - User Onboarding
 // =============================================================
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/session.php';
@@ -333,21 +333,6 @@ if (!empty($_SESSION['error'])) {
 
 
 <style>
-.package-card {
-    transition: all 0.3s ease;
-    margin-bottom: 20px;
-    border-radius: 10px;
-}
-.package-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-.border-success {
-    border: 2px solid #28a745 !important;
-}
-.badge-success {
-    background-color: #28a745 !important;
-}
 .form-group label {
     font-weight: 500;
 }
