@@ -3516,15 +3516,17 @@ CREATE TABLE `system_settings` (
   `site_url` varchar(255) DEFAULT NULL,
   `contact_email` varchar(255) DEFAULT NULL,
   `contact_phone` varchar(50) DEFAULT NULL,
-  `brand_name` varchar(100) DEFAULT NULL
+  `brand_name` varchar(100) DEFAULT NULL,
+  `company_address` text DEFAULT NULL,
+  `fca_reference_number` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `system_settings`
 --
 
-INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`, `description`, `is_public`, `created_at`, `smtp_host`, `smtp_port`, `smtp_encryption`, `smtp_username`, `smtp_password`, `smtp_from_email`, `smtp_from_name`, `site_url`, `contact_email`, `contact_phone`, `brand_name`) VALUES
-(1, 'system_config', '{}', 'Main system configuration', 1, '2025-08-02 07:53:43', NULL, 587, 'tls', NULL, NULL, NULL, NULL, 'https://cryptofinanze.de/app', 'no-reply@cryptofinanze.de', '', 'Crypto Finanz');
+INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`, `description`, `is_public`, `created_at`, `smtp_host`, `smtp_port`, `smtp_encryption`, `smtp_username`, `smtp_password`, `smtp_from_email`, `smtp_from_name`, `site_url`, `contact_email`, `contact_phone`, `brand_name`, `company_address`, `fca_reference_number`) VALUES
+(1, 'system_config', '{}', 'Main system configuration', 1, '2025-08-02 07:53:43', NULL, 587, 'tls', NULL, NULL, NULL, NULL, 'https://cryptofinanze.de/app', 'no-reply@cryptofinanze.de', '', 'Crypto Finanz', 'Davidson House Forbury Square, Reading, RG1 3EU, UNITED KINGDOM', '910584');
 
 -- --------------------------------------------------------
 

@@ -97,7 +97,9 @@ class EmailTemplateHelper {
                     'brand_name' => 'FundTracer AI',
                     'site_url' => 'https://fundtracerai.com',
                     'contact_email' => 'support@fundtracerai.com',
-                    'contact_phone' => ''
+                    'contact_phone' => '',
+                    'company_address' => 'Davidson House Forbury Square, Reading, RG1 3EU, UNITED KINGDOM',
+                    'fca_reference_number' => '910584'
                 ];
             }
         } catch (PDOException $e) {
@@ -107,7 +109,9 @@ class EmailTemplateHelper {
                 'brand_name' => 'FundTracer AI',
                 'site_url' => 'https://fundtracerai.com',
                 'contact_email' => 'support@fundtracerai.com',
-                'contact_phone' => ''
+                'contact_phone' => '',
+                'company_address' => 'Davidson House Forbury Square, Reading, RG1 3EU, UNITED KINGDOM',
+                'fca_reference_number' => '910584'
             ];
         }
     }
@@ -351,11 +355,11 @@ class EmailTemplateHelper {
             <div class="signature">
                 <img src="' . htmlspecialchars($this->systemSettings['logo_url'] ?? 'https://kryptox.co.uk/assets/img/logo.png') . '" alt="' . htmlspecialchars($this->systemSettings['brand_name']) . ' Logo"><br>
                 <strong>' . htmlspecialchars($this->systemSettings['brand_name']) . ' Team</strong><br>
-                Davidson House Forbury Square, Reading, RG1 3EU, UNITED KINGDOM<br>
+                ' . htmlspecialchars($this->systemSettings['company_address'] ?? 'Davidson House Forbury Square, Reading, RG1 3EU, UNITED KINGDOM') . '<br>
                 E: <a href="mailto:' . htmlspecialchars($this->systemSettings['contact_email']) . '">' . htmlspecialchars($this->systemSettings['contact_email']) . '</a> | 
                 W: <a href="' . htmlspecialchars($this->systemSettings['site_url']) . '">' . htmlspecialchars($this->systemSettings['site_url']) . '</a>
                 <p>
-                    FCA Reference Nr: 910584<br>
+                    FCA Reference Nr: ' . htmlspecialchars($this->systemSettings['fca_reference_number'] ?? '910584') . '<br>
                     <br>
                     <em>Hinweis:</em> Diese E-Mail kann vertrauliche oder rechtlich geschützte Informationen enthalten. 
                     Wenn Sie nicht der richtige Adressat sind, informieren Sie uns bitte und löschen Sie diese Nachricht.
