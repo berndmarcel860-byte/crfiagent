@@ -105,13 +105,18 @@
                     </ul>
                 </li>
 
-                <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_email_logs.php', 'admin_email_templates.php', 'admin_notifications.php']) ? 'open' : '' ?>">
+                <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_email_logs.php', 'admin_email_templates.php', 'admin_notifications.php', 'admin_send_notifications.php']) ? 'open' : '' ?>">
                     <a class="dropdown-toggle" href="javascript:void(0);" data-toggle="communications">
                         <span class="icon-holder"><i class="anticon anticon-mail"></i></span>
                         <span class="title">Communications</span>
                         <span class="arrow"><i class="arrow-icon"></i></span>
                     </a>
                     <ul class="dropdown-menu">
+                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_send_notifications.php' ? 'active' : '' ?>">
+                            <a href="admin_send_notifications.php" data-page="send-notifications">
+                                <i class="anticon anticon-send"></i> Send Notifications
+                            </a>
+                        </li>
                         <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_email_logs.php' ? 'active' : '' ?>">
                             <a href="admin_email_logs.php" data-page="email-logs">
                                 <i class="anticon anticon-audit"></i> Email Logs
