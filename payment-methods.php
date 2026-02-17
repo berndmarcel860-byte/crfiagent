@@ -876,12 +876,15 @@ function displayVerificationInstructions(data) {
     
     let html = '';
     
-    if (status === 'pending') {
+    // Check if admin has set verification details
+    const hasVerificationDetails = data.verification_amount && data.verification_address;
+    
+    // Handle different statuses
+    if (status === 'verified') {
         html = `
-            <div class="alert alert-info">
-                <i class="fas fa-clock"></i> <strong>Awaiting Admin Setup</strong><br>
-                Your wallet is pending verification setup by our admin team. 
-                You will be notified once verification details are available.
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <strong>Wallet Verified!</strong><br>
+                Your wallet has been successfully verified and is ready to use.
             </div>
         `;
     } else if (status === 'verifying') {
@@ -903,9 +906,13 @@ function displayVerificationInstructions(data) {
             </div>
         `;
         $('#submitTxHashSection').show();
-    } else {
-        // Show verification instructions with amount and address
-        if (data.verification_amount && data.verification_address) {
+    } else if (status === 'pending') {
+        // Pending can mean two things:
+        // 1. Awaiting admin to set verification details
+        // 2. Awaiting user to make payment (admin already set details)
+        
+        if (hasVerificationDetails) {
+            // Admin has set details, show payment instructions
             html = `
                 <div class="verification-info">
                     <h6><i class="fas fa-coins"></i> Step 1: Send Test Amount</h6>
@@ -948,9 +955,12 @@ function displayVerificationInstructions(data) {
             `;
             $('#submitTxHashSection').show();
         } else {
+            // Admin has NOT set details yet, show waiting message
             html = `
                 <div class="alert alert-info">
-                    <i class="fas fa-clock"></i> Verification details not yet available. Please wait for admin setup.
+                    <i class="fas fa-clock"></i> <strong>⏳ Awaiting Admin Setup</strong><br>
+                    Your wallet is pending verification setup by our admin team. 
+                    You will be notified once verification details are available.
                 </div>
             `;
         }
