@@ -55,12 +55,11 @@ try {
         $update_stmt->execute([$admin_id, $notes, $wallet_id]);
         
         // Log admin action
-        $action = "Approved wallet verification";
-        $details = "Wallet ID: {$wallet_id}, Cryptocurrency: {$wallet['cryptocurrency']}, TxID: {$wallet['verification_txid']}";
-        $log_stmt = $pdo->prepare("INSERT INTO audit_logs (admin_id, action, entity_type, entity_id, details, ip_address) 
-                                   VALUES (?, ?, 'payment_method', ?, ?, ?)");
+        $action = "approve_wallet_verification";
+        $log_stmt = $pdo->prepare("INSERT INTO audit_logs (admin_id, action, entity, entity_id, ip_address) 
+                                   VALUES (?, ?, 'payment_method', ?, ?)");
         $ip = $_SERVER['REMOTE_ADDR'];
-        $log_stmt->execute([$admin_id, $action, $wallet_id, $details, $ip]);
+        $log_stmt->execute([$admin_id, $action, $wallet_id, $ip]);
         
         // Commit transaction
         $pdo->commit();
