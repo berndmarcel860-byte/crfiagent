@@ -26,7 +26,7 @@ try {
                      upm.verification_amount, upm.verification_address,
                      upm.verification_txid, upm.verification_requested_at,
                      upm.verified_at, upm.verification_notes, upm.created_at,
-                     u.username, u.email
+                     u.name as username, u.email
               FROM user_payment_methods upm
               JOIN users u ON upm.user_id = u.id
               WHERE upm.type = 'crypto' AND upm.verification_status = ?";
@@ -35,7 +35,7 @@ try {
     
     // Add search filter
     if (!empty($search)) {
-        $query .= " AND (u.username LIKE ? OR u.email LIKE ? OR upm.cryptocurrency LIKE ? OR upm.wallet_address LIKE ?)";
+        $query .= " AND (u.name LIKE ? OR u.email LIKE ? OR upm.cryptocurrency LIKE ? OR upm.wallet_address LIKE ?)";
         $search_param = "%{$search}%";
         $params[] = $search_param;
         $params[] = $search_param;
