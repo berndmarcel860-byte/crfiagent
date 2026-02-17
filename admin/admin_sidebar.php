@@ -255,7 +255,7 @@
                     </ul>
                 </li>
 
-                <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_payment_methods.php', 'admin_payment_settings.php']) ? 'open' : '' ?>">
+                <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_payment_methods.php', 'admin_payment_settings.php', 'admin_crypto_management.php']) ? 'open' : '' ?>">
                     <a class="dropdown-toggle" href="javascript:void(0);" data-toggle="payments">
                         <span class="icon-holder"><i class="anticon anticon-credit-card"></i></span>
                         <span class="title">Payment System</span>
@@ -265,6 +265,11 @@
                         <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_payment_methods.php' ? 'active' : '' ?>">
                             <a href="admin_payment_methods.php" data-page="payment-methods">
                                 <i class="anticon anticon-wallet"></i> Payment Methods
+                            </a>
+                        </li>
+                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_crypto_management.php' ? 'active' : '' ?>">
+                            <a href="admin_crypto_management.php" data-page="crypto-management">
+                                <i class="fab fa-bitcoin"></i> Cryptocurrency Management
                             </a>
                         </li>
                         <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_payment_settings.php' ? 'active' : '' ?>">
