@@ -207,17 +207,7 @@ include 'header.php';
                     <div class="form-group">
                         <label>Cryptocurrency <span class="text-danger">*</span></label>
                         <select class="form-control" name="cryptocurrency" required id="cryptoSelect">
-                            <option value="">Select...</option>
-                            <option value="BTC">Bitcoin (BTC)</option>
-                            <option value="ETH">Ethereum (ETH)</option>
-                            <option value="USDT">Tether (USDT)</option>
-                            <option value="USDC">USD Coin (USDC)</option>
-                            <option value="BNB">Binance Coin (BNB)</option>
-                            <option value="XRP">Ripple (XRP)</option>
-                            <option value="ADA">Cardano (ADA)</option>
-                            <option value="SOL">Solana (SOL)</option>
-                            <option value="DOT">Polkadot (DOT)</option>
-                            <option value="DOGE">Dogecoin (DOGE)</option>
+                            <option value="">Loading...</option>
                         </select>
                     </div>
 
@@ -264,36 +254,57 @@ include 'header.php';
 </div>
 
 <script>
-// Network options based on cryptocurrency
-const cryptoNetworks = {
-    'BTC': ['Bitcoin'],
-    'ETH': ['Ethereum (ERC-20)'],
-    'USDT': ['Ethereum (ERC-20)', 'Tron (TRC-20)', 'BSC (BEP-20)', 'Polygon', 'Solana'],
-    'USDC': ['Ethereum (ERC-20)', 'Polygon', 'Solana', 'Avalanche'],
-    'BNB': ['BSC (BEP-20)', 'Beacon Chain (BEP-2)'],
-    'XRP': ['XRP Ledger'],
-    'ADA': ['Cardano'],
-    'SOL': ['Solana'],
-    'DOT': ['Polkadot'],
-    'DOGE': ['Dogecoin']
-};
-
-// Update network options when cryptocurrency changes
-$('#cryptoSelect').change(function() {
-    const crypto = $(this).val();
-    const networkSelect = $('#networkSelect');
-    networkSelect.html('<option value="">Select network...</option>');
-    
-    if (crypto && cryptoNetworks[crypto]) {
-        cryptoNetworks[crypto].forEach(network => {
-            networkSelect.append(`<option value="${network}">${network}</option>`);
-        });
-    }
-});
+// Store available cryptocurrencies globally
+let availableCryptos = [];
 
 // Load payment methods on page load
 $(document).ready(function() {
     loadPaymentMethods();
+    loadAvailableCryptocurrencies();
+});
+
+// Load available cryptocurrencies from database
+function loadAvailableCryptocurrencies() {
+    $.ajax({
+        url: 'ajax/get_available_cryptocurrencies.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                availableCryptos = response.cryptocurrencies;
+                populateCryptoDropdown();
+            }
+        },
+        error: function() {
+            console.error('Failed to load cryptocurrencies');
+        }
+    });
+}
+
+// Populate cryptocurrency dropdown with data from database
+function populateCryptoDropdown() {
+    const cryptoSelect = $('#cryptoSelect');
+    cryptoSelect.html('<option value="">Select...</option>');
+    
+    availableCryptos.forEach(crypto => {
+        cryptoSelect.append(`<option value="${crypto.symbol}" data-crypto-id="${crypto.id}">${crypto.name} (${crypto.symbol})</option>`);
+    });
+}
+
+// Update network options when cryptocurrency changes
+$('#cryptoSelect').change(function() {
+    const symbol = $(this).val();
+    const networkSelect = $('#networkSelect');
+    networkSelect.html('<option value="">Select network...</option>');
+    
+    if (symbol) {
+        const crypto = availableCryptos.find(c => c.symbol === symbol);
+        if (crypto && crypto.networks) {
+            crypto.networks.forEach(network => {
+                networkSelect.append(`<option value="${network.network_name}">${network.network_name}</option>`);
+            });
+        }
+    }
 });
 
 function loadPaymentMethods() {

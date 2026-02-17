@@ -40,7 +40,8 @@ try {
         'payment_method' => $payment_method,
         'label' => !empty($label) ? $label : $payment_method,
         'is_default' => $is_default,
-        'status' => 'active'
+        'status' => 'active',
+        'created_at' => date('Y-m-d H:i:s')
     ];
 
     if ($type === 'fiat') {
