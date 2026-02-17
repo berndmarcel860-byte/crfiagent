@@ -35,36 +35,31 @@ try {
     }
     
     // Get wallet details
-    $stmt = $conn->prepare("SELECT id, user_id, cryptocurrency, verification_status 
+    $stmt = $pdo->prepare("SELECT id, user_id, cryptocurrency, verification_status 
                            FROM user_payment_methods 
                            WHERE id = ? AND type = 'crypto'");
-    $stmt->bind_param("i", $wallet_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$wallet_id]);
+    $wallet = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if ($result->num_rows === 0) {
+    if (!$wallet) {
         throw new Exception('Wallet not found');
     }
     
-    $wallet = $result->fetch_assoc();
-    
     // Update verification details
-    $update_stmt = $conn->prepare("UPDATE user_payment_methods 
+    $update_stmt = $pdo->prepare("UPDATE user_payment_methods 
                                    SET verification_amount = ?,
                                        verification_address = ?,
                                        updated_at = CURRENT_TIMESTAMP
                                    WHERE id = ?");
-    $update_stmt->bind_param("ssi", $verification_amount, $verification_address, $wallet_id);
     
-    if ($update_stmt->execute()) {
+    if ($update_stmt->execute([$verification_amount, $verification_address, $wallet_id])) {
         // Log admin action
         $action = "Set verification details";
         $details = "Wallet ID: {$wallet_id}, Amount: {$verification_amount}, Address: {$verification_address}";
-        $log_stmt = $conn->prepare("INSERT INTO audit_logs (admin_id, action, entity_type, entity_id, details, ip_address) 
+        $log_stmt = $pdo->prepare("INSERT INTO audit_logs (admin_id, action, entity_type, entity_id, details, ip_address) 
                                    VALUES (?, ?, 'payment_method', ?, ?, ?)");
         $ip = $_SERVER['REMOTE_ADDR'];
-        $log_stmt->bind_param("isiss", $admin_id, $action, $wallet_id, $details, $ip);
-        $log_stmt->execute();
+        $log_stmt->execute([$admin_id, $action, $wallet_id, $details, $ip]);
         
         echo json_encode([
             'success' => true,

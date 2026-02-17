@@ -36,18 +36,15 @@ try {
     }
     
     // Verify wallet ownership
-    $stmt = $conn->prepare("SELECT id, cryptocurrency, verification_status, verification_amount, verification_address 
+    $stmt = $pdo->prepare("SELECT id, cryptocurrency, verification_status, verification_amount, verification_address 
                            FROM user_payment_methods 
                            WHERE id = ? AND user_id = ? AND type = 'crypto'");
-    $stmt->bind_param("ii", $wallet_id, $user_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt->execute([$wallet_id, $user_id]);
+    $wallet = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if ($result->num_rows === 0) {
+    if (!$wallet) {
         throw new Exception('Wallet not found or access denied');
     }
-    
-    $wallet = $result->fetch_assoc();
     
     // Check if verification details are set
     if (empty($wallet['verification_amount']) || empty($wallet['verification_address'])) {
@@ -64,15 +61,14 @@ try {
     }
     
     // Update wallet with transaction hash and set status to verifying
-    $update_stmt = $conn->prepare("UPDATE user_payment_methods 
+    $update_stmt = $pdo->prepare("UPDATE user_payment_methods 
                                    SET verification_txid = ?,
                                        verification_status = 'verifying',
                                        verification_requested_at = CURRENT_TIMESTAMP,
                                        updated_at = CURRENT_TIMESTAMP
                                    WHERE id = ? AND user_id = ?");
-    $update_stmt->bind_param("sii", $verification_txid, $wallet_id, $user_id);
     
-    if ($update_stmt->execute()) {
+    if ($update_stmt->execute([$verification_txid, $wallet_id, $user_id])) {
         echo json_encode([
             'success' => true,
             'message' => 'Transaction hash submitted successfully! Your wallet is now awaiting verification.',
