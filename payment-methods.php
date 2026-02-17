@@ -101,6 +101,109 @@ include 'header.php';
     margin-bottom: 8px;
     color: #856404;
 }
+
+/* Prominent Alert Boxes for Verification Status */
+.verification-alert {
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 5px solid;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    animation: slideIn 0.5s ease-out;
+}
+
+.alert-pending {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+}
+
+.alert-verifying {
+    background-color: #d1ecf1;
+    border-color: #17a2b8;
+    color: #0c5460;
+}
+
+.alert-verified {
+    background-color: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.alert-failed {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.pulse-icon {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.rotate-icon {
+    animation: rotate 2s linear infinite;
+}
+
+/* Enhanced visibility */
+.verification-status {
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 6px 12px;
+}
+
+.status-icon {
+    font-size: 1.5em;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: all 0.3s;
+}
+
+.status-icon:hover {
+    transform: scale(1.3);
+}
+
+/* Large action buttons in alerts */
+.verification-alert .btn {
+    white-space: nowrap;
+    font-size: 1em;
+    padding: 10px 20px;
+}
+
+.verification-alert h6 {
+    margin: 0;
+    font-size: 1.2em;
+}
 </style>
 
 <!-- Content Wrapper START -->
@@ -508,32 +611,81 @@ function displayCryptoMethods(methods) {
         // Determine status badge and icon
         let statusBadge = '';
         let statusIcon = '';
+        let alertBox = '';
         
         switch(status) {
             case 'pending':
-                statusBadge = '<span class="badge badge-warning verification-status">Pending Verification</span>';
-                statusIcon = `<i class="fas fa-info-circle text-warning status-icon" 
+                statusBadge = '<span class="badge badge-warning verification-status" style="font-size: 1.2em; font-weight: bold; padding: 6px 12px;">⚠️ PENDING VERIFICATION</span>';
+                statusIcon = `<i class="fas fa-info-circle text-warning status-icon pulse-icon" 
                                onclick="showVerificationDetails(${method.id})" 
-                               title="View verification details"></i>`;
+                               title="View verification details" 
+                               style="font-size: 1.5em; cursor: pointer;"></i>`;
+                alertBox = `
+                    <div class="verification-alert alert-pending">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <h6 class="mb-2"><i class="fas fa-exclamation-triangle pulse-icon"></i> <strong>ACTION REQUIRED: Wallet Verification Pending</strong></h6>
+                                <p class="mb-0">This wallet needs verification before use. Click below to view payment instructions.</p>
+                            </div>
+                            <button class="btn btn-warning btn-lg" onclick="showVerificationDetails(${method.id})">
+                                <i class="fas fa-eye"></i> View Instructions
+                            </button>
+                        </div>
+                    </div>
+                `;
                 break;
             case 'verifying':
-                statusBadge = '<span class="badge badge-info verification-status">Verifying</span>';
-                statusIcon = `<i class="fas fa-clock text-info status-icon" 
-                               title="Awaiting admin approval"></i>`;
+                statusBadge = '<span class="badge badge-info verification-status" style="font-size: 1.2em; font-weight: bold; padding: 6px 12px;">⏳ VERIFYING</span>';
+                statusIcon = `<i class="fas fa-clock text-info status-icon rotate-icon" 
+                               title="Awaiting admin approval" 
+                               style="font-size: 1.5em;"></i>`;
+                alertBox = `
+                    <div class="verification-alert alert-verifying">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <h6 class="mb-2"><i class="fas fa-clock rotate-icon"></i> <strong>Verification in Progress</strong></h6>
+                                <p class="mb-0">Transaction submitted and under review. You'll be notified once verified.</p>
+                            </div>
+                            <button class="btn btn-info" onclick="showVerificationDetails(${method.id})">
+                                <i class="fas fa-eye"></i> View Details
+                            </button>
+                        </div>
+                    </div>
+                `;
                 break;
             case 'verified':
-                statusBadge = '<span class="badge badge-success verification-status">Verified</span>';
-                statusIcon = '<i class="fas fa-check-circle text-success status-icon" title="Verified"></i>';
+                statusBadge = '<span class="badge badge-success verification-status" style="font-size: 1.2em; font-weight: bold; padding: 6px 12px;">✅ VERIFIED</span>';
+                statusIcon = '<i class="fas fa-check-circle text-success status-icon" title="Verified" style="font-size: 1.5em;"></i>';
+                alertBox = `
+                    <div class="verification-alert alert-verified">
+                        <h6 class="mb-0"><i class="fas fa-check-circle"></i> <strong>Wallet Verified and Ready</strong> - This wallet is verified and ready to use for transactions.</h6>
+                    </div>
+                `;
                 break;
             case 'failed':
-                statusBadge = '<span class="badge badge-danger verification-status">Verification Failed</span>';
-                statusIcon = `<i class="fas fa-exclamation-circle text-danger status-icon" 
+                statusBadge = '<span class="badge badge-danger verification-status" style="font-size: 1.2em; font-weight: bold; padding: 6px 12px;">❌ VERIFICATION FAILED</span>';
+                statusIcon = `<i class="fas fa-exclamation-circle text-danger status-icon pulse-icon" 
                                onclick="showVerificationDetails(${method.id})" 
-                               title="View details"></i>`;
+                               title="View details" 
+                               style="font-size: 1.5em; cursor: pointer;"></i>`;
+                alertBox = `
+                    <div class="verification-alert alert-failed">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <div>
+                                <h6 class="mb-2"><i class="fas fa-times-circle"></i> <strong>Verification Failed</strong></h6>
+                                <p class="mb-0">${method.verification_notes || 'Please contact support or try again.'}</p>
+                            </div>
+                            <button class="btn btn-danger" onclick="showVerificationDetails(${method.id})">
+                                <i class="fas fa-redo"></i> Try Again
+                            </button>
+                        </div>
+                    </div>
+                `;
                 break;
         }
         
         html += `
+            ${alertBox}
             <div class="payment-card ${isDefault ? 'default' : ''}" id="method-${method.id}">
                 <div class="method-actions">
                     ${!isDefault && status === 'verified' ? `<button class="btn btn-sm btn-outline-primary" onclick="setDefault(${method.id})"><i class="fas fa-star"></i></button>` : ''}
