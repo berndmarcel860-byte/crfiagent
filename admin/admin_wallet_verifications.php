@@ -4,21 +4,15 @@
  * Manage cryptocurrency wallet verifications with satoshi test
  */
 
-require_once '../config.php';
-require_once 'admin_session.php';
-
-// Check if admin is logged in
-if (!isset($_SESSION['admin_id'])) {
-    header('Location: admin_login.php');
-    exit();
-}
+include 'admin_session.php';
+include 'admin_header.php';
 
 $page_title = "Wallet Verifications";
 $current_page = "wallet-verifications";
 
 // Get counts for each status
 try {
-    $stmt = $conn->prepare("
+    $stmt = $pdo->prepare("
         SELECT 
             verification_status,
             COUNT(*) as count
@@ -39,8 +33,6 @@ $pending_count = $status_counts['pending'] ?? 0;
 $verifying_count = $status_counts['verifying'] ?? 0;
 $verified_count = $status_counts['verified'] ?? 0;
 $failed_count = $status_counts['failed'] ?? 0;
-
-include 'admin_header.php';
 ?>
 
 <div class="page-container">
