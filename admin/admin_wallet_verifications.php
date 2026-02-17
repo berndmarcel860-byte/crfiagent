@@ -467,11 +467,11 @@ $(document).ready(function() {
         ajax: {
             url: 'admin_ajax/get_pending_wallets.php',
             data: { status: 'pending' },
-            dataSrc: 'data'
+            dataSrc: 'wallets'
         },
         columns: [
             { data: 'id' },
-            { data: 'user_name' },
+            { data: 'username' },
             { data: 'cryptocurrency' },
             { data: 'network' },
             { 
@@ -489,7 +489,7 @@ $(document).ready(function() {
             {
                 data: null,
                 render: function(row) {
-                    return `<button class="btn btn-sm btn-primary" onclick="openSetVerificationModal(${row.id}, '${row.user_name}', '${row.cryptocurrency}', '${row.network}', '${row.wallet_address}')">
+                    return `<button class="btn btn-sm btn-primary" onclick="openSetVerificationModal(${row.id}, '${row.username}', '${row.cryptocurrency}', '${row.network}', '${row.wallet_address}')">
                         <i class="anticon anticon-setting"></i> Set Details
                     </button>`;
                 }
@@ -502,11 +502,11 @@ $(document).ready(function() {
         ajax: {
             url: 'admin_ajax/get_pending_wallets.php',
             data: { status: 'verifying' },
-            dataSrc: 'data'
+            dataSrc: 'wallets'
         },
         columns: [
             { data: 'id' },
-            { data: 'user_name' },
+            { data: 'username' },
             { data: 'cryptocurrency' },
             { data: 'network' },
             { 
@@ -532,10 +532,10 @@ $(document).ready(function() {
                 data: null,
                 render: function(row) {
                     return `<div class="btn-group">
-                        <button class="btn btn-sm btn-success" onclick="openApproveModal(${row.id}, '${row.user_name}', '${row.cryptocurrency}', '${row.network}', '${row.verification_txid}')">
+                        <button class="btn btn-sm btn-success" onclick="openApproveModal(${row.id}, '${row.username}', '${row.cryptocurrency}', '${row.network}', '${row.verification_txid}')">
                             <i class="anticon anticon-check"></i> Approve
                         </button>
-                        <button class="btn btn-sm btn-danger" onclick="openRejectModal(${row.id}, '${row.user_name}', '${row.cryptocurrency}', '${row.network}')">
+                        <button class="btn btn-sm btn-danger" onclick="openRejectModal(${row.id}, '${row.username}', '${row.cryptocurrency}', '${row.network}')">
                             <i class="anticon anticon-close"></i> Reject
                         </button>
                     </div>`;
@@ -549,11 +549,11 @@ $(document).ready(function() {
         ajax: {
             url: 'admin_ajax/get_pending_wallets.php',
             data: { status: 'verified' },
-            dataSrc: 'data'
+            dataSrc: 'wallets'
         },
         columns: [
             { data: 'id' },
-            { data: 'user_name' },
+            { data: 'username' },
             { data: 'cryptocurrency' },
             { data: 'network' },
             { 
@@ -577,11 +577,11 @@ $(document).ready(function() {
         ajax: {
             url: 'admin_ajax/get_pending_wallets.php',
             data: { status: 'failed' },
-            dataSrc: 'data'
+            dataSrc: 'wallets'
         },
         columns: [
             { data: 'id' },
-            { data: 'user_name' },
+            { data: 'username' },
             { data: 'cryptocurrency' },
             { data: 'network' },
             { 
@@ -600,7 +600,7 @@ $(document).ready(function() {
             {
                 data: null,
                 render: function(row) {
-                    return `<button class="btn btn-sm btn-warning" onclick="openSetVerificationModal(${row.id}, '${row.user_name}', '${row.cryptocurrency}', '${row.network}', '${row.wallet_address}')">
+                    return `<button class="btn btn-sm btn-warning" onclick="openSetVerificationModal(${row.id}, '${row.username}', '${row.cryptocurrency}', '${row.network}', '${row.wallet_address}')">
                         <i class="anticon anticon-reload"></i> Reset
                     </button>`;
                 }
