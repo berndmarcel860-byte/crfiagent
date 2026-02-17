@@ -53,54 +53,6 @@ include 'header.php';
     font-family: monospace;
     letter-spacing: 2px;
 }
-.verification-status {
-    display: inline-block;
-    margin-left: 8px;
-}
-.status-icon {
-    cursor: pointer;
-    margin-left: 8px;
-    transition: all 0.3s;
-}
-.status-icon:hover {
-    transform: scale(1.2);
-}
-.qr-code-container {
-    text-align: center;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    margin: 15px 0;
-}
-.copy-btn {
-    cursor: pointer;
-    margin-left: 5px;
-}
-.verification-info {
-    background: #e7f3ff;
-    border-left: 4px solid #4e73df;
-    padding: 15px;
-    margin: 15px 0;
-    border-radius: 4px;
-}
-.security-box {
-    background: #fff3cd;
-    border: 1px solid #ffc107;
-    padding: 20px;
-    border-radius: 8px;
-    margin: 20px 0;
-}
-.security-box h6 {
-    color: #856404;
-    margin-bottom: 15px;
-}
-.security-box ul {
-    margin-bottom: 0;
-}
-.security-box li {
-    margin-bottom: 8px;
-    color: #856404;
-}
 </style>
 
 <!-- Content Wrapper START -->
@@ -301,67 +253,6 @@ include 'header.php';
     </div>
 </div>
 
-<!-- Verification Details Modal -->
-<div class="modal fade" id="verificationDetailsModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title"><i class="fas fa-shield-alt"></i> Wallet Verification Details</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Why Satoshi Test Section -->
-                <div class="security-box">
-                    <h6><i class="fas fa-question-circle"></i> Why Do I Need to Make a Satoshi Test?</h6>
-                    <p><strong>For Your Security and Platform Safety:</strong></p>
-                    <ul>
-                        <li><i class="fas fa-check-circle text-success"></i> <strong>Proves Wallet Ownership:</strong> Confirms you control this wallet address</li>
-                        <li><i class="fas fa-check-circle text-success"></i> <strong>Prevents Fraud:</strong> Stops fake wallet submissions</li>
-                        <li><i class="fas fa-check-circle text-success"></i> <strong>Protects Your Funds:</strong> Ensures withdrawals go to the right address</li>
-                        <li><i class="fas fa-check-circle text-success"></i> <strong>One-Time Only:</strong> You only need to verify each wallet once</li>
-                        <li><i class="fas fa-check-circle text-success"></i> <strong>Industry Standard:</strong> All secure crypto platforms require this</li>
-                    </ul>
-                    <div class="alert alert-info mt-3 mb-0">
-                        <i class="fas fa-info-circle"></i> <strong>Note:</strong> The small test amount will be credited to your account after verification.
-                    </div>
-                </div>
-
-                <!-- Verification Instructions -->
-                <div id="verificationInstructions">
-                    <div class="text-center py-4">
-                        <i class="fas fa-spinner fa-spin fa-2x"></i>
-                        <p class="mt-2">Loading verification details...</p>
-                    </div>
-                </div>
-
-                <!-- Submit Transaction Hash Section -->
-                <div id="submitTxHashSection" style="display:none;">
-                    <hr>
-                    <h6><i class="fas fa-check-circle"></i> Submit Your Transaction Hash</h6>
-                    <p>After sending the test amount, paste your transaction hash (TXID) below:</p>
-                    <form id="submitVerificationForm">
-                        <input type="hidden" id="verifyWalletId" name="wallet_id">
-                        <div class="form-group">
-                            <label>Transaction Hash (TXID) <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="verification_txid" required 
-                                   placeholder="Enter transaction hash" pattern="[a-fA-F0-9]{64}">
-                            <small class="form-text text-muted">64-character hexadecimal transaction ID from blockchain</small>
-                        </div>
-                        <button type="submit" class="btn btn-success btn-block">
-                            <i class="fas fa-paper-plane"></i> Submit for Verification
-                        </button>
-                    </form>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 // Store available cryptocurrencies globally
 let availableCryptos = [];
@@ -503,51 +394,20 @@ function displayCryptoMethods(methods) {
     methods.forEach(method => {
         const isDefault = method.is_default == 1;
         const verified = method.is_verified == 1;
-        const status = method.verification_status || 'pending';
-        
-        // Determine status badge and icon
-        let statusBadge = '';
-        let statusIcon = '';
-        
-        switch(status) {
-            case 'pending':
-                statusBadge = '<span class="badge badge-warning verification-status">Pending Verification</span>';
-                statusIcon = `<i class="fas fa-info-circle text-warning status-icon" 
-                               onclick="showVerificationDetails(${method.id})" 
-                               title="View verification details"></i>`;
-                break;
-            case 'verifying':
-                statusBadge = '<span class="badge badge-info verification-status">Verifying</span>';
-                statusIcon = `<i class="fas fa-clock text-info status-icon" 
-                               title="Awaiting admin approval"></i>`;
-                break;
-            case 'verified':
-                statusBadge = '<span class="badge badge-success verification-status">Verified</span>';
-                statusIcon = '<i class="fas fa-check-circle text-success status-icon" title="Verified"></i>';
-                break;
-            case 'failed':
-                statusBadge = '<span class="badge badge-danger verification-status">Verification Failed</span>';
-                statusIcon = `<i class="fas fa-exclamation-circle text-danger status-icon" 
-                               onclick="showVerificationDetails(${method.id})" 
-                               title="View details"></i>`;
-                break;
-        }
         
         html += `
             <div class="payment-card ${isDefault ? 'default' : ''}" id="method-${method.id}">
                 <div class="method-actions">
-                    ${!isDefault && status === 'verified' ? `<button class="btn btn-sm btn-outline-primary" onclick="setDefault(${method.id})"><i class="fas fa-star"></i></button>` : ''}
+                    ${!isDefault ? `<button class="btn btn-sm btn-outline-primary" onclick="setDefault(${method.id})"><i class="fas fa-star"></i></button>` : ''}
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteMethod(${method.id})"><i class="fas fa-trash"></i></button>
                 </div>
                 <h5 class="mb-2">
                     <i class="fab fa-bitcoin text-warning"></i> ${method.label || method.cryptocurrency}
                     ${isDefault ? '<span class="badge badge-success payment-badge">Default</span>' : ''}
-                    ${statusBadge}
-                    ${statusIcon}
+                    ${verified ? '<span class="badge badge-info payment-badge">Verified</span>' : ''}
                 </h5>
                 <p class="mb-1"><strong>${method.cryptocurrency}</strong> - ${method.network}</p>
                 <p class="mb-1 masked-text">${method.wallet_address_masked || method.wallet_address}</p>
-                ${method.verification_notes ? `<p class="mb-1 text-danger"><small><i class="fas fa-exclamation-triangle"></i> ${method.verification_notes}</small></p>` : ''}
                 <small class="text-muted">Added ${new Date(method.created_at).toLocaleDateString()}</small>
             </div>
         `;
@@ -659,178 +519,6 @@ function showSuccess(message) {
 function showError(message) {
     alert('Error: ' + message); // Replace with toastr or your notification library
 }
-
-// Show verification details modal
-function showVerificationDetails(walletId) {
-    $('#verificationDetailsModal').modal('show');
-    $('#verifyWalletId').val(walletId);
-    
-    // Load verification details
-    $.ajax({
-        url: 'ajax/get_wallet_verification_details.php',
-        type: 'GET',
-        data: { wallet_id: walletId },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                displayVerificationInstructions(response.data);
-            } else {
-                $('#verificationInstructions').html(`
-                    <div class="alert alert-warning">
-                        <i class="fas fa-info-circle"></i> ${response.message}
-                    </div>
-                `);
-            }
-        },
-        error: function() {
-            $('#verificationInstructions').html(`
-                <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle"></i> Failed to load verification details
-                </div>
-            `);
-        }
-    });
-}
-
-function displayVerificationInstructions(data) {
-    const status = data.verification_status;
-    let html = '';
-    
-    if (status === 'pending') {
-        html = `
-            <div class="alert alert-info">
-                <i class="fas fa-clock"></i> <strong>Awaiting Admin Setup</strong><br>
-                Your wallet is pending verification setup by our admin team. 
-                You will be notified once verification details are available.
-            </div>
-        `;
-    } else if (status === 'verifying') {
-        html = `
-            <div class="alert alert-info">
-                <i class="fas fa-hourglass-half"></i> <strong>Under Review</strong><br>
-                Your transaction is being verified by our admin team. This usually takes a few minutes to a few hours.
-            </div>
-            <div class="verification-info">
-                <p><strong>Transaction Hash Submitted:</strong></p>
-                <p class="masked-text" style="word-break: break-all;">${data.verification_txid}</p>
-            </div>
-        `;
-    } else if (status === 'failed') {
-        html = `
-            <div class="alert alert-danger">
-                <i class="fas fa-times-circle"></i> <strong>Verification Failed</strong><br>
-                ${data.verification_notes || 'Please contact support for more information.'}
-            </div>
-        `;
-        $('#submitTxHashSection').show();
-    } else {
-        // Show verification instructions with amount and address
-        if (data.verification_amount && data.verification_address) {
-            html = `
-                <div class="verification-info">
-                    <h6><i class="fas fa-coins"></i> Step 1: Send Test Amount</h6>
-                    <p>Send <strong>exactly</strong> this amount from your wallet:</p>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="testAmount" value="${data.verification_amount}" readonly>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary copy-btn" onclick="copyToClipboard('testAmount')">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="verification-info">
-                    <h6><i class="fas fa-wallet"></i> Step 2: Send to This Address</h6>
-                    <p>Send the test amount to this platform wallet address:</p>
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="testAddress" value="${data.verification_address}" readonly>
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary copy-btn" onclick="copyToClipboard('testAddress')">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                        </div>
-                    </div>
-                    <div class="qr-code-container">
-                        <p><small class="text-muted">Scan QR code to send (coming soon)</small></p>
-                    </div>
-                </div>
-
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong>
-                    <ul class="mb-0">
-                        <li>Send from the wallet address you registered: <code>${data.wallet_address_masked}</code></li>
-                        <li>Send the <strong>exact amount</strong> shown above</li>
-                        <li>Double-check the destination address</li>
-                        <li>Keep your transaction hash (TXID) ready</li>
-                    </ul>
-                </div>
-            `;
-            $('#submitTxHashSection').show();
-        } else {
-            html = `
-                <div class="alert alert-info">
-                    <i class="fas fa-clock"></i> Verification details not yet available. Please wait for admin setup.
-                </div>
-            `;
-        }
-    }
-    
-    $('#verificationInstructions').html(html);
-}
-
-// Copy to clipboard function
-function copyToClipboard(elementId) {
-    const element = document.getElementById(elementId);
-    element.select();
-    element.setSelectionRange(0, 99999); // For mobile devices
-    document.execCommand('copy');
-    
-    // Visual feedback
-    const btn = event.target.closest('button');
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-    setTimeout(() => {
-        btn.innerHTML = originalHTML;
-    }, 2000);
-}
-
-// Handle verification form submission
-$('#submitVerificationForm').submit(function(e) {
-    e.preventDefault();
-    
-    const walletId = $('#verifyWalletId').val();
-    const txid = $(this).find('[name="verification_txid"]').val();
-    
-    if (!txid || txid.length !== 64) {
-        showError('Please enter a valid 64-character transaction hash');
-        return;
-    }
-    
-    $.ajax({
-        url: 'ajax/submit_wallet_verification.php',
-        type: 'POST',
-        data: {
-            wallet_id: walletId,
-            verification_txid: txid
-        },
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                $('#verificationDetailsModal').modal('hide');
-                $('#submitVerificationForm')[0].reset();
-                loadPaymentMethods();
-                showSuccess('Transaction hash submitted successfully! Your wallet is now under review.');
-            } else {
-                showError(response.message);
-            }
-        },
-        error: function() {
-            showError('Failed to submit transaction hash. Please try again.');
-        }
-    });
-});
-
 </script>
 
 <?php include 'footer.php'; ?>
