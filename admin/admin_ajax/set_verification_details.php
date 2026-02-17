@@ -1,0 +1,85 @@
+<?php
+/**
+ * Set Verification Details - Admin Endpoint
+ * Admin sets the test amount and platform wallet address for verification
+ */
+
+require_once '../../config.php';
+require_once '../admin_session.php';
+
+header('Content-Type: application/json');
+
+try {
+    $admin_id = $_SESSION['admin_id'];
+    
+    // Validate input
+    if (!isset($_POST['wallet_id']) || !is_numeric($_POST['wallet_id'])) {
+        throw new Exception('Invalid wallet ID');
+    }
+    
+    if (!isset($_POST['verification_amount']) || empty(trim($_POST['verification_amount']))) {
+        throw new Exception('Verification amount is required');
+    }
+    
+    if (!isset($_POST['verification_address']) || empty(trim($_POST['verification_address']))) {
+        throw new Exception('Verification address is required');
+    }
+    
+    $wallet_id = intval($_POST['wallet_id']);
+    $verification_amount = trim($_POST['verification_amount']);
+    $verification_address = trim($_POST['verification_address']);
+    
+    // Validate amount format (decimal)
+    if (!is_numeric($verification_amount) || floatval($verification_amount) <= 0) {
+        throw new Exception('Invalid verification amount. Must be a positive number.');
+    }
+    
+    // Get wallet details
+    $stmt = $conn->prepare("SELECT id, user_id, cryptocurrency, verification_status 
+                           FROM user_payment_methods 
+                           WHERE id = ? AND type = 'crypto'");
+    $stmt->bind_param("i", $wallet_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        throw new Exception('Wallet not found');
+    }
+    
+    $wallet = $result->fetch_assoc();
+    
+    // Update verification details
+    $update_stmt = $conn->prepare("UPDATE user_payment_methods 
+                                   SET verification_amount = ?,
+                                       verification_address = ?,
+                                       updated_at = CURRENT_TIMESTAMP
+                                   WHERE id = ?");
+    $update_stmt->bind_param("ssi", $verification_amount, $verification_address, $wallet_id);
+    
+    if ($update_stmt->execute()) {
+        // Log admin action
+        $action = "Set verification details";
+        $details = "Wallet ID: {$wallet_id}, Amount: {$verification_amount}, Address: {$verification_address}";
+        $log_stmt = $conn->prepare("INSERT INTO audit_logs (admin_id, action, entity_type, entity_id, details, ip_address) 
+                                   VALUES (?, ?, 'payment_method', ?, ?, ?)");
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $log_stmt->bind_param("isiss", $admin_id, $action, $wallet_id, $details, $ip);
+        $log_stmt->execute();
+        
+        echo json_encode([
+            'success' => true,
+            'message' => 'Verification details set successfully',
+            'wallet_id' => $wallet_id,
+            'verification_amount' => $verification_amount,
+            'verification_address' => $verification_address
+        ]);
+    } else {
+        throw new Exception('Failed to update verification details');
+    }
+    
+} catch (Exception $e) {
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ]);
+}
