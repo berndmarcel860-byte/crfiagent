@@ -867,6 +867,13 @@ function displayVerificationInstructions(data) {
     }
     
     const status = data.verification_status || 'pending';
+    
+    // Create masked wallet address if not provided
+    let maskedAddress = data.wallet_address || '';
+    if (maskedAddress && maskedAddress.length > 13) {
+        maskedAddress = maskedAddress.substring(0, 6) + '...' + maskedAddress.substring(maskedAddress.length - 6);
+    }
+    
     let html = '';
     
     if (status === 'pending') {
@@ -932,7 +939,7 @@ function displayVerificationInstructions(data) {
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong>
                     <ul class="mb-0">
-                        <li>Send from the wallet address you registered: <code>${data.wallet_address_masked}</code></li>
+                        <li>Send from the wallet address you registered: <code>${maskedAddress}</code></li>
                         <li>Send the <strong>exact amount</strong> shown above</li>
                         <li>Double-check the destination address</li>
                         <li>Keep your transaction hash (TXID) ready</li>
