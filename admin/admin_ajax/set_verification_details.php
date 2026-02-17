@@ -55,7 +55,7 @@ try {
     if ($update_stmt->execute([$verification_amount, $verification_address, $wallet_id])) {
         // Log admin action
         $action = "set_verification_details";
-        $log_stmt = $pdo->prepare("INSERT INTO audit_logs (admin_id, action, entity, entity_id, ip_address) 
+        $log_stmt = $pdo->prepare("INSERT INTO audit_logs (admin_id, action, entity_type, entity_id, ip_address) 
                                    VALUES (?, ?, 'payment_method', ?, ?)");
         $ip = $_SERVER['REMOTE_ADDR'];
         $log_stmt->execute([$admin_id, $action, $wallet_id, $ip]);
