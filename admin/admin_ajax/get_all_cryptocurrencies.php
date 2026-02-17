@@ -3,16 +3,10 @@
  * Get All Cryptocurrencies with Networks (Admin)
  */
 
-session_start();
 require_once '../../config.php';
+require_once '../admin_session.php';
 
 header('Content-Type: application/json');
-
-// Check if admin is logged in
-if (!isset($_SESSION['admin_id'])) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
-    exit;
-}
 
 try {
     // Fetch all cryptocurrencies (including inactive)
