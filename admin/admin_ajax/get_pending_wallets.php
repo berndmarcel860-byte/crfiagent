@@ -32,7 +32,6 @@ try {
               WHERE upm.type = 'crypto' AND upm.verification_status = ?";
     
     $params = [$status];
-    $types = 's';
     
     // Add search filter
     if (!empty($search)) {
@@ -42,19 +41,17 @@ try {
         $params[] = $search_param;
         $params[] = $search_param;
         $params[] = $search_param;
-        $types .= 'ssss';
     }
     
     $query .= " ORDER BY upm.created_at DESC";
     
-    // Execute query
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param($types, ...$params);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Execute query using PDO
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     $wallets = [];
-    while ($row = $result->fetch_assoc()) {
+    foreach ($results as $row) {
         // Mask wallet address for display (show first 6 and last 6 characters)
         $masked_address = strlen($row['wallet_address']) > 12 
             ? substr($row['wallet_address'], 0, 6) . '...' . substr($row['wallet_address'], -6)
