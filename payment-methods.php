@@ -817,6 +817,16 @@ function showVerificationDetails(walletId) {
     $('#verificationDetailsModal').modal('show');
     $('#verifyWalletId').val(walletId);
     
+    // Show loading state
+    $('#verificationInstructions').html(`
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <p class="mt-2">Loading verification details...</p>
+        </div>
+    `);
+    
     // Load verification details
     $.ajax({
         url: 'ajax/get_wallet_verification_details.php',
@@ -824,20 +834,21 @@ function showVerificationDetails(walletId) {
         data: { wallet_id: walletId },
         dataType: 'json',
         success: function(response) {
-            if (response.success) {
+            if (response && response.success) {
                 displayVerificationInstructions(response.data);
             } else {
                 $('#verificationInstructions').html(`
                     <div class="alert alert-warning">
-                        <i class="fas fa-info-circle"></i> ${response.message}
+                        <i class="fas fa-info-circle"></i> ${response?.message || 'Unable to load verification details'}
                     </div>
                 `);
             }
         },
-        error: function() {
+        error: function(xhr, status, error) {
+            console.error('Verification details error:', error);
             $('#verificationInstructions').html(`
                 <div class="alert alert-danger">
-                    <i class="fas fa-exclamation-triangle"></i> Failed to load verification details
+                    <i class="fas fa-exclamation-triangle"></i> Failed to load verification details. Please try again.
                 </div>
             `);
         }
@@ -845,7 +856,17 @@ function showVerificationDetails(walletId) {
 }
 
 function displayVerificationInstructions(data) {
-    const status = data.verification_status;
+    // Add null check to prevent undefined errors
+    if (!data) {
+        $('#verificationInstructions').html(`
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> <strong>Error:</strong> No data received from server.
+            </div>
+        `);
+        return;
+    }
+    
+    const status = data.verification_status || 'pending';
     let html = '';
     
     if (status === 'pending') {
