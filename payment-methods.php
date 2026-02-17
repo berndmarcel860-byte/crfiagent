@@ -265,18 +265,26 @@ $(document).ready(function() {
 
 // Load available cryptocurrencies from database
 function loadAvailableCryptocurrencies() {
+    console.log('Loading cryptocurrencies...');
     $.ajax({
         url: 'ajax/get_available_cryptocurrencies.php',
         type: 'GET',
         dataType: 'json',
         success: function(response) {
+            console.log('AJAX Response:', response);
             if (response.success) {
+                console.log('Cryptocurrencies loaded:', response.cryptocurrencies.length);
                 availableCryptos = response.cryptocurrencies;
                 populateCryptoDropdown();
+            } else {
+                console.error('Server returned error:', response.message);
+                alert('Error loading cryptocurrencies: ' + response.message);
             }
         },
-        error: function() {
-            console.error('Failed to load cryptocurrencies');
+        error: function(xhr, status, error) {
+            console.error('AJAX Error:', status, error);
+            console.error('Response:', xhr.responseText);
+            alert('Failed to load cryptocurrencies. Check console for details.');
         }
     });
 }

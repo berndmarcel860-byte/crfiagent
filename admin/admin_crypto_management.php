@@ -178,19 +178,25 @@ $(document).ready(function() {
 });
 
 function loadCryptocurrencies() {
+    console.log('Admin: Loading cryptocurrencies...');
     $.ajax({
         url: 'admin_ajax/get_all_cryptocurrencies.php',
         type: 'GET',
         dataType: 'json',
         success: function(response) {
+            console.log('Admin: AJAX Response:', response);
             if (response.success) {
+                console.log('Admin: Cryptocurrencies loaded:', response.cryptocurrencies.length);
                 displayCryptocurrencies(response.cryptocurrencies);
             } else {
+                console.error('Admin: Server returned error:', response.message);
                 $('#cryptoList').html(`<div class="alert alert-danger">${response.message}</div>`);
             }
         },
-        error: function() {
-            $('#cryptoList').html(`<div class="alert alert-danger">Failed to load cryptocurrencies</div>`);
+        error: function(xhr, status, error) {
+            console.error('Admin: AJAX Error:', status, error);
+            console.error('Admin: Response:', xhr.responseText);
+            $('#cryptoList').html(`<div class="alert alert-danger">Failed to load cryptocurrencies. Check console for details.<br>Error: ${error}</div>`);
         }
     });
 }
