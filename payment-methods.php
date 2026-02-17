@@ -835,7 +835,7 @@ function showVerificationDetails(walletId) {
         dataType: 'json',
         success: function(response) {
             if (response && response.success) {
-                displayVerificationInstructions(response.data);
+                displayVerificationInstructions(response);
             } else {
                 $('#verificationInstructions').html(`
                     <div class="alert alert-warning">
