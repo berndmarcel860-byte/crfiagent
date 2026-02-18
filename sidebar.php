@@ -76,6 +76,12 @@
                             </a>
                         </li>
                         <li>
+                            <a href="payment-methods.php" title="Manage Payment Methods">
+                                <i class="anticon anticon-credit-card m-r-10"></i>
+                                Payment Methods
+                            </a>
+                        </li>
+                        <li>
                             <a href="logout.php" title="Sign Out">
                                 <i class="anticon anticon-logout m-r-10"></i>
                                 Logout

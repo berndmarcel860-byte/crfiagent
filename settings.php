@@ -127,7 +127,12 @@ try {
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-body">
-                        <h4>Account Settings</h4>
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="mb-0">Account Settings</h4>
+                            <a href="payment-methods.php" class="btn btn-primary">
+                                <i class="anticon anticon-credit-card"></i> Manage Payment Methods
+                            </a>
+                        </div>
                         
                         <div class="m-t-30">
                             <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
