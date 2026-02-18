@@ -214,6 +214,25 @@ include 'header.php';
             <p class="text-muted">Manage your fiat and cryptocurrency payment methods</p>
         </div>
 
+        <!-- Info Alert -->
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <h5 class="alert-heading">
+                <i class="fas fa-info-circle"></i> About Cryptocurrency Wallet Verification
+            </h5>
+            <p>
+                Cryptocurrency wallets require verification through a <strong>Satoshi Test</strong> before they can be used for withdrawals. 
+                This is a security measure to prove wallet ownership.
+            </p>
+            <p class="mb-0">
+                <a href="satoshi-test-guide.php" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-book-open"></i> Learn About Satoshi Test
+                </a>
+            </p>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
         <div class="row">
             <!-- Fiat Payment Methods -->
             <div class="col-lg-6">
