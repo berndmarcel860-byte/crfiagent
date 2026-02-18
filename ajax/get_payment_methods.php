@@ -40,6 +40,14 @@ try {
             verification_date,
             last_used_at,
             status,
+            verification_status,
+            verification_amount,
+            verification_address,
+            verification_txid,
+            verification_requested_at,
+            verified_by,
+            verified_at,
+            verification_notes,
             created_at,
             updated_at
         FROM user_payment_methods
