@@ -57,13 +57,30 @@ try {
 
     // 5️⃣ Validate inputs
     $amount = filter_input(INPUT_POST, 'amount', FILTER_VALIDATE_FLOAT);
-    $methodCode = isset($_POST['payment_method']) ? htmlspecialchars($_POST['payment_method'], ENT_QUOTES, 'UTF-8') : null;
+    $paymentMethodId = filter_input(INPUT_POST, 'payment_method_id', FILTER_VALIDATE_INT);
     $details = isset($_POST['payment_details']) ? htmlspecialchars($_POST['payment_details'], ENT_QUOTES, 'UTF-8') : null;
 
     if (!$amount || $amount <= 0) throw new Exception('Please enter a valid withdrawal amount', 400);
     if ($amount < 10) throw new Exception('Minimum withdrawal amount is $10', 400);
-    if (empty($methodCode)) throw new Exception('Please select a payment method', 400);
+    if (!$paymentMethodId) throw new Exception('Please select a verified payment method', 400);
     if (empty($details)) throw new Exception('Please provide payment details', 400);
+
+    // 5.5️⃣ Verify payment method belongs to user and is verified
+    $stmt = $pdo->prepare("SELECT * FROM user_payment_methods 
+                           WHERE id = ? AND user_id = ? AND verification_status = 'verified'");
+    $stmt->execute([$paymentMethodId, $_SESSION['user_id']]);
+    $userPaymentMethod = $stmt->fetch();
+    
+    if (!$userPaymentMethod) {
+        throw new Exception('Invalid or unverified payment method. Please use a verified payment method for withdrawals.', 400);
+    }
+    
+    // Set method code based on type
+    if ($userPaymentMethod['type'] === 'crypto') {
+        $methodCode = strtolower($userPaymentMethod['cryptocurrency']);
+    } else {
+        $methodCode = 'bank_transfer';
+    }
 
     // Prevent double submit
     if (isset($_SESSION['withdraw_in_progress']) && $_SESSION['withdraw_in_progress'] === true) {
