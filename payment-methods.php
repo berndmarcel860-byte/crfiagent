@@ -449,8 +449,8 @@ include 'header.php';
                         <div class="form-group">
                             <label>Transaction Hash (TXID) <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="verification_txid" required 
-                                   placeholder="Enter transaction hash" pattern="[a-fA-F0-9]{64}">
-                            <small class="form-text text-muted">64-character hexadecimal transaction ID from blockchain</small>
+                                   placeholder="0xf088dbc09554739ba15d5788378f6b3f76e85f53294213b03fceadf891446487" pattern="0x[a-fA-F0-9]{64}">
+                            <small class="form-text text-muted">66-character transaction hash (0x + 64 hex characters)</small>
                         </div>
                         <button type="submit" class="btn btn-success btn-block">
                             <i class="fas fa-paper-plane"></i> Submit for Verification
@@ -992,8 +992,8 @@ $('#submitVerificationForm').submit(function(e) {
     const walletId = $('#verifyWalletId').val();
     const txid = $(this).find('[name="verification_txid"]').val();
     
-    if (!txid || txid.length !== 64) {
-        showError('Please enter a valid 64-character transaction hash');
+    if (!txid || txid.length !== 66 || !txid.startsWith('0x')) {
+        showError('Please enter a valid transaction hash (0x + 64 hex characters)');
         return;
     }
     
