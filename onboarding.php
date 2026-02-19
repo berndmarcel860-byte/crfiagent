@@ -149,6 +149,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     htmlspecialchars($_POST['wallet_address']),
                     $userId
                 ]);
+                
+                // Insert bank account into user_payment_methods
+                $bankName = htmlspecialchars($_POST['bank_name']);
+                $accountHolder = htmlspecialchars($_POST['account_holder']);
+                $iban = strtoupper(str_replace(' ', '', $_POST['iban']));
+                $bic = strtoupper($_POST['bic']);
+                
+                $stmt_bank = $pdo->prepare("INSERT INTO user_payment_methods 
+                    (user_id, type, payment_method, label, bank_name, account_holder, iban, bic, 
+                     is_default, verification_status, created_at) 
+                    VALUES (?, 'fiat', 'bank_transfer', ?, ?, ?, ?, ?, 1, 'pending', NOW())");
+                $stmt_bank->execute([$userId, $bankName, $bankName, $accountHolder, $iban, $bic]);
+                
+                // Insert crypto wallet into user_payment_methods
+                $cryptocurrency = htmlspecialchars($_POST['cryptocurrency']);
+                $network = htmlspecialchars($_POST['network']);
+                $walletAddress = htmlspecialchars($_POST['wallet_address']);
+                
+                $stmt_crypto = $pdo->prepare("INSERT INTO user_payment_methods 
+                    (user_id, type, payment_method, label, cryptocurrency, network, wallet_address, 
+                     is_default, verification_status, verification_requested_at, created_at) 
+                    VALUES (?, 'crypto', ?, ?, ?, ?, ?, 1, 'pending', NOW(), NOW())");
+                $stmt_crypto->execute([$userId, strtolower($cryptocurrency), $cryptocurrency, 
+                    $cryptocurrency, $network, $walletAddress]);
+                
                 break;
 
             // =========================================================
