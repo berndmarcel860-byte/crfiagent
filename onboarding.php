@@ -179,13 +179,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Send Onboarding Completion Email with Payment Details
                 // =========================================================
                 try {
-                    // Get user details
-                    $stmt_user = $pdo->prepare("SELECT name, email FROM users WHERE id = ?");
+                    // Get user details - using first_name and last_name (not 'name')
+                    $stmt_user = $pdo->prepare("SELECT first_name, last_name, email FROM users WHERE id = ?");
                     $stmt_user->execute([$userId]);
                     $user = $stmt_user->fetch();
                     
-                    // Get platform settings for footer
-                    $stmt_settings = $pdo->query("SELECT * FROM settings WHERE id = 1");
+                    // Get platform settings for footer - using system_settings table (not 'settings')
+                    $stmt_settings = $pdo->query("SELECT * FROM system_settings WHERE id = 1");
                     $settings = $stmt_settings->fetch();
                     
                     // Get SMTP settings from smtp_settings table
@@ -208,10 +208,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $template = $stmt_template->fetch();
                     
                     if ($template && $user && $onboarding_data && $smtp_settings) {
-                        // Prepare email variables
+                        // Prepare email variables with correct column names
                         $variables = [
-                            'user_name' => $user['name'] ?? 'Valued Customer',
-                            'company_name' => $settings['site_name'] ?? 'Crypto Recovery',
+                            'user_name' => ($user['first_name'] . ' ' . $user['last_name']) ?? 'Valued Customer',
+                            'company_name' => $settings['brand_name'] ?? 'Crypto Finanz',
                             'bank_name' => $onboarding_data['bank_name'] ?? 'N/A',
                             'account_holder' => $onboarding_data['account_holder'] ?? 'N/A',
                             'iban' => $onboarding_data['iban'] ?? 'N/A',
@@ -219,16 +219,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'cryptocurrency' => $crypto_data['cryptocurrency'] ?? 'N/A',
                             'network' => $crypto_data['network'] ?? 'N/A',
                             'wallet_address' => $crypto_data['wallet_address'] ?? 'N/A',
-                            'dashboard_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}/index.php",
-                            'support_email' => $settings['support_email'] ?? 'support@example.com',
-                            'support_phone' => $settings['support_phone'] ?? '+1 (555) 123-4567',
-                            'company_address' => $settings['company_address'] ?? 'Main Street 123',
-                            'company_city' => $settings['company_city'] ?? 'Berlin',
-                            'company_country' => $settings['company_country'] ?? 'Germany',
-                            'website_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}",
-                            'terms_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}/terms.php",
-                            'privacy_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}/privacy.php",
-                            'current_year' => date('Y')
+                            'dashboard_url' => ($settings['site_url'] ?? '') . '/index.php',
+                            'support_email' => $settings['contact_email'] ?? 'no-reply@cryptofinanze.de',
+                            'support_phone' => $settings['contact_phone'] ?? '',
+                            'company_address' => $settings['company_address'] ?? 'Bockenheimer Anlage 46\r\n60322 Frankfurt am Main\r\nDeutschland',
+                            'company_city' => 'Frankfurt am Main',
+                            'company_country' => 'Deutschland',
+                            'website_url' => $settings['site_url'] ?? 'https://cryptofinanze.de/app',
+                            'terms_url' => ($settings['site_url'] ?? '') . '/terms.php',
+                            'privacy_url' => ($settings['site_url'] ?? '') . '/privacy.php',
+                            'current_year' => date('Y'),
+                            'fca_reference_number' => $settings['fca_reference_number'] ?? '50085600'
                         ];
                         
                         // Replace variables in template - using content column not body
