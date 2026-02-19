@@ -202,8 +202,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt_crypto->execute([$userId]);
                     $crypto_data = $stmt_crypto->fetch();
                     
-                    // Get email template from database
-                    $stmt_template = $pdo->prepare("SELECT * FROM email_templates WHERE name = 'onboarding_completed'");
+                    // Get email template from database - using template_key column
+                    $stmt_template = $pdo->prepare("SELECT * FROM email_templates WHERE template_key = 'onboarding_complete'");
                     $stmt_template->execute();
                     $template = $stmt_template->fetch();
                     
@@ -231,9 +231,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'current_year' => date('Y')
                         ];
                         
-                        // Replace variables in template
+                        // Replace variables in template - using content column not body
                         $email_subject = $template['subject'];
-                        $email_body = $template['body'];
+                        $email_body = $template['content'];
                         
                         foreach ($variables as $key => $value) {
                             $email_subject = str_replace('{{'.$key.'}}', $value, $email_subject);
