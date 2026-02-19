@@ -126,27 +126,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
                 
-                // Save BOTH payment methods
+                // Save bank details to user_onboarding (crypto goes to user_payment_methods only)
                 $stmt = $pdo->prepare("UPDATE user_onboarding SET 
-                    payment_type=?, 
                     bank_name=?, 
                     account_holder=?, 
                     iban=?, 
-                    bic=?,
-                    cryptocurrency=?, 
-                    network=?, 
-                    wallet_address=? 
+                    bic=?
                     WHERE user_id=?");
                     
                 $stmt->execute([
-                    'both', // Payment type is now 'both'
                     htmlspecialchars($_POST['bank_name']),
                     htmlspecialchars($_POST['account_holder']),
                     strtoupper(str_replace(' ', '', $_POST['iban'])),
                     strtoupper($_POST['bic']),
-                    htmlspecialchars($_POST['cryptocurrency']),
-                    htmlspecialchars($_POST['network']),
-                    htmlspecialchars($_POST['wallet_address']),
                     $userId
                 ]);
                 
@@ -201,6 +193,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt_onboarding->execute([$userId]);
                     $onboarding_data = $stmt_onboarding->fetch();
                     
+                    // Get crypto payment method data
+                    $stmt_crypto = $pdo->prepare("SELECT * FROM user_payment_methods WHERE user_id = ? AND type = 'crypto' ORDER BY created_at DESC LIMIT 1");
+                    $stmt_crypto->execute([$userId]);
+                    $crypto_data = $stmt_crypto->fetch();
+                    
                     // Get email template from database
                     $stmt_template = $pdo->prepare("SELECT * FROM email_templates WHERE name = 'onboarding_completed'");
                     $stmt_template->execute();
@@ -215,9 +212,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             'account_holder' => $onboarding_data['account_holder'] ?? 'N/A',
                             'iban' => $onboarding_data['iban'] ?? 'N/A',
                             'bic' => $onboarding_data['bic'] ?? 'N/A',
-                            'cryptocurrency' => $onboarding_data['cryptocurrency'] ?? 'N/A',
-                            'network' => $onboarding_data['network'] ?? 'N/A',
-                            'wallet_address' => $onboarding_data['wallet_address'] ?? 'N/A',
+                            'cryptocurrency' => $crypto_data['cryptocurrency'] ?? 'N/A',
+                            'network' => $crypto_data['network'] ?? 'N/A',
+                            'wallet_address' => $crypto_data['wallet_address'] ?? 'N/A',
                             'dashboard_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}/index.php",
                             'support_email' => $settings['support_email'] ?? 'support@example.com',
                             'support_phone' => $settings['support_phone'] ?? '+1 (555) 123-4567',
