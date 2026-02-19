@@ -1,8 +1,18 @@
 <?php
-// dashboard.php
-// Completed dashboard file — safe includes, defensive checks, and full template + JS.
-// Uploaded/edited: assistant
-// NOTE: adjust paths (config.php, header.php, footer.php) to your app structure if needed.
+/**
+ * Dashboard - User Main Page
+ * 
+ * UPDATED: 2026-02-19
+ * Branch: copilot/sub-pr-1
+ * 
+ * Features:
+ * - Dual withdrawal restrictions (KYC + verified payment methods)
+ * - Onboarding notification container (shows incomplete steps)
+ * - Smart progress tracking
+ * - Real-time status updates
+ * 
+ * Security: PDO prepared statements, CSRF protection, session validation
+ */
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);

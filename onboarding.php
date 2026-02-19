@@ -1,4 +1,19 @@
 <?php
+/**
+ * User Onboarding Wizard
+ * 
+ * UPDATED: 2026-02-19
+ * Branch: copilot/sub-pr-1
+ * 
+ * Features:
+ * - Multi-step registration wizard
+ * - Case details collection
+ * - Address information
+ * - Payment method setup (Bank & Crypto support)
+ * - Modern responsive card-based design
+ * 
+ * Security: CSRF protection, input validation, PDO prepared statements
+ */
 // =============================================================
 // 🧠 Scam Recovery - User Onboarding
 // =============================================================
