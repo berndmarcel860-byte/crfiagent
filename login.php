@@ -50,8 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['last_otp_sent'] = time();
                     
                     // Store OTP in database
-                    $stmt = $pdo->prepare("INSERT INTO otp_logs (user_id, otp_code, purpose, ip_address, expires_at) VALUES (?, ?, 'login', ?, ?)");
-                    $stmt->execute([$user['id'], $otp, $ip, $expires]);
+                    $stmt = $pdo->prepare("INSERT INTO otp_logs (user_id, otp_code, purpose, expires_at, created_at) VALUES (?, ?, 'login', ?, NOW())");
+                    $stmt->execute([$user['id'], $otp, $expires]);
                     
                     // Send OTP via email
                     try {
