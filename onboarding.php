@@ -188,6 +188,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt_settings = $pdo->query("SELECT * FROM settings WHERE id = 1");
                     $settings = $stmt_settings->fetch();
                     
+                    // Get SMTP settings from smtp_settings table
+                    $stmt_smtp = $pdo->query("SELECT * FROM smtp_settings WHERE id = 1");
+                    $smtp_settings = $stmt_smtp->fetch();
+                    
                     // Get onboarding data with payment details
                     $stmt_onboarding = $pdo->prepare("SELECT * FROM user_onboarding WHERE user_id = ?");
                     $stmt_onboarding->execute([$userId]);
@@ -203,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $stmt_template->execute();
                     $template = $stmt_template->fetch();
                     
-                    if ($template && $user && $onboarding_data) {
+                    if ($template && $user && $onboarding_data && $smtp_settings) {
                         // Prepare email variables
                         $variables = [
                             'user_name' => $user['name'] ?? 'Valued Customer',
@@ -236,23 +240,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $email_body = str_replace('{{'.$key.'}}', $value, $email_body);
                         }
                         
-                        // Setup email headers
-                        $headers = "MIME-Version: 1.0\r\n";
-                        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-                        $headers .= "From: " . ($settings['site_name'] ?? 'Crypto Recovery') . " <" . ($settings['from_email'] ?? 'noreply@example.com') . ">\r\n";
-                        $headers .= "Reply-To: " . ($settings['support_email'] ?? 'support@example.com') . "\r\n";
+                        // Use PHPMailer to send email
+                        require_once __DIR__ . '/vendor/autoload.php';
                         
-                        // Send the email
-                        $mail_sent = mail($user['email'], $email_subject, $email_body, $headers);
+                        use PHPMailer\PHPMailer\PHPMailer;
+                        use PHPMailer\PHPMailer\Exception as PHPMailerException;
                         
-                        // Log email sending
-                        if ($mail_sent) {
-                            $stmt_log = $pdo->prepare("INSERT INTO email_logs (user_id, email_type, recipient, subject, sent_at, status) VALUES (?, 'onboarding_completed', ?, ?, NOW(), 'sent')");
-                            $stmt_log->execute([$userId, $user['email'], $email_subject]);
-                        } else {
-                            $stmt_log = $pdo->prepare("INSERT INTO email_logs (user_id, email_type, recipient, subject, sent_at, status, error_message) VALUES (?, 'onboarding_completed', ?, ?, NOW(), 'failed', 'Mail function returned false')");
-                            $stmt_log->execute([$userId, $user['email'], $email_subject]);
-                        }
+                        $mail = new PHPMailer(true);
+                        
+                        // Server settings
+                        $mail->isSMTP();
+                        $mail->Host       = $smtp_settings['smtp_host'] ?? 'localhost';
+                        $mail->SMTPAuth   = !empty($smtp_settings['smtp_username']);
+                        $mail->Username   = $smtp_settings['smtp_username'] ?? '';
+                        $mail->Password   = $smtp_settings['smtp_password'] ?? '';
+                        $mail->SMTPSecure = $smtp_settings['smtp_encryption'] ?? PHPMailer::ENCRYPTION_STARTTLS;
+                        $mail->Port       = $smtp_settings['smtp_port'] ?? 587;
+                        
+                        // Recipients
+                        $mail->setFrom($smtp_settings['smtp_from_email'] ?? 'noreply@example.com', 
+                                      $smtp_settings['smtp_from_name'] ?? ($settings['site_name'] ?? 'Crypto Recovery'));
+                        $mail->addAddress($user['email'], $user['name']);
+                        $mail->addReplyTo($settings['support_email'] ?? 'support@example.com', 
+                                         $settings['site_name'] ?? 'Support');
+                        
+                        // Content
+                        $mail->isHTML(true);
+                        $mail->CharSet = 'UTF-8';
+                        $mail->Subject = $email_subject;
+                        $mail->Body    = $email_body;
+                        $mail->AltBody = strip_tags($email_body);
+                        
+                        // Send email
+                        $mail->send();
+                        
+                        // Log successful email
+                        $stmt_log = $pdo->prepare("INSERT INTO email_logs (user_id, email_type, recipient, subject, sent_at, status) VALUES (?, 'onboarding_completed', ?, ?, NOW(), 'sent')");
+                        $stmt_log->execute([$userId, $user['email'], $email_subject]);
+                        
+                        error_log("Onboarding completion email sent successfully to: " . $user['email']);
+                        
+                    } else {
+                        $missing = [];
+                        if (!$template) $missing[] = 'email template';
+                        if (!$user) $missing[] = 'user data';
+                        if (!$onboarding_data) $missing[] = 'onboarding data';
+                        if (!$smtp_settings) $missing[] = 'SMTP settings';
+                        
+                        error_log("Cannot send email - Missing: " . implode(', ', $missing));
+                        
+                        $stmt_log = $pdo->prepare("INSERT INTO email_logs (user_id, email_type, sent_at, status, error_message) VALUES (?, 'onboarding_completed', NOW(), 'failed', ?)");
+                        $stmt_log->execute([$userId, 'Missing required data: ' . implode(', ', $missing)]);
+                    }
+                } catch (PHPMailerException $e) {
+                    // Log PHPMailer specific error
+                    error_log("PHPMailer Error: " . $e->getMessage());
+                    try {
+                        $stmt_log = $pdo->prepare("INSERT INTO email_logs (user_id, email_type, recipient, sent_at, status, error_message) VALUES (?, 'onboarding_completed', ?, NOW(), 'error', ?)");
+                        $stmt_log->execute([$userId, $user['email'] ?? 'unknown', 'PHPMailer Error: ' . $e->getMessage()]);
+                    } catch (Exception $log_error) {
+                        error_log("Email logging error: " . $log_error->getMessage());
                     }
                 } catch (Exception $e) {
                     // Log error but don't stop onboarding completion
