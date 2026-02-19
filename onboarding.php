@@ -102,25 +102,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
             // =========================================================
-            // STEP 3: Bank Information
+            // STEP 3: Payment Method (Bank OR Crypto)
             // =========================================================
             case 3:
-                $required = ['bank_name','account_holder','iban','bic'];
-                foreach ($required as $f)
-                    if (empty($_POST[$f])) throw new Exception("Please complete all bank fields.");
+                $paymentType = $_POST['payment_type'] ?? 'bank';
+                
+                if ($paymentType === 'crypto') {
+                    // Crypto wallet validation
+                    $required = ['cryptocurrency', 'network', 'wallet_address'];
+                    foreach ($required as $f) {
+                        if (empty($_POST[$f])) {
+                            throw new Exception("Please complete all cryptocurrency fields.");
+                        }
+                    }
+                    
+                    $stmt = $pdo->prepare("UPDATE user_onboarding SET payment_type=?, cryptocurrency=?, network=?, wallet_address=? WHERE user_id=?");
+                    $stmt->execute([
+                        'crypto',
+                        htmlspecialchars($_POST['cryptocurrency']),
+                        htmlspecialchars($_POST['network']),
+                        htmlspecialchars($_POST['wallet_address']),
+                        $userId
+                    ]);
+                } else {
+                    // Bank account validation
+                    $required = ['bank_name','account_holder','iban','bic'];
+                    foreach ($required as $f) {
+                        if (empty($_POST[$f])) {
+                            throw new Exception("Please complete all bank fields.");
+                        }
+                    }
 
-                if (!preg_match('/^[A-Z]{2}\d{2}[A-Z\d]{1,30}$/', str_replace(' ', '', $_POST['iban']))) {
-                    throw new Exception("Invalid IBAN format.");
+                    if (!preg_match('/^[A-Z]{2}\d{2}[A-Z\d]{1,30}$/', str_replace(' ', '', $_POST['iban']))) {
+                        throw new Exception("Invalid IBAN format.");
+                    }
+
+                    $stmt = $pdo->prepare("UPDATE user_onboarding SET payment_type=?, bank_name=?, account_holder=?, iban=?, bic=? WHERE user_id=?");
+                    $stmt->execute([
+                        'bank',
+                        htmlspecialchars($_POST['bank_name']),
+                        htmlspecialchars($_POST['account_holder']),
+                        strtoupper(str_replace(' ', '', $_POST['iban'])),
+                        strtoupper($_POST['bic']),
+                        $userId
+                    ]);
                 }
-
-                $stmt = $pdo->prepare("UPDATE user_onboarding SET bank_name=?, account_holder=?, iban=?, bic=? WHERE user_id=?");
-                $stmt->execute([
-                    htmlspecialchars($_POST['bank_name']),
-                    htmlspecialchars($_POST['account_holder']),
-                    strtoupper(str_replace(' ', '', $_POST['iban'])),
-                    strtoupper($_POST['bic']),
-                    $userId
-                ]);
                 break;
 
             // =========================================================
@@ -165,19 +191,30 @@ if (!empty($_SESSION['error'])) {
 ?>
 
 <!-- =========================================================
- FRONTEND HTML SECTION
+ FRONTEND HTML SECTION - Modern Responsive Design
 ========================================================= -->
 <div class="main-content">
-<div class="card"><div class="card-body">
+<div class="container" style="max-width: 800px;">
+<div class="card shadow-lg" style="border-radius: 15px; border: none;">
+<div class="card-body p-4">
 
-<!-- Progress -->
-<div class="m-b-30">
-<div class="progress" style="height:10px;">
-<div class="progress-bar" style="width:<?= ($step / $maxSteps) * 100 ?>%"></div>
+<!-- Modern Progress Indicator -->
+<div class="mb-5">
+<div class="progress" style="height: 8px; border-radius: 10px;">
+<div class="progress-bar bg-gradient-primary" style="width:<?= ($step / $maxSteps) * 100 ?>%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
 </div>
-<div class="d-flex justify-content-between m-t-10">
-<?php for ($i=1;$i<=$maxSteps;$i++): ?>
-<span class="<?= $i <= $step ? 'text-primary font-weight-bold' : 'text-muted' ?>">Step <?= $i ?></span>
+<div class="d-flex justify-content-between mt-3">
+<?php 
+$stepIcons = ['📋', '🏠', '💳', '✅'];
+for ($i=1;$i<=$maxSteps;$i++): 
+    $active = $i <= $step;
+?>
+<div class="text-center">
+    <div class="step-icon mb-2" style="font-size: 2rem;"><?= $stepIcons[$i-1] ?></div>
+    <span class="<?= $active ? 'text-primary font-weight-bold' : 'text-muted' ?>" style="font-size: 0.9rem;">
+        Step <?= $i ?>
+    </span>
+</div>
 <?php endfor; ?>
 </div></div>
 
@@ -290,37 +327,177 @@ if (!empty($_SESSION['error'])) {
 
 <?php elseif ($step == 3): ?>
 <!-- ============================================================
- STEP 3: Bank Information
+ STEP 3: Payment Method (Bank Account OR Cryptocurrency)
 ============================================================ -->
-<h4 class="mb-4">Bank Details</h4>
+<h4 class="mb-4" style="color: #667eea; font-weight: 600;">💳 Add Payment Method</h4>
 
-<form method="post">
+<div class="alert alert-info mb-4">
+    <i class="fas fa-info-circle"></i>
+    <strong>Choose your payment method:</strong> Select either a bank account or cryptocurrency wallet for receiving recovered funds.
+    <span class="badge badge-warning">⚠️ Verification Required</span>
+</div>
+
+<!-- Tab Navigation -->
+<ul class="nav nav-tabs mb-4" role="tablist" style="border-bottom: 2px solid #e1e8ed;">
+    <li class="nav-item">
+        <a class="nav-link active" id="bank-tab" data-toggle="tab" href="#bankAccountTab" role="tab" style="border: none; border-bottom: 3px solid #667eea; color: #667eea; font-weight: 600;">
+            🏦 Bank Account
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="crypto-tab" data-toggle="tab" href="#cryptoWalletTab" role="tab" style="border: none; color: #6c757d;">
+            💰 Cryptocurrency
+        </a>
+    </li>
+</ul>
+
+<form method="post" id="paymentForm">
     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+    <input type="hidden" name="payment_type" id="payment_type" value="bank">
 
-    <div class="form-group">
-        <label>Bank Name</label>
-        <input name="bank_name" class="form-control" value="<?= htmlspecialchars($saved['bank_name'] ?? '') ?>" required>
+    <div class="tab-content">
+        <!-- Bank Account Tab -->
+        <div class="tab-pane fade show active" id="bankAccountTab" role="tabpanel">
+            <div class="card border-0 bg-light p-4 mb-3">
+                <h5 class="mb-3" style="color: #667eea;">Bank Account Details</h5>
+                
+                <div class="form-group">
+                    <label class="font-weight-bold">Bank Name</label>
+                    <input type="text" name="bank_name" class="form-control form-control-lg" 
+                           value="<?= htmlspecialchars($saved['bank_name'] ?? '') ?>" 
+                           placeholder="e.g., Chase Bank, Deutsche Bank">
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold">Account Holder</label>
+                    <input type="text" name="account_holder" class="form-control form-control-lg" 
+                           value="<?= htmlspecialchars($saved['account_holder'] ?? '') ?>" 
+                           placeholder="Full name as it appears on bank account">
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold">IBAN</label>
+                    <input type="text" name="iban" class="form-control form-control-lg" 
+                           value="<?= htmlspecialchars($saved['iban'] ?? '') ?>" 
+                           placeholder="DE89 3704 0044 0532 0130 00"
+                           pattern="[A-Z]{2}\d{2}[A-Z\d]{1,30}">
+                    <small class="text-muted">International Bank Account Number</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold">BIC / SWIFT</label>
+                    <input type="text" name="bic" class="form-control form-control-lg" 
+                           value="<?= htmlspecialchars($saved['bic'] ?? '') ?>" 
+                           placeholder="COBADEFFXXX">
+                    <small class="text-muted">Bank Identifier Code</small>
+                </div>
+
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Verification Required:</strong> Your bank account will need to be verified before receiving funds.
+                </div>
+            </div>
+        </div>
+
+        <!-- Cryptocurrency Tab -->
+        <div class="tab-pane fade" id="cryptoWalletTab" role="tabpanel">
+            <div class="card border-0 bg-light p-4 mb-3">
+                <h5 class="mb-3" style="color: #667eea;">Cryptocurrency Wallet Details</h5>
+                
+                <div class="form-group">
+                    <label class="font-weight-bold">Cryptocurrency</label>
+                    <select name="cryptocurrency" class="form-control form-control-lg">
+                        <option value="">Select cryptocurrency</option>
+                        <option value="BTC" <?= ($saved['cryptocurrency'] ?? '') == 'BTC' ? 'selected' : '' ?>>Bitcoin (BTC)</option>
+                        <option value="ETH" <?= ($saved['cryptocurrency'] ?? '') == 'ETH' ? 'selected' : '' ?>>Ethereum (ETH)</option>
+                        <option value="USDT" <?= ($saved['cryptocurrency'] ?? '') == 'USDT' ? 'selected' : '' ?>>Tether (USDT)</option>
+                        <option value="USDC" <?= ($saved['cryptocurrency'] ?? '') == 'USDC' ? 'selected' : '' ?>>USD Coin (USDC)</option>
+                        <option value="BNB" <?= ($saved['cryptocurrency'] ?? '') == 'BNB' ? 'selected' : '' ?>>Binance Coin (BNB)</option>
+                        <option value="ADA" <?= ($saved['cryptocurrency'] ?? '') == 'ADA' ? 'selected' : '' ?>>Cardano (ADA)</option>
+                        <option value="LTC" <?= ($saved['cryptocurrency'] ?? '') == 'LTC' ? 'selected' : '' ?>>Litecoin (LTC)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold">Network</label>
+                    <select name="network" class="form-control form-control-lg">
+                        <option value="">Select network</option>
+                        <option value="Bitcoin Network" <?= ($saved['network'] ?? '') == 'Bitcoin Network' ? 'selected' : '' ?>>Bitcoin Network</option>
+                        <option value="Ethereum (ERC-20)" <?= ($saved['network'] ?? '') == 'Ethereum (ERC-20)' ? 'selected' : '' ?>>Ethereum (ERC-20)</option>
+                        <option value="Tron (TRC-20)" <?= ($saved['network'] ?? '') == 'Tron (TRC-20)' ? 'selected' : '' ?>>Tron (TRC-20)</option>
+                        <option value="Binance Smart Chain (BEP-20)" <?= ($saved['network'] ?? '') == 'Binance Smart Chain (BEP-20)' ? 'selected' : '' ?>>Binance Smart Chain (BEP-20)</option>
+                        <option value="Polygon Network" <?= ($saved['network'] ?? '') == 'Polygon Network' ? 'selected' : '' ?>>Polygon Network</option>
+                        <option value="Solana Network" <?= ($saved['network'] ?? '') == 'Solana Network' ? 'selected' : '' ?>>Solana Network</option>
+                    </select>
+                    <small class="text-muted">Choose the blockchain network for your wallet</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold">Wallet Address</label>
+                    <input type="text" name="wallet_address" class="form-control form-control-lg" 
+                           value="<?= htmlspecialchars($saved['wallet_address'] ?? '') ?>" 
+                           placeholder="0xabcd1234..." style="font-family: monospace;">
+                    <small class="text-muted">Your cryptocurrency wallet address</small>
+                </div>
+
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-shield-alt"></i>
+                    <strong>Satoshi Test Required:</strong> Your wallet will be verified through a small test transaction before receiving recovered funds.
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Account Holder</label>
-        <input name="account_holder" class="form-control" value="<?= htmlspecialchars($saved['account_holder'] ?? '') ?>" required>
-    </div>
-
-    <div class="form-group">
-        <label>IBAN</label>
-        <input name="iban" class="form-control" value="<?= htmlspecialchars($saved['iban'] ?? '') ?>" required>
-    </div>
-
-    <div class="form-group">
-        <label>BIC / SWIFT</label>
-        <input name="bic" class="form-control" value="<?= htmlspecialchars($saved['bic'] ?? '') ?>" required>
-    </div>
-
-    <div class="text-right mt-3">
-        <button class="btn btn-primary">Next Step</button>
+    <div class="text-right mt-4">
+        <button type="submit" class="btn btn-primary btn-lg px-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 25px;">
+            Next Step <i class="fas fa-arrow-right ml-2"></i>
+        </button>
     </div>
 </form>
+
+<script>
+// Tab switching functionality
+document.querySelectorAll('[data-toggle="tab"]').forEach(tab => {
+    tab.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Update payment_type hidden field
+        const isBank = this.id === 'bank-tab';
+        document.getElementById('payment_type').value = isBank ? 'bank' : 'crypto';
+        
+        // Update tab active states
+        document.querySelectorAll('.nav-link').forEach(t => {
+            t.classList.remove('active');
+            t.style.borderBottom = 'none';
+            t.style.color = '#6c757d';
+        });
+        this.classList.add('active');
+        this.style.borderBottom = '3px solid #667eea';
+        this.style.color = '#667eea';
+        
+        // Update tab content
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.remove('show', 'active');
+        });
+        const target = document.querySelector(this.getAttribute('href'));
+        target.classList.add('show', 'active');
+        
+        // Update form field requirements
+        if (isBank) {
+            // Bank fields required
+            document.querySelectorAll('#bankAccountTab input').forEach(inp => inp.required = true);
+            document.querySelectorAll('#cryptoWalletTab input, #cryptoWalletTab select').forEach(inp => inp.required = false);
+        } else {
+            // Crypto fields required
+            document.querySelectorAll('#bankAccountTab input').forEach(inp => inp.required = false);
+            document.querySelectorAll('#cryptoWalletTab input, #cryptoWalletTab select').forEach(inp => inp.required = true);
+        }
+    });
+});
+
+// Initialize default required fields
+document.querySelectorAll('#bankAccountTab input').forEach(inp => inp.required = true);
+</script>
 
 <?php elseif ($step == 4): ?>
 <!-- ============================================================
@@ -343,16 +520,106 @@ if (!empty($_SESSION['error'])) {
 <?php endif; ?>
 
 
-</div></div></div>
-
+</div></div></div></div>
 
 
 <style>
-.form-group label {
-    font-weight: 500;
+/* Modern Onboarding Styles */
+.card {
+    transition: all 0.3s ease;
 }
-.form-control {
-    border-radius: 6px;
+
+.card:hover {
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+}
+
+.form-control-lg {
+    border-radius: 10px;
+    border: 2px solid #e1e8ed;
+    padding: 12px 20px;
+    font-size: 1rem;
+}
+
+.form-control-lg:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.nav-tabs {
+    border: none;
+}
+
+.nav-tabs .nav-link {
+    transition: all 0.3s ease;
+    font-size: 1.1rem;
+    padding: 12px 24px;
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom: 3px solid #764ba2 !important;
+    color: #764ba2 !important;
+}
+
+.step-icon {
+    transition: transform 0.3s ease;
+}
+
+.step-icon:hover {
+    transform: scale(1.2);
+}
+
+.btn-primary {
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.alert {
+    border-radius: 10px;
+    border-left: 4px solid;
+}
+
+.alert-info {
+    border-left-color: #17a2b8;
+    background-color: #d1ecf1;
+}
+
+.alert-warning {
+    border-left-color: #ffc107;
+    background-color: #fff3cd;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.text-muted {
+    font-size: 0.875rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem !important;
+    }
+    
+    .step-icon {
+        font-size: 1.5rem !important;
+    }
+    
+    .nav-tabs .nav-link {
+        font-size: 0.9rem;
+        padding: 10px 16px;
+    }
 }
 </style>
 
