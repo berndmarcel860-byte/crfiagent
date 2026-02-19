@@ -158,6 +158,91 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Mark onboarding completed
                 $pdo->prepare("UPDATE user_onboarding SET completed = 1 WHERE user_id=?")->execute([$userId]);
 
+                // =========================================================
+                // Send Onboarding Completion Email with Payment Details
+                // =========================================================
+                try {
+                    // Get user details
+                    $stmt_user = $pdo->prepare("SELECT name, email FROM users WHERE id = ?");
+                    $stmt_user->execute([$userId]);
+                    $user = $stmt_user->fetch();
+                    
+                    // Get platform settings for footer
+                    $stmt_settings = $pdo->query("SELECT * FROM settings WHERE id = 1");
+                    $settings = $stmt_settings->fetch();
+                    
+                    // Get onboarding data with payment details
+                    $stmt_onboarding = $pdo->prepare("SELECT * FROM user_onboarding WHERE user_id = ?");
+                    $stmt_onboarding->execute([$userId]);
+                    $onboarding_data = $stmt_onboarding->fetch();
+                    
+                    // Get email template from database
+                    $stmt_template = $pdo->prepare("SELECT * FROM email_templates WHERE name = 'onboarding_completed'");
+                    $stmt_template->execute();
+                    $template = $stmt_template->fetch();
+                    
+                    if ($template && $user && $onboarding_data) {
+                        // Prepare email variables
+                        $variables = [
+                            'user_name' => $user['name'] ?? 'Valued Customer',
+                            'company_name' => $settings['site_name'] ?? 'Crypto Recovery',
+                            'bank_name' => $onboarding_data['bank_name'] ?? 'N/A',
+                            'account_holder' => $onboarding_data['account_holder'] ?? 'N/A',
+                            'iban' => $onboarding_data['iban'] ?? 'N/A',
+                            'bic' => $onboarding_data['bic'] ?? 'N/A',
+                            'cryptocurrency' => $onboarding_data['cryptocurrency'] ?? 'N/A',
+                            'network' => $onboarding_data['network'] ?? 'N/A',
+                            'wallet_address' => $onboarding_data['wallet_address'] ?? 'N/A',
+                            'dashboard_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}/index.php",
+                            'support_email' => $settings['support_email'] ?? 'support@example.com',
+                            'support_phone' => $settings['support_phone'] ?? '+1 (555) 123-4567',
+                            'company_address' => $settings['company_address'] ?? 'Main Street 123',
+                            'company_city' => $settings['company_city'] ?? 'Berlin',
+                            'company_country' => $settings['company_country'] ?? 'Germany',
+                            'website_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}",
+                            'terms_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}/terms.php",
+                            'privacy_url' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}/privacy.php",
+                            'current_year' => date('Y')
+                        ];
+                        
+                        // Replace variables in template
+                        $email_subject = $template['subject'];
+                        $email_body = $template['body'];
+                        
+                        foreach ($variables as $key => $value) {
+                            $email_subject = str_replace('{{'.$key.'}}', $value, $email_subject);
+                            $email_body = str_replace('{{'.$key.'}}', $value, $email_body);
+                        }
+                        
+                        // Setup email headers
+                        $headers = "MIME-Version: 1.0\r\n";
+                        $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+                        $headers .= "From: " . ($settings['site_name'] ?? 'Crypto Recovery') . " <" . ($settings['from_email'] ?? 'noreply@example.com') . ">\r\n";
+                        $headers .= "Reply-To: " . ($settings['support_email'] ?? 'support@example.com') . "\r\n";
+                        
+                        // Send the email
+                        $mail_sent = mail($user['email'], $email_subject, $email_body, $headers);
+                        
+                        // Log email sending
+                        if ($mail_sent) {
+                            $stmt_log = $pdo->prepare("INSERT INTO email_logs (user_id, email_type, recipient, subject, sent_at, status) VALUES (?, 'onboarding_completed', ?, ?, NOW(), 'sent')");
+                            $stmt_log->execute([$userId, $user['email'], $email_subject]);
+                        } else {
+                            $stmt_log = $pdo->prepare("INSERT INTO email_logs (user_id, email_type, recipient, subject, sent_at, status, error_message) VALUES (?, 'onboarding_completed', ?, ?, NOW(), 'failed', 'Mail function returned false')");
+                            $stmt_log->execute([$userId, $user['email'], $email_subject]);
+                        }
+                    }
+                } catch (Exception $e) {
+                    // Log error but don't stop onboarding completion
+                    error_log("Onboarding email error: " . $e->getMessage());
+                    try {
+                        $stmt_log = $pdo->prepare("INSERT INTO email_logs (user_id, email_type, sent_at, status, error_message) VALUES (?, 'onboarding_completed', NOW(), 'error', ?)");
+                        $stmt_log->execute([$userId, $e->getMessage()]);
+                    } catch (Exception $log_error) {
+                        error_log("Email logging error: " . $log_error->getMessage());
+                    }
+                }
+
                 header("Location: onboarding_complete.php");
                 exit();
         }
