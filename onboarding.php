@@ -248,16 +248,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         // Server settings
                         $mail->isSMTP();
-                        $mail->Host       = $smtp_settings['smtp_host'] ?? 'localhost';
-                        $mail->SMTPAuth   = !empty($smtp_settings['smtp_username']);
-                        $mail->Username   = $smtp_settings['smtp_username'] ?? '';
-                        $mail->Password   = $smtp_settings['smtp_password'] ?? '';
-                        $mail->SMTPSecure = $smtp_settings['smtp_encryption'] ?? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-                        $mail->Port       = $smtp_settings['smtp_port'] ?? 587;
+                        $mail->Host       = $smtp_settings['host'] ?? 'localhost';
+                        $mail->SMTPAuth   = !empty($smtp_settings['username']);
+                        $mail->Username   = $smtp_settings['username'] ?? '';
+                        $mail->Password   = $smtp_settings['password'] ?? '';
+                        $mail->SMTPSecure = $smtp_settings['encryption'] ?? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                        $mail->Port       = $smtp_settings['port'] ?? 587;
                         
                         // Recipients
-                        $mail->setFrom($smtp_settings['smtp_from_email'] ?? 'noreply@example.com', 
-                                      $smtp_settings['smtp_from_name'] ?? ($settings['site_name'] ?? 'Crypto Recovery'));
+                        $mail->setFrom($smtp_settings['from_email'] ?? 'noreply@example.com', 
+                                      $smtp_settings['from_name'] ?? ($settings['site_name'] ?? 'Crypto Recovery'));
                         $mail->addAddress($user['email'], $user['name']);
                         $mail->addReplyTo($settings['support_email'] ?? 'support@example.com', 
                                          $settings['site_name'] ?? 'Support');
