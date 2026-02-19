@@ -243,10 +243,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Use PHPMailer to send email
                         require_once __DIR__ . '/vendor/autoload.php';
                         
-                        use PHPMailer\PHPMailer\PHPMailer;
-                        use PHPMailer\PHPMailer\Exception as PHPMailerException;
-                        
-                        $mail = new PHPMailer(true);
+                        // Use fully qualified class names to avoid syntax errors
+                        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
                         
                         // Server settings
                         $mail->isSMTP();
@@ -254,7 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $mail->SMTPAuth   = !empty($smtp_settings['smtp_username']);
                         $mail->Username   = $smtp_settings['smtp_username'] ?? '';
                         $mail->Password   = $smtp_settings['smtp_password'] ?? '';
-                        $mail->SMTPSecure = $smtp_settings['smtp_encryption'] ?? PHPMailer::ENCRYPTION_STARTTLS;
+                        $mail->SMTPSecure = $smtp_settings['smtp_encryption'] ?? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
                         $mail->Port       = $smtp_settings['smtp_port'] ?? 587;
                         
                         // Recipients
@@ -292,7 +290,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $stmt_log = $pdo->prepare("INSERT INTO email_logs (user_id, email_type, sent_at, status, error_message) VALUES (?, 'onboarding_completed', NOW(), 'failed', ?)");
                         $stmt_log->execute([$userId, 'Missing required data: ' . implode(', ', $missing)]);
                     }
-                } catch (PHPMailerException $e) {
+                } catch (\PHPMailer\PHPMailer\Exception $e) {
                     // Log PHPMailer specific error
                     error_log("PHPMailer Error: " . $e->getMessage());
                     try {
