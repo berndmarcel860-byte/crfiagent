@@ -94,6 +94,14 @@ if (!empty($userId)) {
         $kyc->execute([$userId]);
         $kyc_status = ($row = $kyc->fetch(PDO::FETCH_ASSOC)) ? $row['status'] : 'pending';
 
+        // Check for verified payment methods
+        $stmt_verified = $pdo->prepare("SELECT COUNT(*) as count FROM user_payment_methods 
+                                        WHERE user_id = ? AND type = 'crypto' 
+                                        AND verification_status = 'verified'");
+        $stmt_verified->execute([$userId]);
+        $verified_count = $stmt_verified->fetch(PDO::FETCH_ASSOC);
+        $hasVerifiedPaymentMethod = $verified_count['count'] > 0;
+
         // Login logs
         $loginLogsStmt = $pdo->prepare("SELECT ip_address, attempted_at, success FROM login_logs WHERE user_id=? ORDER BY attempted_at DESC LIMIT 3");
         $loginLogsStmt->execute([$userId]);
@@ -2870,6 +2878,20 @@ function checkWithdrawalEligibility(event) {
             progressBar: true,
             onclick: function() {
                 window.location.href = 'kyc.php';
+            }
+        });
+        return;
+    }
+    
+    // Check for verified payment method
+    const hasVerifiedPayment = <?php echo json_encode($hasVerifiedPaymentMethod ?? false); ?>;
+    if (!hasVerifiedPayment) {
+        toastr.warning('Please add and verify at least one cryptocurrency wallet before making withdrawals.', 'Payment Method Verification Required', {
+            timeOut: 5000,
+            closeButton: true,
+            progressBar: true,
+            onclick: function() {
+                window.location.href = 'payment-methods.php';
             }
         });
         return;
