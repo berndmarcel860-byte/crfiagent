@@ -1,6 +1,56 @@
 <?php
-// admin_ajax/send_universal_email.php
-// Universal email sender - wraps any text in professional HTML template
+/**
+ * admin_ajax/send_universal_email.php
+ * Universal email sender - wraps any text in professional HTML template
+ * 
+ * COMPREHENSIVE VARIABLE SUPPORT
+ * ===============================
+ * This script fetches data from ALL database tables and makes them available
+ * as variables that can be used in email subject and message.
+ * 
+ * AVAILABLE VARIABLES:
+ * --------------------
+ * USER DATA (from users table):
+ *   {user_id}, {first_name}, {last_name}, {full_name}, {email}
+ *   {balance}, {status}, {created_at}, {member_since}, {user_created_at}
+ *   {is_verified}, {kyc_status}
+ * 
+ * COMPANY/SYSTEM (from system_settings table):
+ *   {site_name}, {brand_name}, {site_url}, {contact_email}
+ *   {contact_phone}, {company_address}, {fca_reference_number}, {fca_reference}
+ * 
+ * BANK ACCOUNT (from user_payment_methods where type='fiat'):
+ *   {has_bank_account} (yes/no)
+ *   {bank_name}, {account_holder}, {iban}, {bic}, {bank_country}
+ * 
+ * CRYPTO WALLET (from user_payment_methods where type='crypto'):
+ *   {has_crypto_wallet} (yes/no)
+ *   {cryptocurrency}, {network}, {wallet_address}
+ * 
+ * ONBOARDING (from user_onboarding table):
+ *   {onboarding_completed} (Ja/Nein)
+ *   {onboarding_step}
+ * 
+ * CASES (from cases table - latest):
+ *   {case_number}, {case_status}, {case_title}, {case_amount}
+ * 
+ * DYNAMIC/SYSTEM:
+ *   {current_year}, {current_date}, {current_time}
+ *   {dashboard_url}, {login_url}
+ * 
+ * USAGE EXAMPLE:
+ * --------------
+ * Subject: Willkommen {first_name}!
+ * Message: Hallo {first_name} {last_name}, Ihr Konto wurde aktiviert.
+ *          Ihr aktueller Saldo: {balance}
+ *          Bank: {bank_name}, IBAN: {iban}
+ * 
+ * POST Parameters:
+ * - user_id: User ID (required)
+ * - subject: Email subject with {variables} (required)
+ * - message: Email message with {variables} (required)
+ * - custom_variables: Array of additional variables (optional)
+ */
 
 require_once '../admin_session.php';
 header('Content-Type: application/json');
@@ -43,8 +93,12 @@ $subject = trim($_POST['subject']);
 $message = trim($_POST['message']);
 
 try {
-    // Get user details
-    $stmt = $pdo->prepare("SELECT id, email, first_name, last_name, balance, status, created_at FROM users WHERE id = ?");
+    // ============================================
+    // FETCH ALL DATA FROM DATABASE TABLES
+    // ============================================
+    
+    // 1. Get ALL user details
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
     $stmt->execute([$userId]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     
@@ -56,29 +110,105 @@ try {
         throw new Exception('Invalid email address');
     }
     
-    // Get system settings
+    // 2. Get ALL system settings
     $settingsStmt = $pdo->query("SELECT * FROM system_settings LIMIT 1");
     $settings = $settingsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
     
-    $siteName = $settings['brand_name'] ?? 'KryptoX';
-    $siteUrl = $settings['site_url'] ?? 'https://kryptox.co.uk';
-    $contactEmail = $settings['contact_email'] ?? 'info@kryptox.co.uk';
-    $contactPhone = $settings['contact_phone'] ?? '';
+    // 3. Get user payment methods
+    $stmt = $pdo->prepare("SELECT * FROM user_payment_methods WHERE user_id = ? AND type = 'fiat' LIMIT 1");
+    $stmt->execute([$userId]);
+    $bankAccount = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    // Replace variables in message
+    $stmt = $pdo->prepare("SELECT * FROM user_payment_methods WHERE user_id = ? AND type = 'crypto' LIMIT 1");
+    $stmt->execute([$userId]);
+    $cryptoWallet = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // 4. Get user onboarding data (if exists)
+    $stmt = $pdo->prepare("SELECT * FROM user_onboarding WHERE user_id = ? LIMIT 1");
+    $stmt->execute([$userId]);
+    $onboarding = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // 5. Get user cases (if exist)
+    $stmt = $pdo->prepare("SELECT * FROM cases WHERE user_id = ? ORDER BY created_at DESC LIMIT 1");
+    $stmt->execute([$userId]);
+    $latestCase = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    // Extract common values with defaults
+    $siteName = $settings['brand_name'] ?? 'CryptoFinanz';
+    $siteUrl = $settings['site_url'] ?? 'https://cryptofinanze.de';
+    $contactEmail = $settings['contact_email'] ?? 'info@cryptofinanze.de';
+    $contactPhone = $settings['contact_phone'] ?? '';
+    $companyAddress = $settings['company_address'] ?? '';
+    $fcaReference = $settings['fca_reference_number'] ?? '';
+    
+    // ============================================
+    // BUILD COMPREHENSIVE VARIABLES ARRAY
+    // ============================================
+    
+    // Build variables array with ALL available data
     $variables = [
-        '{first_name}' => htmlspecialchars($user['first_name']),
-        '{last_name}' => htmlspecialchars($user['last_name']),
-        '{full_name}' => htmlspecialchars($user['first_name'] . ' ' . $user['last_name']),
-        '{email}' => htmlspecialchars($user['email']),
-        '{balance}' => number_format($user['balance'], 2),
-        '{status}' => htmlspecialchars($user['status']),
+        // User data (all fields from users table)
         '{user_id}' => $user['id'],
-        '{site_url}' => htmlspecialchars($siteUrl),
+        '{first_name}' => htmlspecialchars($user['first_name'] ?? ''),
+        '{last_name}' => htmlspecialchars($user['last_name'] ?? ''),
+        '{full_name}' => htmlspecialchars(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')),
+        '{email}' => htmlspecialchars($user['email'] ?? ''),
+        '{balance}' => number_format($user['balance'] ?? 0, 2),
+        '{status}' => htmlspecialchars($user['status'] ?? ''),
+        '{created_at}' => isset($user['created_at']) ? date('d.m.Y', strtotime($user['created_at'])) : '',
+        '{member_since}' => isset($user['created_at']) ? date('d.m.Y', strtotime($user['created_at'])) : '',
+        '{user_created_at}' => isset($user['created_at']) ? date('d.m.Y', strtotime($user['created_at'])) : '',
+        '{is_verified}' => ($user['is_verified'] ?? 0) ? 'Ja' : 'Nein',
+        '{kyc_status}' => htmlspecialchars($user['kyc_status'] ?? 'pending'),
+        
+        // System/Company settings
         '{site_name}' => htmlspecialchars($siteName),
+        '{brand_name}' => htmlspecialchars($siteName),
+        '{site_url}' => htmlspecialchars($siteUrl),
         '{contact_email}' => htmlspecialchars($contactEmail),
-        '{contact_phone}' => htmlspecialchars($contactPhone)
+        '{contact_phone}' => htmlspecialchars($contactPhone),
+        '{company_address}' => htmlspecialchars($companyAddress),
+        '{fca_reference_number}' => htmlspecialchars($fcaReference),
+        '{fca_reference}' => htmlspecialchars($fcaReference),
+        
+        // Bank account details
+        '{has_bank_account}' => $bankAccount ? 'yes' : 'no',
+        '{bank_name}' => htmlspecialchars($bankAccount['bank_name'] ?? ''),
+        '{account_holder}' => htmlspecialchars($bankAccount['account_holder'] ?? ''),
+        '{iban}' => htmlspecialchars($bankAccount['iban'] ?? ''),
+        '{bic}' => htmlspecialchars($bankAccount['bic'] ?? ''),
+        '{bank_country}' => htmlspecialchars($bankAccount['country'] ?? ''),
+        
+        // Crypto wallet details
+        '{has_crypto_wallet}' => $cryptoWallet ? 'yes' : 'no',
+        '{cryptocurrency}' => htmlspecialchars($cryptoWallet['cryptocurrency'] ?? ''),
+        '{network}' => htmlspecialchars($cryptoWallet['network'] ?? ''),
+        '{wallet_address}' => htmlspecialchars($cryptoWallet['wallet_address'] ?? ''),
+        
+        // Onboarding data
+        '{onboarding_completed}' => ($onboarding && ($onboarding['completed'] ?? 0)) ? 'Ja' : 'Nein',
+        '{onboarding_step}' => htmlspecialchars($onboarding['current_step'] ?? ''),
+        
+        // Case data (latest)
+        '{case_number}' => htmlspecialchars($latestCase['case_number'] ?? ''),
+        '{case_status}' => htmlspecialchars($latestCase['status'] ?? ''),
+        '{case_title}' => htmlspecialchars($latestCase['title'] ?? ''),
+        '{case_amount}' => isset($latestCase['amount']) ? number_format($latestCase['amount'], 2) : '',
+        
+        // Dynamic/System variables
+        '{current_year}' => date('Y'),
+        '{current_date}' => date('d.m.Y'),
+        '{current_time}' => date('H:i'),
+        '{dashboard_url}' => htmlspecialchars($siteUrl) . '/dashboard',
+        '{login_url}' => htmlspecialchars($siteUrl) . '/login.php',
     ];
+    
+    // Add any custom variables from POST data
+    if (isset($_POST['custom_variables']) && is_array($_POST['custom_variables'])) {
+        foreach ($_POST['custom_variables'] as $key => $value) {
+            $variables['{' . $key . '}'] = htmlspecialchars($value);
+        }
+    }
     
     $subject = str_replace(array_keys($variables), array_values($variables), $subject);
     $message = str_replace(array_keys($variables), array_values($variables), $message);
