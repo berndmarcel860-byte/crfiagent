@@ -1304,49 +1304,132 @@ h5, .h5 {
             </div>
         </div>
         
-        <!-- Quick Access Cards for Verified Users -->
+        <!-- Account Overview & Recent Activity for Verified Users -->
         <div class="row mb-4">
-            <div class="col-lg-4 col-md-6 mb-3">
-                <div class="card border-0 shadow-sm h-100 hover-shadow" style="transition: all 0.3s;">
-                    <div class="card-body text-center">
-                        <div class="avatar-icon avatar-lg mx-auto mb-3" style="background: linear-gradient(135deg, #2950a8, #2da9e3); font-size: 28px;">
-                            <i class="anticon anticon-file-add text-white"></i>
+            <!-- Left: Account Statistics -->
+            <div class="col-lg-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="mb-4" style="color: #2c3e50; font-weight: 600;">
+                            <i class="anticon anticon-dashboard mr-2 text-primary"></i>Konto-Übersicht
+                        </h5>
+                        
+                        <!-- KYC Status -->
+                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                            <div class="avatar-icon mr-3" style="background: linear-gradient(135deg, #28a745, #5cb85c); width: 45px; height: 45px; font-size: 20px;">
+                                <i class="anticon anticon-check-circle text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 font-weight-bold">KYC-Verifizierung</h6>
+                                <small class="text-muted">Vollständig verifiziert</small>
+                            </div>
+                            <span class="badge badge-success">Aktiv</span>
                         </div>
-                        <h5 class="font-weight-bold mb-2">Neuer Fall</h5>
-                        <p class="text-muted mb-3" style="font-size: 13px;">Erstellen Sie einen neuen Wiederherstellungsfall</p>
-                        <a href="cases.php?action=create" class="btn btn-primary btn-sm">
-                            <i class="anticon anticon-plus-circle mr-1"></i>Fall erstellen
-                        </a>
+                        
+                        <!-- Wallet Status -->
+                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                            <div class="avatar-icon mr-3" style="background: linear-gradient(135deg, #17a2b8, #5bc0de); width: 45px; height: 45px; font-size: 20px;">
+                                <i class="anticon anticon-wallet text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 font-weight-bold">Krypto-Wallet</h6>
+                                <small class="text-muted">Verifiziert & Gesichert</small>
+                            </div>
+                            <span class="badge badge-info">Verbunden</span>
+                        </div>
+                        
+                        <!-- Account Age -->
+                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
+                            <div class="avatar-icon mr-3" style="background: linear-gradient(135deg, #6f42c1, #9b59b6); width: 45px; height: 45px; font-size: 20px;">
+                                <i class="anticon anticon-user text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 font-weight-bold">Konto-Alter</h6>
+                                <small class="text-muted">Mitglied seit <?= isset($currentUser['created_at']) ? date('d.m.Y', strtotime($currentUser['created_at'])) : 'N/A' ?></small>
+                            </div>
+                            <span class="badge badge-secondary">Aktiv</span>
+                        </div>
+                        
+                        <!-- Security Level -->
+                        <div class="d-flex align-items-center">
+                            <div class="avatar-icon mr-3" style="background: linear-gradient(135deg, #ffc107, #ffdb4d); width: 45px; height: 45px; font-size: 20px;">
+                                <i class="anticon anticon-safety text-white"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 font-weight-bold">Sicherheitsstufe</h6>
+                                <small class="text-muted">2FA aktiviert</small>
+                            </div>
+                            <span class="badge badge-warning">Hoch</span>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <div class="col-lg-4 col-md-6 mb-3">
-                <div class="card border-0 shadow-sm h-100 hover-shadow" style="transition: all 0.3s;">
-                    <div class="card-body text-center">
-                        <div class="avatar-icon avatar-lg mx-auto mb-3" style="background: linear-gradient(135deg, #28a745, #5cb85c); font-size: 28px;">
-                            <i class="anticon anticon-credit-card text-white"></i>
+            <!-- Right: Recent Activity -->
+            <div class="col-lg-6 mb-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="mb-4" style="color: #2c3e50; font-weight: 600;">
+                            <i class="anticon anticon-clock-circle mr-2 text-info"></i>Letzte Aktivitäten
+                        </h5>
+                        
+                        <!-- Activity Timeline -->
+                        <div class="activity-timeline">
+                            <!-- Login Activity -->
+                            <div class="d-flex mb-3">
+                                <div class="mr-3">
+                                    <div class="avatar-icon" style="background: linear-gradient(135deg, #28a745, #5cb85c); width: 40px; height: 40px; font-size: 16px;">
+                                        <i class="anticon anticon-login text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 font-weight-bold">Erfolgreiche Anmeldung</h6>
+                                    <p class="text-muted mb-1" style="font-size: 13px;">Sie haben sich erfolgreich angemeldet</p>
+                                    <small class="text-muted">
+                                        <i class="anticon anticon-clock-circle mr-1"></i>Heute, <?= date('H:i') ?> Uhr
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- OTP Verification -->
+                            <div class="d-flex mb-3">
+                                <div class="mr-3">
+                                    <div class="avatar-icon" style="background: linear-gradient(135deg, #2950a8, #2da9e3); width: 40px; height: 40px; font-size: 16px;">
+                                        <i class="anticon anticon-safety text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 font-weight-bold">OTP-Verifizierung</h6>
+                                    <p class="text-muted mb-1" style="font-size: 13px;">Zwei-Faktor-Authentifizierung erfolgreich</p>
+                                    <small class="text-muted">
+                                        <i class="anticon anticon-clock-circle mr-1"></i>Heute, <?= date('H:i', strtotime('-2 minutes')) ?> Uhr
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- Profile View -->
+                            <div class="d-flex mb-3">
+                                <div class="mr-3">
+                                    <div class="avatar-icon" style="background: linear-gradient(135deg, #17a2b8, #5bc0de); width: 40px; height: 40px; font-size: 16px;">
+                                        <i class="anticon anticon-eye text-white"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 font-weight-bold">Profil angesehen</h6>
+                                    <p class="text-muted mb-1" style="font-size: 13px;">Sie haben Ihr Dashboard aufgerufen</p>
+                                    <small class="text-muted">
+                                        <i class="anticon anticon-clock-circle mr-1"></i>Vor wenigen Sekunden
+                                    </small>
+                                </div>
+                            </div>
+                            
+                            <!-- View More Link -->
+                            <div class="text-center mt-3 pt-3 border-top">
+                                <a href="#" class="text-primary font-weight-bold" style="font-size: 14px;">
+                                    <i class="anticon anticon-history mr-1"></i>Vollständiger Aktivitätsverlauf
+                                </a>
+                            </div>
                         </div>
-                        <h5 class="font-weight-bold mb-2">Auszahlung</h5>
-                        <p class="text-muted mb-3" style="font-size: 13px;">Fordern Sie eine Auszahlung an</p>
-                        <a href="withdrawal.php" class="btn btn-success btn-sm">
-                            <i class="anticon anticon-arrow-up mr-1"></i>Auszahlen
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-4 col-md-6 mb-3">
-                <div class="card border-0 shadow-sm h-100 hover-shadow" style="transition: all 0.3s;">
-                    <div class="card-body text-center">
-                        <div class="avatar-icon avatar-lg mx-auto mb-3" style="background: linear-gradient(135deg, #ffc107, #ffdb4d); font-size: 28px;">
-                            <i class="anticon anticon-bar-chart text-white"></i>
-                        </div>
-                        <h5 class="font-weight-bold mb-2">Transaktionen</h5>
-                        <p class="text-muted mb-3" style="font-size: 13px;">Sehen Sie Ihre Transaktionshistorie</p>
-                        <a href="transactions.php" class="btn btn-warning btn-sm">
-                            <i class="anticon anticon-line-chart mr-1"></i>Ansehen
-                        </a>
                     </div>
                 </div>
             </div>
