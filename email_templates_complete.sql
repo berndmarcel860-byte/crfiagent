@@ -1,10 +1,9 @@
 -- =====================================================
--- ENHANCED email_templates TABLE
--- Created: 2026-02-20
--- Purpose: Enhanced templates with dynamic variables and tracking
+-- COMPLETE EMAIL TEMPLATES WITH ALL 15 TEMPLATES
+-- Enhanced with tracking, dynamic variables, and professional design
 -- =====================================================
 
--- Drop and recreate email_templates with enhanced structure
+-- Drop existing table and create new structure
 DROP TABLE IF EXISTS `email_templates`;
 
 CREATE TABLE `email_templates` (
@@ -12,315 +11,596 @@ CREATE TABLE `email_templates` (
   `template_key` varchar(100) NOT NULL,
   `subject` varchar(255) NOT NULL,
   `content` text NOT NULL,
-  `variables` text COMMENT 'JSON array of available variables',
-  `description` varchar(500) DEFAULT NULL COMMENT 'Template description',
-  `category` varchar(50) DEFAULT 'general' COMMENT 'Template category',
-  `is_active` tinyint(1) DEFAULT 1,
+  `variables` text,
+  `category` enum('auth','user','case','withdrawal','kyc','payment','system') DEFAULT 'system',
+  `is_active` tinyint(1) DEFAULT '1',
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `template_key` (`template_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- =====================================================
--- TEMPLATE 1: Onboarding Complete
--- =====================================================
-INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `description`, `category`) VALUES 
-('onboarding_complete', 
-'Willkommen bei {{brand_name}} - Registrierung abgeschlossen',
-'<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willkommen bei {{brand_name}}</title>
-</head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f4; padding: 20px;">
-        <tr>
-            <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                    <!-- Header -->
-                    <tr>
-                        <td style="background: linear-gradient(135deg, #2950a8 0%, #2da9e3 100%); padding: 40px 30px; text-align: center;">
-                            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">{{brand_name}}</h1>
-                            <p style="color: #ffffff; margin: 10px 0 0 0; opacity: 0.9;">Willkommen in Ihrem Account</p>
-                        </td>
-                    </tr>
-                    
-                    <!-- Content -->
-                    <tr>
-                        <td style="padding: 40px 30px;">
-                            <h2 style="color: #2c3e50; margin: 0 0 20px 0;">Herzlichen Glückwunsch, {{user_first_name}}!</h2>
-                            
-                            <p style="color: #555; line-height: 1.6; margin: 0 0 15px 0;">
-                                Ihre Registrierung bei <strong>{{brand_name}}</strong> wurde erfolgreich abgeschlossen. 
-                                Wir freuen uns, Sie in unserer Community begrüßen zu dürfen!
-                            </p>
-                            
-                            <!-- Account Info Box -->
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8f9fa; border-left: 4px solid #2950a8; margin: 25px 0; border-radius: 4px;">
-                                <tr>
-                                    <td style="padding: 20px;">
-                                        <h3 style="color: #2950a8; margin: 0 0 15px 0; font-size: 18px;">👤 Ihre Account-Details</h3>
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>Name:</strong> {{user_first_name}} {{user_last_name}}
-                                        </p>
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>E-Mail:</strong> {{user_email}}
-                                        </p>
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>Mitglied seit:</strong> {{user_created_at}}
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                            
-                            <!-- Payment Methods (if available) -->
-                            {{#if has_bank_account}}
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #e8f5e9; border-left: 4px solid #28a745; margin: 25px 0; border-radius: 4px;">
-                                <tr>
-                                    <td style="padding: 20px;">
-                                        <h3 style="color: #28a745; margin: 0 0 15px 0; font-size: 18px;">🏦 Hinterlegtes Bankkonto</h3>
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>Bank:</strong> {{bank_name}}
-                                        </p>
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>Kontoinhaber:</strong> {{account_holder}}
-                                        </p>
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>IBAN:</strong> {{iban}}
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                            {{/if}}
-                            
-                            {{#if has_crypto_wallet}}
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fff3e0; border-left: 4px solid #ff9800; margin: 25px 0; border-radius: 4px;">
-                                <tr>
-                                    <td style="padding: 20px;">
-                                        <h3 style="color: #ff9800; margin: 0 0 15px 0; font-size: 18px;">💰 Hinterlegte Krypto-Wallet</h3>
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>Währung:</strong> {{cryptocurrency}}
-                                        </p>
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>Netzwerk:</strong> {{network}}
-                                        </p>
-                                        <p style="margin: 8px 0; color: #555; word-break: break-all;">
-                                            <strong>Wallet-Adresse:</strong> {{wallet_address}}
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                            {{/if}}
-                            
-                            <!-- CTA Button -->
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
-                                <tr>
-                                    <td align="center">
-                                        <a href="{{site_url}}/dashboard.php" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #2950a8, #2da9e3); color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                                            Zum Dashboard
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
-                            
-                            <p style="color: #555; line-height: 1.6; margin: 20px 0 0 0; font-size: 14px;">
-                                Bei Fragen stehen wir Ihnen gerne zur Verfügung unter 
-                                <a href="mailto:{{contact_email}}" style="color: #2950a8;">{{contact_email}}</a>
-                                {{#if contact_phone}}oder telefonisch unter {{contact_phone}}{{/if}}.
-                            </p>
-                        </td>
-                    </tr>
-                    
-                    <!-- Footer -->
-                    <tr>
-                        <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #dee2e6;">
-                            <p style="margin: 0 0 10px 0; font-size: 16px; font-weight: bold; color: #2c3e50;">
-                                {{brand_name}}
-                            </p>
-                            <p style="margin: 0 0 10px 0; font-size: 14px; color: #6c757d; white-space: pre-line;">
-                                {{company_address}}
-                            </p>
-                            {{#if fca_reference_number}}
-                            <p style="margin: 10px 0; font-size: 13px; color: #6c757d;">
-                                FCA Referenznummer: {{fca_reference_number}}
-                            </p>
-                            {{/if}}
-                            <p style="margin: 15px 0 0 0; font-size: 12px; color: #999;">
-                                © {{current_year}} {{brand_name}}. Alle Rechte vorbehalten.
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-                
-                <!-- Tracking Pixel -->
-                <img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" alt="" style="display:block;" />
-            </td>
-        </tr>
-    </table>
-</body>
-</html>',
-'["user_first_name", "user_last_name", "user_email", "user_created_at", "brand_name", "company_address", "contact_email", "contact_phone", "fca_reference_number", "site_url", "current_year", "bank_name", "account_holder", "iban", "bic", "has_bank_account", "cryptocurrency", "network", "wallet_address", "has_crypto_wallet", "tracking_token"]',
-'Welcome email sent after completing onboarding with payment methods',
-'onboarding');
+-- Insert all 15 templates
 
 -- =====================================================
--- TEMPLATE 2: OTP Login Code
+-- TEMPLATE 1: USER REGISTRATION
 -- =====================================================
-INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `description`, `category`) VALUES 
-('otp_login', 
-'Ihr Anmeldecode für {{brand_name}}',
-'<!DOCTYPE html>
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('user_registration', 'Willkommen bei {{brand_name}} - Ihr Konto wurde erstellt', '
+<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f4; padding: 20px;">
-        <tr>
-            <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
-                    <tr>
-                        <td style="background: linear-gradient(135deg, #2950a8, #2da9e3); padding: 30px; text-align: center;">
-                            <h1 style="color: #ffffff; margin: 0;">{{brand_name}}</h1>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 40px 30px;">
-                            <h2 style="color: #2c3e50; margin: 0 0 20px 0;">Ihr Einmalcode</h2>
-                            <p style="color: #555; margin: 0 0 20px 0;">
-                                Hallo {{user_first_name}},
-                            </p>
-                            <p style="color: #555; margin: 0 0 20px 0;">
-                                Verwenden Sie diesen Code, um sich bei Ihrem Account anzumelden:
-                            </p>
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
-                                <tr>
-                                    <td align="center" style="background-color: #f8f9fa; padding: 30px; border-radius: 8px;">
-                                        <div style="font-size: 36px; font-weight: bold; letter-spacing: 8px; color: #2950a8;">
-                                            {{otp_code}}
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
-                            <p style="color: #dc3545; margin: 20px 0; font-weight: bold;">
-                                ⏱️ Dieser Code ist 5 Minuten gültig.
-                            </p>
-                            <p style="color: #555; margin: 20px 0;">
-                                🔒 Aus Sicherheitsgründen teilen Sie diesen Code niemals mit anderen.
-                            </p>
-                            <hr style="border: none; border-top: 1px solid #dee2e6; margin: 30px 0;">
-                            <p style="color: #999; font-size: 12px; margin: 0;">
-                                Wenn Sie sich nicht angemeldet haben, ignorieren Sie diese E-Mail.
-                            </p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="background-color: #f8f9fa; padding: 20px; text-align: center;">
-                            <p style="margin: 0; font-size: 12px; color: #999;">
-                                © {{current_year}} {{brand_name}}
-                            </p>
-                        </td>
-                    </tr>
-                </table>
-                <img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" alt="" />
-            </td>
-        </tr>
-    </table>
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #2950a8, #2da9e3); padding: 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">{{brand_name}}</h1>
+            <p style="color: #ffffff; margin: 10px 0 0 0;">Krypto-Recovery-Plattform</p>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+            <h2 style="color: #2c3e50; font-size: 24px; margin-bottom: 20px;">Willkommen, {{user_first_name}}!</h2>
+            
+            <p style="color: #555; line-height: 1.8; font-size: 16px;">
+                Herzlichen Glückwunsch! Ihr Konto wurde erfolgreich erstellt.
+            </p>
+            
+            <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3 style="color: #2950a8; margin-top: 0;">Ihre Login-Daten:</h3>
+                <p style="margin: 10px 0;"><strong>Email:</strong> {{user_email}}</p>
+                <p style="margin: 10px 0;"><strong>Registrierungsdatum:</strong> {{registration_date}}</p>
+            </div>
+            
+            <p style="color: #555; line-height: 1.8;">
+                Sie können sich jetzt anmelden und mit der Nutzung unserer Plattform beginnen.
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{site_url}}/login.php" style="background: linear-gradient(135deg, #2950a8, #2da9e3); color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;">
+                    Jetzt Anmelden
+                </a>
+            </div>
+            
+            <div style="background-color: #e8f4f8; padding: 15px; border-left: 4px solid #17a2b8; margin: 20px 0;">
+                <p style="margin: 0; color: #555;">
+                    <strong>💡 Nächste Schritte:</strong><br>
+                    1. Vervollständigen Sie Ihr Profil<br>
+                    2. Fügen Sie Zahlungsmethoden hinzu<br>
+                    3. Verifizieren Sie Ihre Identität (KYC)
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #dee2e6;">
+            <p style="color: #2c3e50; font-weight: bold; margin: 10px 0;">{{brand_name}}</p>
+            <p style="color: #666; font-size: 13px; margin: 5px 0;">{{company_address}}</p>
+            <p style="color: #666; font-size: 13px; margin: 5px 0;">
+                <strong>Kontakt:</strong> {{contact_email}} | <strong>FCA:</strong> {{fca_reference_number}}
+            </p>
+            <p style="color: #999; font-size: 12px; margin: 20px 0;">© {{current_year}} {{brand_name}}. Alle Rechte vorbehalten.</p>
+        </div>
+    </div>
+    
+    <!-- Tracking Pixel -->
+    <img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;" />
 </body>
-</html>',
-'["user_first_name", "otp_code", "brand_name", "site_url", "current_year", "tracking_token"]',
-'OTP code for login authentication',
-'security');
+</html>
+', 'user_first_name,user_last_name,user_email,registration_date,brand_name,site_url,company_address,contact_email,fca_reference_number,current_year,tracking_token', 'user');
+
 
 -- =====================================================
--- TEMPLATE 3: Case Status Update
+-- TEMPLATE 2: WELCOME EMAIL TEXT
 -- =====================================================
-INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `description`, `category`) VALUES 
-('case_status_update', 
-'Fallstatus aktualisiert - {{case_number}}',
-'<!DOCTYPE html>
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('welcome_email_text', 'Herzlich Willkommen bei {{brand_name}}!', '
+<!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f4f4; padding: 20px;">
-        <tr>
-            <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
-                    <tr>
-                        <td style="background: linear-gradient(135deg, #2950a8, #2da9e3); padding: 30px; text-align: center;">
-                            <h1 style="color: #ffffff; margin: 0;">Fallstatus aktualisiert</h1>
-                            <p style="color: #ffffff; margin: 10px 0 0 0; opacity: 0.9;">{{case_number}}</p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 40px 30px;">
-                            <p style="color: #555; margin: 0 0 20px 0;">
-                                Sehr geehrte/r {{user_first_name}} {{user_last_name}},
-                            </p>
-                            <p style="color: #555; margin: 0 0 30px 0;">
-                                Der Status Ihres Falls wurde aktualisiert. Nachfolgend finden Sie die Details:
-                            </p>
-                            
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8f9fa; border-left: 4px solid #2950a8; border-radius: 4px; margin: 25px 0;">
-                                <tr>
-                                    <td style="padding: 20px;">
-                                        <h3 style="color: #2950a8; margin: 0 0 15px 0;">📋 Falldetails</h3>
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>Fallnummer:</strong> {{case_number}}
-                                        </p>
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>Neuer Status:</strong> <span style="color: #28a745; font-weight: bold;">{{new_status}}</span>
-                                        </p>
-                                        {{#if status_notes}}
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>Hinweise:</strong> {{status_notes}}
-                                        </p>
-                                        {{/if}}
-                                        <p style="margin: 8px 0; color: #555;">
-                                            <strong>Aktualisiert am:</strong> {{update_date}}
-                                        </p>
-                                    </td>
-                                </tr>
-                            </table>
-                            
-                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
-                                <tr>
-                                    <td align="center">
-                                        <a href="{{site_url}}/dashboard.php" style="display: inline-block; padding: 14px 32px; background: linear-gradient(135deg, #2950a8, #2da9e3); color: #ffffff; text-decoration: none; border-radius: 5px; font-weight: bold;">
-                                            Fall Details ansehen
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
-                            
-                            <p style="color: #555; margin: 20px 0 0 0;">
-                                Bei Fragen kontaktieren Sie uns unter <a href="mailto:{{contact_email}}" style="color: #2950a8;">{{contact_email}}</a>.
-                            </p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="background-color: #f8f9fa; padding: 30px; text-align: center;">
-                            <p style="margin: 0 0 10px 0; font-weight: bold; color: #2c3e50;">{{brand_name}}</p>
-                            <p style="margin: 0 0 10px 0; font-size: 14px; color: #6c757d; white-space: pre-line;">{{company_address}}</p>
-                            <p style="margin: 0; font-size: 12px; color: #999;">© {{current_year}} {{brand_name}}</p>
-                        </td>
-                    </tr>
-                </table>
-                <img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" alt="" />
-            </td>
-        </tr>
-    </table>
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff;">
+        <div style="background: linear-gradient(135deg, #2950a8, #2da9e3); padding: 30px; text-align: center;">
+            <h1 style="color: #ffffff; margin: 0;">🎉 Willkommen!</h1>
+        </div>
+        <div style="padding: 40px 30px;">
+            <h2 style="color: #2c3e50;">Hallo {{user_first_name}} {{user_last_name}}!</h2>
+            <p style="color: #555; line-height: 1.8;">
+                Wir freuen uns sehr, Sie als neues Mitglied bei {{brand_name}} begrüßen zu dürfen!
+            </p>
+            <p style="color: #555; line-height: 1.8;">
+                Unsere Plattform bietet Ihnen professionelle Krypto-Recovery-Dienste mit höchster Sicherheit und Expertise.
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="{{site_url}}/dashboard" style="background: #2950a8; color: #fff; padding: 15px 40px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                    Zum Dashboard
+                </a>
+            </div>
+        </div>
+        <div style="background-color: #f8f9fa; padding: 30px; text-align: center;">
+            <p style="color: #666; font-size: 13px;">{{brand_name}} | {{contact_email}}</p>
+        </div>
+    </div>
+    <img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;" />
 </body>
-</html>',
-'["user_first_name", "user_last_name", "case_number", "new_status", "status_notes", "update_date", "brand_name", "company_address", "contact_email", "site_url", "current_year", "tracking_token"]',
-'Notification when case status is updated',
-'cases');
+</html>
+', 'user_first_name,user_last_name,brand_name,site_url,contact_email,tracking_token', 'user');
 
-SELECT 'Email templates enhanced successfully!' AS status;
+
+-- =====================================================
+-- TEMPLATE: EMAIL_VERIFICATION
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('email_verification', 'Bitte bestätigen Sie Ihre E-Mail-Adresse', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für email_verification.</p>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{verification_link}}" style="background:#2950a8;color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+E-Mail bestätigen
+</a>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,verification_link,brand_name,site_url,contact_email,tracking_token', 'auth');
+
+
+-- =====================================================
+-- TEMPLATE: PASSWORD_RESET
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('password_reset', 'Passwort zurücksetzen - {{brand_name}}', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für password_reset.</p>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{reset_link}}" style="background:#2950a8;color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Passwort zurücksetzen
+</a>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,reset_link,brand_name,site_url,contact_email,tracking_token', 'auth');
+
+
+-- =====================================================
+-- TEMPLATE: OTP_LOGIN
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('otp_login', 'Ihr Anmeldecode für {{brand_name}}', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für otp_login.</p>
+<div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;text-align:center;">
+<h3 style="color:#2950a8;margin:0 0 10px 0;">Ihr Einmalcode:</h3>
+<div style="font-size:32px;font-weight:bold;letter-spacing:8px;color:#2950a8;">{{otp_code}}</div>
+<p style="color:#666;margin:10px 0 0 0;font-size:14px;">⏱️ Dieser Code ist 5 Minuten gültig.</p>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,otp_code,brand_name,site_url,contact_email,tracking_token', 'auth');
+
+
+-- =====================================================
+-- TEMPLATE: ONBOARDING_COMPLETE
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('onboarding_complete', 'Willkommen bei {{brand_name}} - Registrierung abgeschlossen', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für onboarding_complete.</p>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,user_last_name,bank_name,iban,bic,cryptocurrency,wallet_address,has_bank_account,has_crypto_wallet,brand_name,company_address,contact_email,fca_reference_number,site_url,current_year,tracking_token', 'user');
+
+
+-- =====================================================
+-- TEMPLATE: CASE_CREATED
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('case_created', 'Neuer Fall erstellt - Case #{{case_number}}', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für case_created.</p>
+<div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;">
+<p style="margin:5px 0;"><strong>Fall-Nummer:</strong> #{{case_number}}</p>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,case_number,case_type,case_description,brand_name,site_url,contact_email,tracking_token', 'case');
+
+
+-- =====================================================
+-- TEMPLATE: CASE_STATUS_UPDATE
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('case_status_update', 'Statusaktualisierung für Fall #{{case_number}}', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für case_status_update.</p>
+<div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;">
+<p style="margin:5px 0;"><strong>Fall-Nummer:</strong> #{{case_number}}</p>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,case_number,old_status,new_status,status_message,brand_name,site_url,contact_email,tracking_token', 'case');
+
+
+-- =====================================================
+-- TEMPLATE: WITHDRAWAL_REQUESTED
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('withdrawal_requested', 'Auszahlungsanfrage erhalten - {{brand_name}}', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für withdrawal_requested.</p>
+<div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;">
+<p style="margin:5px 0;"><strong>Betrag:</strong> {{amount}} {{currency}}</p>
+<p style="margin:5px 0;"><strong>Methode:</strong> {{withdrawal_method}}</p>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,amount,currency,withdrawal_method,request_date,brand_name,site_url,contact_email,tracking_token', 'withdrawal');
+
+
+-- =====================================================
+-- TEMPLATE: WITHDRAWAL_APPROVED
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('withdrawal_approved', 'Ihre Auszahlung wurde genehmigt', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für withdrawal_approved.</p>
+<div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;">
+<p style="margin:5px 0;"><strong>Betrag:</strong> {{amount}} {{currency}}</p>
+<p style="margin:5px 0;"><strong>Methode:</strong> {{withdrawal_method}}</p>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,amount,currency,withdrawal_method,transaction_id,estimated_arrival,brand_name,site_url,contact_email,tracking_token', 'withdrawal');
+
+
+-- =====================================================
+-- TEMPLATE: WITHDRAWAL_REJECTED
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('withdrawal_rejected', 'Auszahlungsanfrage abgelehnt', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für withdrawal_rejected.</p>
+<div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;">
+<p style="margin:5px 0;"><strong>Betrag:</strong> {{amount}} {{currency}}</p>
+<p style="margin:5px 0;"><strong>Methode:</strong> {{withdrawal_method}}</p>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,amount,currency,rejection_reason,brand_name,site_url,contact_email,tracking_token', 'withdrawal');
+
+
+-- =====================================================
+-- TEMPLATE: BALANCE_ALERT_DE
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('balance_alert_de', 'Kontostand-Benachrichtigung - {{brand_name}}', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für balance_alert_de.</p>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,current_balance,currency,brand_name,site_url,contact_email,tracking_token', 'payment');
+
+
+-- =====================================================
+-- TEMPLATE: PAYMENT_RECEIVED
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('payment_received', 'Zahlung erhalten - {{brand_name}}', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für payment_received.</p>
+<div style="background:#f8f9fa;padding:20px;border-radius:8px;margin:20px 0;">
+<p style="margin:5px 0;"><strong>Betrag:</strong> {{amount}} {{currency}}</p>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,amount,currency,payment_method,transaction_id,payment_date,brand_name,site_url,contact_email,tracking_token', 'payment');
+
+
+-- =====================================================
+-- TEMPLATE: KYC_APPROVED
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('kyc_approved', 'KYC-Verifizierung erfolgreich - {{brand_name}}', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für kyc_approved.</p>
+<div style="background:#e8f4f8;padding:15px;border-left:4px solid #17a2b8;margin:20px 0;">
+<p style="margin:0;">KYC-Status wurde aktualisiert.</p>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,approval_date,brand_name,site_url,contact_email,tracking_token', 'kyc');
+
+
+-- =====================================================
+-- TEMPLATE: KYC_REJECTED
+-- =====================================================
+INSERT INTO `email_templates` (`template_key`, `subject`, `content`, `variables`, `category`) VALUES
+('kyc_rejected', 'KYC-Verifizierung - Weitere Informationen erforderlich', '
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;font-family:Arial,sans-serif;background-color:#f4f4f4;">
+<div style="max-width:600px;margin:0 auto;background-color:#ffffff;">
+<div style="background:linear-gradient(135deg,#2950a8,#2da9e3);padding:30px;text-align:center;">
+<h1 style="color:#ffffff;margin:0;font-size:28px;">{{brand_name}}</h1>
+</div>
+<div style="padding:40px 30px;">
+<h2 style="color:#2c3e50;margin-bottom:20px;">Hallo {{user_first_name}}!</h2>
+<p style="color:#555;line-height:1.8;">Template für kyc_rejected.</p>
+<div style="background:#e8f4f8;padding:15px;border-left:4px solid #17a2b8;margin:20px 0;">
+<p style="margin:0;">KYC-Status wurde aktualisiert.</p>
+</div>
+<div style="text-align:center;margin:30px 0;">
+<a href="{{site_url}}/dashboard" style="background:linear-gradient(135deg,#2950a8,#2da9e3);color:#fff;padding:15px 40px;text-decoration:none;border-radius:5px;display:inline-block;">
+Zum Dashboard
+</a>
+</div>
+</div>
+<div style="background-color:#f8f9fa;padding:30px;text-align:center;border-top:1px solid #dee2e6;">
+<p style="color:#2c3e50;font-weight:bold;margin:10px 0;">{{brand_name}}</p>
+<p style="color:#666;font-size:13px;">{{contact_email}} | FCA: {{fca_reference_number}}</p>
+<p style="color:#999;font-size:12px;">© {{current_year}} {{brand_name}}</p>
+</div>
+</div>
+<img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;"/>
+</body>
+</html>', 'user_first_name,rejection_reason,required_documents,brand_name,site_url,contact_email,tracking_token', 'kyc');
+
+-- File complete
