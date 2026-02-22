@@ -84,7 +84,7 @@ if (!$smtpSettings) {
                                 </div>
                                 <div class="card-body">
                                     <form id="systemSettingsForm">
-                                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                                         
                                         <div class="row">
                                             <div class="col-md-6">
@@ -162,7 +162,7 @@ if (!$smtpSettings) {
                                     </div>
 
                                     <form id="smtpSettingsForm">
-                                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
                                         
                                         <div class="row">
                                             <div class="col-md-8">
