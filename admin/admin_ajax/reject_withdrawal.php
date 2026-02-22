@@ -1,16 +1,6 @@
 <?php 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
-
-$phpMailerAvailable = false;
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-    $phpMailerAvailable = true;
-}
 
 require_once '../admin_session.php';
 
@@ -65,7 +55,21 @@ try {
 
     if ($user) {
         // --- SEND EMAIL NOTIFICATION ---
-        sendWithdrawalRejectionEmail($pdo, $user, 'withdrawal_rejected', $withdrawal, $reason);
+        try {
+            require_once '../AdminEmailHelper.php';
+            $emailHelper = new AdminEmailHelper($pdo);
+            
+            $customVars = [
+                'amount' => number_format($withdrawal['amount'], 2) . ' €',
+                'reason' => $reason,
+                'reference' => $withdrawal['reference'] ?? 'WD-' . $withdrawal['id'],
+                'transaction_date' => date('Y-m-d H:i:s')
+            ];
+            
+            $emailHelper->sendTemplateEmail('withdrawal_rejected', $user['id'], $customVars);
+        } catch (Exception $e) {
+            error_log("Withdrawal rejection email failed: " . $e->getMessage());
+        }
 
         // --- USER NOTIFICATION ---
         $notifUser = $pdo->prepare("
@@ -116,105 +120,3 @@ try {
         'error' => $e->getMessage()
     ]);
 }
-
-/**
- * =======================================================
- * SEND WITHDRAWAL REJECTION EMAIL
- * =======================================================
- */
-function sendWithdrawalRejectionEmail($pdo, $user, $templateKey, $withdrawal, $reason)
-{
-    global $phpMailerAvailable;
-
-    try {
-        // LOAD TEMPLATE
-        $tpl = $pdo->prepare("SELECT * FROM email_templates WHERE template_key = ? LIMIT 1");
-        $tpl->execute([$templateKey]);
-        $template = $tpl->fetch(PDO::FETCH_ASSOC);
-
-        if (!$template) {
-            error_log("Email template missing: " . $templateKey);
-            return;
-        }
-
-        // SMTP SETTINGS
-        $smtp = $pdo->query("SELECT * FROM smtp_settings WHERE is_active = 1 LIMIT 1")->fetch(PDO::FETCH_ASSOC);
-        if (!$smtp) {
-            error_log("SMTP not configured.");
-            return;
-        }
-
-        $sys = $pdo->query("SELECT * FROM system_settings WHERE id = 1")->fetch(PDO::FETCH_ASSOC);
-
-        // PAYMENT METHOD NAME
-        $methodName = 'Banküberweisung';
-        if (!empty($withdrawal['method_code'])) {
-            $methodStmt = $pdo->prepare("SELECT method_name FROM payment_methods WHERE method_code = ? LIMIT 1");
-            $methodStmt->execute([$withdrawal['method_code']]);
-            $method = $methodStmt->fetch(PDO::FETCH_ASSOC);
-            if ($method && !empty($method['method_name'])) {
-                $methodName = $method['method_name'];
-            }
-        }
-
-        // VARIABLES
-        $vars = [
-            '{first_name}'       => htmlspecialchars($user['first_name'] ?? '', ENT_QUOTES, 'UTF-8'),
-            '{last_name}'        => htmlspecialchars($user['last_name'] ?? '', ENT_QUOTES, 'UTF-8'),
-            '{amount}'           => number_format($withdrawal['amount'], 2) . ' €',
-            '{reason}'           => htmlspecialchars($reason, ENT_QUOTES, 'UTF-8'),
-            '{payment_method}'   => htmlspecialchars($methodName, ENT_QUOTES, 'UTF-8'),
-            '{payment_details}'  => htmlspecialchars($withdrawal['payment_details'] ?? '', ENT_QUOTES, 'UTF-8'),
-            '{reference}'        => htmlspecialchars($withdrawal['reference'] ?? 'WD-' . $withdrawal['id'], ENT_QUOTES, 'UTF-8'),
-            '{transaction_id}'   => htmlspecialchars($withdrawal['reference'] ?? 'WD-' . $withdrawal['id'], ENT_QUOTES, 'UTF-8'),
-            '{transaction_date}' => date('Y-m-d H:i:s'),
-            '{balance}'          => number_format($user['balance'] ?? 0, 2) . ' €',
-            '{site_url}'         => $sys['site_url'] ?? 'https://kryptox.co.uk',
-            '{site_name}'        => htmlspecialchars($sys['site_name'] ?? 'KryptoX', ENT_QUOTES, 'UTF-8'),
-            '{surl}'             => $sys['site_url'] ?? 'https://kryptox.co.uk',
-            '{sbrand}'           => htmlspecialchars($sys['site_name'] ?? 'KryptoX', ENT_QUOTES, 'UTF-8'),
-            '{semail}'           => htmlspecialchars($sys['contact_email'] ?? 'info@kryptox.co.uk', ENT_QUOTES, 'UTF-8'),
-            '{sphone}'           => htmlspecialchars($sys['contact_phone'] ?? '', ENT_QUOTES, 'UTF-8')
-        ];
-
-        $subject = strtr($template['subject'], $vars);
-        $htmlBody = strtr($template['content'], $vars);
-        $textBody = strip_tags($htmlBody);
-
-        // SEND EMAIL
-        if ($phpMailerAvailable) {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host       = $smtp['host'];
-            $mail->SMTPAuth   = true;
-            $mail->Username   = $smtp['username'];
-            $mail->Password   = $smtp['password'];
-            $mail->SMTPSecure = ($smtp['encryption'] === 'ssl')
-                ? PHPMailer::ENCRYPTION_SMTPS
-                : PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = (int)$smtp['port'];
-            $mail->CharSet    = 'UTF-8';
-            $mail->Encoding   = 'base64';
-            $mail->setFrom($smtp['from_email'], $smtp['from_name']);
-            $mail->addAddress($user['email'], trim($user['first_name'] . ' ' . $user['last_name']));
-            $mail->isHTML(true);
-            $mail->Subject = $subject;
-            $mail->Body    = $htmlBody;
-            $mail->AltBody = $textBody;
-            $mail->send();
-        }
-
-        // LOG EMAIL
-        $log = $pdo->prepare("
-            INSERT INTO email_logs (template_id, recipient, subject, content, sent_at, status)
-            VALUES (?, ?, ?, ?, NOW(), 'sent')
-        ");
-        $log->execute([$template['id'], $user['email'], $subject, $htmlBody]);
-
-    } catch (Exception $e) {
-        error_log("Email failure: " . $e->getMessage());
-    }
-}
-
-?>
-
