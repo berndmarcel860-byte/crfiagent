@@ -1,30 +1,15 @@
 <?php
 // =======================================================
-// PHPMailer imports
-// =======================================================
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
-// =======================================================
 // Error reporting (disable in production)
 // =======================================================
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 // =======================================================
-// PHPMailer availability check
-// =======================================================
-$phpMailerAvailable = false;
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-    $phpMailerAvailable = true;
-}
-
-// =======================================================
-// Include admin session
+// Include admin session and email helper
 // =======================================================
 require_once '../admin_session.php';
+require_once '../AdminEmailHelper.php';
 header('Content-Type: application/json');
 
 // =======================================================
@@ -106,7 +91,33 @@ try {
     // =======================================================
     // 7️⃣ Send deposit confirmation email
     // =======================================================
-    sendDepositEmail($pdo, $user, 'deposit_received', $transaction);
+    try {
+        $emailHelper = new AdminEmailHelper($pdo);
+        
+        // Lookup payment method name
+        $methodName = 'Unknown';
+        if (!empty($transaction['payment_method_id'])) {
+            $methodStmt = $pdo->prepare("SELECT method_name FROM payment_methods WHERE id = ? LIMIT 1");
+            $methodStmt->execute([$transaction['payment_method_id']]);
+            $method = $methodStmt->fetch(PDO::FETCH_ASSOC);
+            if ($method && !empty($method['method_name'])) {
+                $methodName = $method['method_name'];
+            }
+        }
+        
+        $customVars = [
+            'amount' => number_format($transaction['amount'], 2) . ' €',
+            'payment_method' => $methodName,
+            'transaction_id' => $transaction['reference'] ?? $transaction['id'],
+            'transaction_date' => date('Y-m-d H:i:s'),
+            'transaction_status' => 'Completed',
+            'deposit_id' => $transaction['id']
+        ];
+        
+        $emailHelper->sendTemplateEmail('deposit_received', $user['id'], $customVars);
+    } catch (Exception $e) {
+        error_log("Deposit confirmation email failed: " . $e->getMessage());
+    }
 
     // =======================================================
     // 8️⃣ Create user notification
@@ -167,94 +178,6 @@ try {
         'message' => 'Failed to approve deposit',
         'error' => $e->getMessage()
     ]);
-}
-
-/**
- * =======================================================
- * Send Deposit Email (with payment method lookup)
- * =======================================================
- */
-function sendDepositEmail($pdo, $user, $templateKey, $transaction)
-{
-    try {
-        // === Template
-        $tpl = $pdo->prepare("SELECT * FROM email_templates WHERE template_key = ? LIMIT 1");
-        $tpl->execute([$templateKey]);
-        $template = $tpl->fetch(PDO::FETCH_ASSOC);
-        if (!$template) throw new Exception("Email template not found: " . $templateKey);
-
-        // === SMTP + System settings
-        $smtp = $pdo->query("SELECT * FROM smtp_settings WHERE is_active = 1 LIMIT 1")->fetch(PDO::FETCH_ASSOC);
-        if (!$smtp) throw new Exception("No active SMTP configuration found");
-        $sys = $pdo->query("SELECT * FROM system_settings WHERE id = 1")->fetch(PDO::FETCH_ASSOC);
-
-        // === Lookup payment method name
-        $methodName = 'Unbekannt';
-        if (!empty($transaction['payment_method_id'])) {
-            $methodStmt = $pdo->prepare("SELECT method_name FROM payment_methods WHERE id = ? LIMIT 1");
-            $methodStmt->execute([$transaction['payment_method_id']]);
-            $method = $methodStmt->fetch(PDO::FETCH_ASSOC);
-            if ($method && !empty($method['method_name'])) {
-                $methodName = $method['method_name'];
-            }
-        }
-
-        // === Template variables
-        $vars = [
-            '{first_name}'         => $user['first_name'] ?? '',
-            '{last_name}'          => $user['last_name'] ?? '',
-            '{amount}'             => number_format($transaction['amount'], 2) . ' €',
-            '{payment_method}'     => $methodName,
-            '{transaction_id}'     => $transaction['reference'] ?? $transaction['id'],
-            '{transaction_date}'   => date('Y-m-d H:i:s'),
-            '{transaction_status}' => 'Completed',
-            '{site_url}'           => $sys['site_url'] ?? 'https://your-site.com'
-        ];
-
-        $subject  = strtr($template['subject'], $vars);
-        $htmlBody = strtr($template['content'], $vars);
-        $textBody = strip_tags($htmlBody);
-
-        global $phpMailerAvailable;
-
-        // === Send email
-        if ($phpMailerAvailable) {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host       = $smtp['host'];
-            $mail->SMTPAuth   = true;
-            $mail->Username   = $smtp['username'];
-            $mail->Password   = $smtp['password'];
-            $mail->SMTPSecure = ($smtp['encryption'] === 'ssl')
-                ? PHPMailer::ENCRYPTION_SMTPS
-                : PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = (int)$smtp['port'];
-$mail->CharSet = 'UTF-8';
-            $mail->Encoding = 'base64';
-            $mail->setFrom($smtp['from_email'], $smtp['from_name']);
-            $mail->addAddress($user['email'], trim($user['first_name'] . ' ' . $user['last_name']));
-            $mail->isHTML(true);
-            $mail->Subject = $subject;
-            $mail->Body    = $htmlBody;
-            $mail->AltBody = $textBody;
-            $mail->send();
-        } else {
-            $headers  = "MIME-Version: 1.0\r\n";
-            $headers .= "Content-type:text/html;charset=UTF-8\r\n";
-            $headers .= 'From: ' . $smtp['from_name'] . ' <' . $smtp['from_email'] . '>' . "\r\n";
-            mail($user['email'], $subject, $htmlBody, $headers);
-        }
-
-        // === Log email
-        $log = $pdo->prepare("
-            INSERT INTO email_logs (template_id, recipient, subject, content, sent_at, status)
-            VALUES (?, ?, ?, ?, NOW(), 'sent')
-        ");
-        $log->execute([$template['id'], $user['email'], $subject, $htmlBody]);
-
-    } catch (Exception $e) {
-        error_log("Deposit email failed: " . $e->getMessage());
-    }
 }
 ?>
 

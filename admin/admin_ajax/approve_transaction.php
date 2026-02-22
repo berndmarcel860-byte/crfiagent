@@ -1,30 +1,15 @@
 <?php
 // =======================================================
-// PHPMailer imports
-// =======================================================
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
-// =======================================================
 // Error reporting (disable in production)
 // =======================================================
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
 // =======================================================
-// PHPMailer availability check
-// =======================================================
-$phpMailerAvailable = false;
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-    $phpMailerAvailable = true;
-}
-
-// =======================================================
-// Include admin session
+// Include admin session and email helper
 // =======================================================
 require_once '../admin_session.php';
+require_once '../AdminEmailHelper.php';
 header('Content-Type: application/json');
 
 if (!isset($_POST['id']) || !is_numeric($_POST['id'])) {
@@ -84,8 +69,22 @@ try {
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user) {
-            // === 1️⃣ Send deposit email
-            sendDepositEmail($pdo, $user, 'deposit_received', $transaction);
+            // === 1️⃣ Send transaction approval email
+            try {
+                $emailHelper = new AdminEmailHelper($pdo);
+                
+                $customVars = [
+                    'amount' => number_format($transaction['amount'], 2) . ' €',
+                    'transaction_type' => $transaction['type'] ?? 'Transaction',
+                    'transaction_id' => $transaction['reference'] ?? $transaction['id'],
+                    'transaction_date' => date('Y-m-d H:i:s'),
+                    'transaction_status' => 'Completed'
+                ];
+                
+                $emailHelper->sendTemplateEmail('deposit_received', $user['id'], $customVars);
+            } catch (Exception $e) {
+                error_log("Transaction approval email failed: " . $e->getMessage());
+            }
 
             // === 2️⃣ Create user notification
             try {
@@ -142,101 +141,5 @@ try {
         'message' => 'Failed to approve transaction',
         'error' => $e->getMessage()
     ]);
-}
-
-/**
- * =======================================================
- * Send Deposit Email
- * =======================================================
- */
-function sendDepositEmail($pdo, $user, $templateKey, $transaction)
-{
-    try {
-        // Get template
-        $templateStmt = $pdo->prepare("SELECT * FROM email_templates WHERE template_key = ? LIMIT 1");
-        $templateStmt->execute([$templateKey]);
-        $template = $templateStmt->fetch(PDO::FETCH_ASSOC);
-        if (!$template) {
-            throw new Exception("Email template not found: " . $templateKey);
-        }
-
-        // SMTP
-        $smtpStmt = $pdo->prepare("SELECT * FROM smtp_settings WHERE is_active = 1 LIMIT 1");
-        $smtpStmt->execute();
-        $smtpSettings = $smtpStmt->fetch(PDO::FETCH_ASSOC);
-        if (!$smtpSettings) {
-            throw new Exception("No active SMTP configuration found");
-        }
-
-        // System settings
-        $systemStmt = $pdo->prepare("SELECT * FROM system_settings WHERE id = 1");
-        $systemStmt->execute();
-        $systemSettings = $systemStmt->fetch(PDO::FETCH_ASSOC);
-
-        // Variables
-        $variables = [
-            '{first_name}' => $user['first_name'] ?? '',
-            '{last_name}' => $user['last_name'] ?? '',
-            '{user_name}' => $user['first_name'] . ' ' . $user['last_name'],
-            '{email}' => $user['email'],
-            '{amount}' => number_format($transaction['amount'], 2),
-            '{reference}' => $transaction['reference'] ?? '',
-            '{status}' => ucfirst($transaction['status']),
-            '{date}' => date('Y-m-d H:i:s'),
-            '{current_year}' => date('Y'),
-            '{site_name}' => $systemSettings['site_name'] ?? 'Fundtracer AI',
-            '{site_url}' => $systemSettings['site_url'] ?? 'https://your-site.com',
-            '{support_email}' => $systemSettings['contact_email'] ?? 'support@your-site.com',
-            '{brand_name}' => $systemSettings['brand_name'] ?? 'Fundtracer AI',
-            '{contact_phone}' => $systemSettings['contact_phone'] ?? '',
-            '{contact_email}' => $systemSettings['contact_email'] ?? ''
-        ];
-
-        $subject = $template['subject'];
-        $htmlBody = $template['content'];
-        foreach ($variables as $key => $value) {
-            $subject = str_replace($key, $value, $subject);
-            $htmlBody = str_replace($key, $value, $htmlBody);
-        }
-        $textBody = strip_tags($htmlBody);
-
-        global $phpMailerAvailable;
-
-        if ($phpMailerAvailable) {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host       = $smtpSettings['host'];
-            $mail->SMTPAuth   = true;
-            $mail->Username   = $smtpSettings['username'];
-            $mail->Password   = $smtpSettings['password'];
-            $mail->SMTPSecure = $smtpSettings['encryption'] === 'ssl'
-                ? PHPMailer::ENCRYPTION_SMTPS
-                : PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = $smtpSettings['port'];
-
-            $mail->setFrom($smtpSettings['from_email'], $smtpSettings['from_name']);
-            $mail->addAddress($user['email'], $user['first_name'] . ' ' . $user['last_name']);
-            $mail->isHTML(true);
-            $mail->Subject = $subject;
-            $mail->Body    = $htmlBody;
-            $mail->AltBody = $textBody;
-            $mail->send();
-        } else {
-            $headers = "MIME-Version: 1.0\r\n";
-            $headers .= "Content-type:text/html;charset=UTF-8\r\n";
-            $headers .= 'From: ' . $smtpSettings['from_name'] . ' <' . $smtpSettings['from_email'] . '>' . "\r\n";
-            mail($user['email'], $subject, $htmlBody, $headers);
-        }
-
-        // Log success
-        $logStmt = $pdo->prepare("
-            INSERT INTO email_logs (template_id, recipient, subject, content, sent_at, status)
-            VALUES (?, ?, ?, ?, NOW(), 'sent')
-        ");
-        $logStmt->execute([$template['id'], $user['email'], $subject, $htmlBody]);
-
-    } catch (Exception $e) {
-        error_log("Deposit email failed: " . $e->getMessage());
-    }
 }
 ?>
