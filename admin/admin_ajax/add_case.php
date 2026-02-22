@@ -1,18 +1,9 @@
 <?php 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-$phpMailerAvailable = false;
-if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
-    require_once __DIR__ . '/../../vendor/autoload.php';
-    $phpMailerAvailable = true;
-}
-
 require_once '../admin_session.php';
+require_once '../AdminEmailHelper.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['admin_id'])) {
@@ -93,12 +84,20 @@ try {
 
     // === 5️⃣ Send case creation email ===
     if ($user) {
-        sendCaseEmail($pdo, $user, 'case_created', $caseId, $caseNumber, [
-            'platform_name' => $platform['name'] ?? 'Unknown Platform',
-            'reported_amount' => $data['reported_amount'],
-            'case_description' => $data['description'],
-            'case_status' => 'Open'
-        ]);
+        try {
+            $emailHelper = new AdminEmailHelper($pdo);
+            $customVars = [
+                'platform_name' => $platform['name'] ?? 'Unknown Platform',
+                'reported_amount' => number_format($data['reported_amount'], 2),
+                'case_description' => $data['description'],
+                'case_status' => 'Open',
+                'case_number' => $caseNumber,
+                'case_id' => $caseId
+            ];
+            $emailHelper->sendTemplateEmail('case_created', $data['user_id'], $customVars);
+        } catch (Exception $e) {
+            error_log("Case email failed: " . $e->getMessage());
+        }
     }
 
     $pdo->commit();
@@ -157,67 +156,5 @@ try {
     $pdo->rollBack();
     error_log("General Error in add_case.php: " . $e->getMessage());
     echo json_encode(['success' => false, 'message' => 'Failed to create case', 'error' => $e->getMessage()]);
-}
-
-/**
- * 📧 Send case email
- */
-function sendCaseEmail($pdo, $user, $templateKey, $caseId, $caseNumber, $vars = []) {
-    global $phpMailerAvailable;
-    try {
-        $templateStmt = $pdo->prepare("SELECT * FROM email_templates WHERE template_key = ? LIMIT 1");
-        $templateStmt->execute([$templateKey]);
-        $template = $templateStmt->fetch(PDO::FETCH_ASSOC);
-        if (!$template) throw new Exception("Email template not found: " . $templateKey);
-
-        $smtpStmt = $pdo->prepare("SELECT * FROM smtp_settings WHERE is_active = 1 LIMIT 1");
-        $smtpStmt->execute();
-        $smtp = $smtpStmt->fetch(PDO::FETCH_ASSOC);
-        if (!$smtp) throw new Exception("No active SMTP configuration found");
-
-        $systemStmt = $pdo->prepare("SELECT * FROM system_settings WHERE id = 1");
-        $systemStmt->execute();
-        $system = $systemStmt->fetch(PDO::FETCH_ASSOC);
-
-        $variables = [
-            '{first_name}' => $user['first_name'],
-            '{last_name}' => $user['last_name'],
-            '{user_name}' => $user['first_name'].' '.$user['last_name'],
-            '{email}' => $user['email'],
-            '{case_number}' => $caseNumber,
-            '{case_id}' => $caseId,
-            '{date}' => date('Y-m-d H:i:s'),
-            '{current_year}' => date('Y'),
-            '{site_name}' => $system['site_name'] ?? 'ScamRecovery',
-            '{support_email}' => $system['contact_email'] ?? 'support@your-site.com'
-        ];
-        foreach ($vars as $k => $v) $variables['{'.$k.'}'] = $v;
-
-        $subject = str_replace(array_keys($variables), array_values($variables), $template['subject']);
-        $body = str_replace(array_keys($variables), array_values($variables), $template['content']);
-
-        if ($phpMailerAvailable) {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host = $smtp['host'];
-            $mail->SMTPAuth = true;
-            $mail->Username = $smtp['username'];
-            $mail->Password = $smtp['password'];
-            $mail->SMTPSecure = $smtp['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = $smtp['port'];
-
-            $mail->CharSet = 'UTF-8';
-            $mail->Encoding = 'base64';
-            $mail->setFrom($smtp['from_email'], $smtp['from_name']);
-            $mail->addAddress($user['email'], $user['first_name'].' '.$user['last_name']);
-            $mail->isHTML(true);
-            $mail->Subject = $subject;
-            $mail->Body = $body;
-            $mail->AltBody = strip_tags($body);
-            $mail->send();
-        }
-    } catch (Exception $e) {
-        error_log("Case email failed: " . $e->getMessage());
-    }
 }
 ?>
