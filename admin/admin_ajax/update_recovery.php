@@ -1,19 +1,8 @@
 <?php 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-$phpMailerAvailable = false;
-if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
-    require_once __DIR__ . '/../../vendor/autoload.php';
-    $phpMailerAvailable = true;
-}
-
 require_once '../admin_session.php';
-require_once '../mail_functions.php';
 header('Content-Type: application/json');
 
 if (!isset($_SESSION['admin_id'])) {
@@ -72,10 +61,24 @@ try {
     ]);
 
     // === 5️⃣ Send recovery update email ===
-    $emailSent = sendRecoveryUpdateEmail(
-        $pdo, $case, $data['case_id'], $newAmount, $totalAfter,
-        $case['reported_amount'], $data, $admin
-    );
+    try {
+        require_once '../AdminEmailHelper.php';
+        $emailHelper = new AdminEmailHelper($pdo);
+        
+        $customVars = [
+            'recovery_amount' => number_format($newAmount, 2) . ' €',
+            'total_recovered' => number_format($totalAfter, 2) . ' €',
+            'reported_amount' => number_format($case['reported_amount'], 2) . ' €',
+            'recovery_id' => $data['case_id'],
+            'update_date' => date('Y-m-d H:i:s'),
+            'admin_notes' => $data['notes'] ?? ''
+        ];
+        
+        $emailSent = $emailHelper->sendTemplateEmail('recovery_amount_updated', $case['user_id'], $customVars);
+    } catch (Exception $e) {
+        error_log("Recovery update email failed: " . $e->getMessage());
+        $emailSent = false;
+    }
 
     // === 6️⃣ Audit log ===
     $stmt = $pdo->prepare("
@@ -157,75 +160,3 @@ try {
 /**
  * 📧 Send recovery update email notification
  */
-function sendRecoveryUpdateEmail($pdo, $userData, $caseId, $newAmount, $totalAfter, $reportedAmount, $updateData, $adminData) {
-    global $phpMailerAvailable;
-    try {
-        $trackingToken = bin2hex(random_bytes(16));
-        $templateStmt = $pdo->prepare("SELECT * FROM email_templates WHERE template_key = 'recovery_amount_updated' LIMIT 1");
-        $templateStmt->execute();
-        $template = $templateStmt->fetch(PDO::FETCH_ASSOC);
-        if (!$template) throw new Exception("Email template not found");
-
-        $smtpStmt = $pdo->prepare("SELECT * FROM smtp_settings WHERE is_active = 1 LIMIT 1");
-        $smtpStmt->execute();
-        $smtp = $smtpStmt->fetch(PDO::FETCH_ASSOC);
-        if (!$smtp) throw new Exception("No active SMTP config");
-
-        $systemStmt = $pdo->prepare("SELECT * FROM system_settings WHERE id = 1");
-        $systemStmt->execute();
-        $system = $systemStmt->fetch(PDO::FETCH_ASSOC);
-
-        $vars = [
-            '{first_name}' => $userData['first_name'],
-            '{last_name}' => $userData['last_name'],
-            '{user_name}' => $userData['first_name'].' '.$userData['last_name'],
-            '{case_number}' => $userData['case_number'],
-            '{case_id}' => $caseId,
-            '{reported_amount}' => number_format($reportedAmount, 2, ',', '.') . ' €',
-            '{recovered_amount}' => number_format($newAmount, 2, ',', '.') . ' €',
-            '{total_recovered}' => number_format($totalAfter, 2, ',', '.') . ' €',
-            '{remaining_amount}' => number_format($reportedAmount - $totalAfter, 2, ',', '.') . ' €',
-            '{recovery_notes}' => $updateData['notes'] ?? 'Keine zusätzlichen Anmerkungen',
-            '{recovery_date}' => date('d.m.Y H:i:s'),
-            '{processed_by}' => $adminData ? ($adminData['first_name'].' '.$adminData['last_name']) : 'System',
-            '{current_year}' => date('Y'),
-            '{site_name}' => $system['site_name'] ?? 'ScamRecovery',
-            '{support_email}' => $system['contact_email'] ?? 'support@your-site.com'
-        ];
-
-        $subject = str_replace(array_keys($vars), array_values($vars), $template['subject']);
-        $body = str_replace(array_keys($vars), array_values($vars), $template['content']);
-        $pixel = '<img src="'.$system['site_url'].'/track.php?token='.$trackingToken.'" width="1" height="1" alt="" style="display:none;" />';
-        $body = str_replace('</body>', $pixel.'</body>', $body);
-
-        if ($phpMailerAvailable) {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host = $smtp['host'];
-            $mail->SMTPAuth = true;
-            $mail->Username = $smtp['username'];
-            $mail->Password = $smtp['password'];
-            $mail->SMTPSecure = $smtp['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = $smtp['port'];
-$mail->CharSet = 'UTF-8';
-            $mail->Encoding = 'base64';
-            $mail->setFrom($smtp['from_email'], $smtp['from_name']);
-            $mail->addAddress($userData['email'], $userData['first_name'].' '.$userData['last_name']);
-            $mail->isHTML(true);
-            $mail->Subject = $subject;
-            $mail->Body = $body;
-            $mail->AltBody = strip_tags($body);
-            $mail->send();
-        }
-
-        // Log success
-        $log = $pdo->prepare("INSERT INTO email_logs (template_id, recipient, subject, content, sent_at, status, tracking_token) VALUES (?, ?, ?, ?, NOW(), 'sent', ?)");
-        $log->execute([$template['id'], $userData['email'], $subject, $body, $trackingToken]);
-        return true;
-
-    } catch (Exception $e) {
-        error_log("Recovery email failed: " . $e->getMessage());
-        return false;
-    }
-}
-?>
