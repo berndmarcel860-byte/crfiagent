@@ -124,6 +124,11 @@ require_once 'admin_header.php';
           <div class="form-group"><label>First Name</label><input type="text" class="form-control" name="first_name" required></div>
           <div class="form-group"><label>Last Name</label><input type="text" class="form-control" name="last_name" required></div>
           <div class="form-group"><label>Email</label><input type="email" class="form-control" name="email" required></div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" class="form-control" name="phone" placeholder="+1234567890">
+            <small class="form-text text-muted">Optional. International format preferred (e.g., +1234567890)</small>
+          </div>
           <div class="form-group"><label>Password</label><input type="text" class="form-control" name="password" value="ceM8fFXV" required></div>
           <div class="form-group">
             <label>Status</label>
