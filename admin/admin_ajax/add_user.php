@@ -1,7 +1,7 @@
 <?php
 require_once '../../config.php'; // Contains SITE_URL and other configurations
 require_once '../admin_session.php';
-require_once '../mail_functions.php';
+require_once '../AdminEmailHelper.php';
 
 header('Content-Type: application/json');
 
@@ -76,24 +76,24 @@ try {
     ]);
 
     // Send welcome email with plain text password
-    $mailer = new Mailer($pdo);
-    $siteUrl = defined('SITE_URL') ? SITE_URL : 'https://blockchainfahndung.com/app/';
-    
-    $variables = [
-        'first_name' => $data['first_name'],
-        'last_name' => $data['last_name'],
-        'pass' => $plain_password, // Plain text password for email
-        'email' => $data['email'],
-        'admin_name' => $_SESSION['admin_name'] ?? 'Administrator',
-        'login_link' => $siteUrl . 'login.php',
-        'change_password_link' => $siteUrl . 'change-password.php'
-    ];
-
-    $emailSent = $mailer->sendTemplateEmail(
-        'welcome_email', 
-        $data['email'], 
-        $variables
-    );
+    $emailSent = false;
+    try {
+        $emailHelper = new AdminEmailHelper($pdo);
+        $siteUrl = defined('SITE_URL') ? SITE_URL : 'https://blockchainfahndung.com/app/';
+        
+        $customVars = [
+            'temp_password' => $plain_password, // Plain text password for email
+            'pass' => $plain_password, // Alias for backwards compatibility
+            'admin_name' => $_SESSION['admin_name'] ?? 'Administrator',
+            'login_link' => $siteUrl . 'login.php',
+            'change_password_link' => $siteUrl . 'change-password.php'
+        ];
+        
+        $emailSent = $emailHelper->sendTemplateEmail('user_registration', $userId, $customVars);
+    } catch (Exception $e) {
+        error_log("Welcome email failed: " . $e->getMessage());
+        $emailSent = false;
+    }
 
     // Prepare response
     $response = [
