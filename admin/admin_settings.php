@@ -7,6 +7,11 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
+// Generate CSRF token if not exists
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Get current system settings
 $stmt = $pdo->query("SELECT * FROM system_settings WHERE id = 1");
 $systemSettings = $stmt->fetch(PDO::FETCH_ASSOC);
