@@ -45,10 +45,7 @@ if (!$smtpSettings) {
 }
 ?>
 
-<div class="page-container">
-    <?php require_once 'admin_sidebar.php'; ?>
-
-    <div class="main-content">
+<div class="main-content">
         <div class="header">
             <div class="container-fluid">
                 <div class="header-body">
@@ -256,7 +253,6 @@ if (!$smtpSettings) {
             </div>
         </div>
     </div>
-</div>
 
 <script>
 $(document).ready(function() {
