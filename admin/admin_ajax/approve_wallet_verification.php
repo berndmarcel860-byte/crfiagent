@@ -6,6 +6,7 @@
 
 require_once '../../config.php';
 require_once '../admin_session.php';
+require_once '../AdminEmailHelper.php';
 
 header('Content-Type: application/json');
 
@@ -71,7 +72,21 @@ try {
             'status' => 'verified'
         ]);
         
-        // TODO: Send notification to user (email/SMS)
+        // Send notification email to user
+        try {
+            $emailHelper = new AdminEmailHelper($pdo);
+            
+            $customVars = [
+                'cryptocurrency' => $wallet['cryptocurrency'],
+                'verification_txid' => $wallet['verification_txid'],
+                'wallet_id' => $wallet_id,
+                'verification_date' => date('Y-m-d H:i:s')
+            ];
+            
+            $emailHelper->sendTemplateEmail('wallet_verified', $wallet['user_id'], $customVars);
+        } catch (Exception $e) {
+            error_log("Wallet verification email failed: " . $e->getMessage());
+        }
         
     } catch (Exception $e) {
         $pdo->rollBack();
