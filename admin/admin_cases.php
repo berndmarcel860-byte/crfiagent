@@ -371,7 +371,7 @@ $(document).ready(function() {
         serverSide: true,
         ajax: {
             url: 'admin_ajax/get_cases.php',
-            type: 'POST'
+            type: 'GET'
         },
         columns: [
             { data: 'case_number' },
