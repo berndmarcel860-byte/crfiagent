@@ -264,7 +264,7 @@ function sendKYCPendingEmail($pdo, $user, $documentType, $kycId) {
         $customVars = [
             'document_type' => $documentType,
             'kyc_id' => $kycId,
-            'submission_date' => date('Y-m-d H:i:s'),
+            'date' => date('Y-m-d H:i:s'), // Maps to {{date}} in template
             'kyc_status' => 'Pending Review'
         ];
         
