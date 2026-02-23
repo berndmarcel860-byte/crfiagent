@@ -257,25 +257,20 @@ try {
  */
 function sendKYCPendingEmail($pdo, $user, $documentType, $kycId) {
     try {
-        require_once __DIR__ . '/../admin/AdminEmailHelper.php';
-        $emailHelper = new AdminEmailHelper($pdo);
+        require_once __DIR__ . '/../EmailHelper.php';
+        $emailHelper = new EmailHelper($pdo);
         
         // Prepare custom variables for the email template
         $customVars = [
             'document_type' => $documentType,
             'kyc_id' => $kycId,
             'submission_date' => date('Y-m-d H:i:s'),
-            'kyc_status' => 'Pending Review',
-            // Company information (AdminEmailHelper will populate these from system_settings)
-            'brand_name' => '', // Will be auto-populated from system_settings
-            'company_address' => '', // Will be auto-populated from system_settings
-            'contact_email' => '', // Will be auto-populated from system_settings
-            'fca_reference_number' => '', // Will be auto-populated from system_settings
-            'current_year' => date('Y') // Explicitly set current year
+            'kyc_status' => 'Pending Review'
         ];
         
-        // Send email using the kyc_pending template
-        $emailHelper->sendTemplateEmail('kyc_pending', $user['id'], $customVars);
+        // Send email using the kyc_pending template from database
+        // EmailHelper automatically provides: user data, system settings, payment methods, tracking token, etc.
+        $emailHelper->sendEmail('kyc_pending', $user['id'], $customVars);
         
         error_log("KYC pending email sent to: " . $user['email'] . " for KYC ID: " . $kycId);
         
