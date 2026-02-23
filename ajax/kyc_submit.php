@@ -274,8 +274,8 @@ function sendKYCPendingEmail($pdo, $user, $documentType, $kycId) {
             'current_year' => date('Y') // Explicitly set current year
         ];
         
-        // Send email using the kyc_submitted template
-        $emailHelper->sendTemplateEmail('kyc_submitted', $user['id'], $customVars);
+        // Send email using the kyc_pending template
+        $emailHelper->sendTemplateEmail('kyc_pending', $user['id'], $customVars);
         
         error_log("KYC pending email sent to: " . $user['email'] . " for KYC ID: " . $kycId);
         
