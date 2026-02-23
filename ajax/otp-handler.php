@@ -2,15 +2,9 @@
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../session.php';
-
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-}
+require_once __DIR__ . '/../EmailHelper.php';
 
 header('Content-Type: application/json');
 
@@ -28,17 +22,11 @@ try {
         throw new Exception('Invalid action', 400);
     }
 
-    // Fetch user email
+    // Fetch user
     $stmt = $pdo->prepare("SELECT id, email, first_name FROM users WHERE id = ?");
     $stmt->execute([$_SESSION['user_id']]);
     $user = $stmt->fetch();
     if (!$user) throw new Exception('User not found');
-
-    // Load SMTP
-    $smtpStmt = $pdo->prepare("SELECT * FROM smtp_settings WHERE is_active = 1 LIMIT 1");
-    $smtpStmt->execute();
-    $smtp = $smtpStmt->fetch();
-    if (!$smtp) throw new Exception('SMTP not configured');
 
     // ------------------------------------------------------------
     // 🔹 SEND OTP
@@ -56,24 +44,19 @@ try {
         $_SESSION['otp_expire'] = $expires;
         $_SESSION['otp_verified'] = false;
 
-        // Prepare email
-        $mail = new PHPMailer(true);
-        $mail->isSMTP();
-        $mail->Host = $smtp['host'];
-        $mail->SMTPAuth = true;
-        $mail->Username = $smtp['username'];
-        $mail->Password = $smtp['password'];
-        $mail->SMTPSecure = $smtp['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = $smtp['port'];
-        $mail->setFrom($smtp['from_email'], $smtp['from_name']);
-        $mail->addAddress($user['email'], $user['first_name']);
-        $mail->isHTML(true);
-        $mail->Subject = "Your Withdrawal OTP Code";
-        $mail->Body = "<p>Dear {$user['first_name']},</p>
-            <p>Your one-time code is <b>{$otp}</b>. It expires in 5 minutes.</p>
-            <p>If you didn’t request this, please ignore this email.</p>";
-
-        $mail->send();
+        // Send OTP email using EmailHelper
+        try {
+            $emailHelper = new EmailHelper($pdo);
+            $customVars = [
+                'otp_code' => $otp,
+                'expires_minutes' => '5',
+                'purpose' => 'Withdrawal'
+            ];
+            $emailHelper->sendEmail('otp_code', $user['id'], $customVars);
+        } catch (Exception $e) {
+            error_log("OTP email failed: " . $e->getMessage());
+            // Don't fail the request if email fails
+        }
 
         echo json_encode([
             'success' => true,
@@ -121,4 +104,3 @@ try {
         'message' => $e->getMessage()
     ]);
 }
-
