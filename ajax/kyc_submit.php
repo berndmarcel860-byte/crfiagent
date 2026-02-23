@@ -2,20 +2,8 @@
 // ajax/kyc_submit.php
 require_once __DIR__ . '/../session.php';
 
-// Use statements must be at the very top
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
-
-// Check if PHPMailer is available
-$phpMailerAvailable = false;
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-    $phpMailerAvailable = true;
-}
 
 header('Content-Type: application/json');
 
@@ -265,139 +253,29 @@ try {
 }
 
 /**
- * Send KYC pending email in German
+ * Send KYC pending email using AdminEmailHelper
  */
 function sendKYCPendingEmail($pdo, $user, $documentType, $kycId) {
-    global $phpMailerAvailable;
-    
     try {
-        // Get SMTP settings
-        $smtpStmt = $pdo->prepare("SELECT * FROM smtp_settings WHERE is_active = 1 LIMIT 1");
-        $smtpStmt->execute();
-        $smtpSettings = $smtpStmt->fetch();
+        require_once __DIR__ . '/../admin/AdminEmailHelper.php';
+        $emailHelper = new AdminEmailHelper($pdo);
         
-        if (!$smtpSettings) {
-            throw new Exception("No active SMTP configuration found");
-        }
-
-        // Get email template from database
-        $templateStmt = $pdo->prepare("SELECT * FROM email_templates WHERE template_key = 'kyc_pending' LIMIT 1");
-        $templateStmt->execute();
-        $template = $templateStmt->fetch();
-
-        // Get system settings
-        $systemStmt = $pdo->prepare("SELECT * FROM system_settings WHERE id = 1");
-        $systemStmt->execute();
-        $systemSettings = $systemStmt->fetch();
-
-        // Prepare template variables for replacement
-        $variables = [
-            '{first_name}' => $user['first_name'] ?? '',
-            '{last_name}' => $user['last_name'] ?? '',
-            '{user_name}' => $user['first_name'] . ' ' . $user['last_name'],
-            '{email}' => $user['email'],
-            '{document_type}' => $documentType,
-            '{kyc_id}' => $kycId,
-            '{date}' => date('Y-m-d H:i:s'),
-            '{current_year}' => date('Y'),
-            '{site_name}' => 'Fundtracer AI',
-            '{site_url}' => $systemSettings['site_url'] ?? 'https://your-site.com',
-            '{support_email}' => $systemSettings['contact_email'] ?? 'support@your-site.com',
-            '{brand_name}' => $systemSettings['brand_name'] ?? 'Fundtracer AI',
-            '{contact_phone}' => $systemSettings['contact_phone'] ?? '',
-            '{contact_email}' => $systemSettings['contact_email'] ?? ''
+        // Prepare custom variables for the email template
+        $customVars = [
+            'document_type' => $documentType,
+            'kyc_id' => $kycId,
+            'submission_date' => date('Y-m-d H:i:s'),
+            'kyc_status' => 'Pending Review'
         ];
-
-        // Use template from database or fallback to default German template
-        if ($template) {
-            $subject = $template['subject'] ?? 'KYC-Verifizierung ausstehend - ' . $kycId;
-            $htmlBody = $template['content'] ?? getDefaultKYCPendingTemplate();
-            
-            // Replace variables in template
-            foreach ($variables as $key => $value) {
-                $subject = str_replace($key, $value, $subject);
-                $htmlBody = str_replace($key, $value, $htmlBody);
-            }
-        } else {
-            // Use default German template if no database template found
-            $subject = 'KYC-Verifizierung ausstehend - ' . $kycId;
-            $htmlBody = getDefaultKYCPendingTemplate();
-            
-            // Replace variables in default template
-            foreach ($variables as $key => $value) {
-                $subject = str_replace($key, $value, $subject);
-                $htmlBody = str_replace($key, $value, $htmlBody);
-            }
-        }
-
-        $textBody = strip_tags($htmlBody);
-
-        // Send email using PHPMailer if available
-        if ($phpMailerAvailable) {
-            $mail = new PHPMailer(true);
-            
-            // Server settings
-            $mail->isSMTP();
-            $mail->Host       = $smtpSettings['host'];
-            $mail->SMTPAuth   = true;
-            $mail->Username   = $smtpSettings['username'];
-            $mail->Password   = $smtpSettings['password'];
-            $mail->SMTPSecure = $smtpSettings['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = $smtpSettings['port'];
-
-            // Recipients
-            $mail->setFrom($smtpSettings['from_email'], $smtpSettings['from_name']);
-            $mail->addAddress($user['email'], $user['first_name'] . ' ' . $user['last_name']);
-
-            // Content
-            $mail->isHTML(true);
-            $mail->Subject = $subject;
-            $mail->Body    = $htmlBody;
-            $mail->AltBody = $textBody;
-
-            $mail->send();
-        } else {
-            // Fallback to PHP mail() function
-            $headers = "MIME-Version: 1.0" . "\r\n";
-            $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-            $headers .= 'From: ' . $smtpSettings['from_name'] . ' <' . $smtpSettings['from_email'] . '>' . "\r\n";
-            
-            if (!mail($user['email'], $subject, $htmlBody, $headers)) {
-                throw new Exception("Failed to send email using mail() function");
-            }
-        }
         
-        // Log successful email in database
-        try {
-            $logStmt = $pdo->prepare("INSERT INTO email_logs (template_id, recipient, subject, content, sent_at, status) VALUES (?, ?, ?, ?, NOW(), 'sent')");
-            $logStmt->execute([
-                $template['id'] ?? null,
-                $user['email'],
-                $subject,
-                $htmlBody
-            ]);
-        } catch (Exception $logError) {
-            error_log("Failed to log email: " . $logError->getMessage());
-        }
+        // Send email using the kyc_submitted template
+        $emailHelper->sendTemplateEmail('kyc_submitted', $user['id'], $customVars);
         
         error_log("KYC pending email sent to: " . $user['email'] . " for KYC ID: " . $kycId);
         
     } catch (Exception $e) {
-        // Log failed email attempt
-        try {
-            $logStmt = $pdo->prepare("INSERT INTO email_logs (template_id, recipient, subject, content, sent_at, status, error_message) VALUES (?, ?, ?, ?, NOW(), 'failed', ?)");
-            $logStmt->execute([
-                isset($template) ? $template['id'] ?? null : null,
-                $user['email'] ?? 'unknown',
-                $subject ?? 'KYC Pending',
-                $htmlBody ?? '',
-                $e->getMessage()
-            ]);
-        } catch (Exception $logError) {
-            error_log("Failed to log email error: " . $logError->getMessage());
-        }
-        
-        error_log("KYC email sending failed: " . $e->getMessage());
+        // Log the error
+        error_log("Failed to send KYC pending email: " . $e->getMessage());
         throw new Exception("Failed to send KYC email: " . $e->getMessage());
     }
 }
