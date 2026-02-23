@@ -265,7 +265,13 @@ function sendKYCPendingEmail($pdo, $user, $documentType, $kycId) {
             'document_type' => $documentType,
             'kyc_id' => $kycId,
             'submission_date' => date('Y-m-d H:i:s'),
-            'kyc_status' => 'Pending Review'
+            'kyc_status' => 'Pending Review',
+            // Company information (AdminEmailHelper will populate these from system_settings)
+            'brand_name' => '', // Will be auto-populated from system_settings
+            'company_address' => '', // Will be auto-populated from system_settings
+            'contact_email' => '', // Will be auto-populated from system_settings
+            'fca_reference_number' => '', // Will be auto-populated from system_settings
+            'current_year' => date('Y') // Explicitly set current year
         ];
         
         // Send email using the kyc_submitted template
