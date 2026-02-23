@@ -8,6 +8,23 @@
  * $emailHelper->sendEmail('onboarding_complete', $userId, $customVariables);
  */
 
+// Load PHPMailer
+$vendorPaths = [
+    $_SERVER['DOCUMENT_ROOT'] . '/app/vendor/autoload.php',
+    __DIR__ . '/vendor/autoload.php',
+    __DIR__ . '/../vendor/autoload.php'
+];
+
+foreach ($vendorPaths as $path) {
+    if (file_exists($path)) {
+        require_once $path;
+        break;
+    }
+}
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 class EmailHelper {
     private $pdo;
     private $siteUrl;
@@ -179,8 +196,6 @@ class EmailHelper {
      * Send email using PHPMailer
      */
     private function sendWithPHPMailer($to, $subject, $htmlContent) {
-        require_once __DIR__ . '/vendor/autoload.php';
-        
         // Get SMTP settings
         $stmt = $this->pdo->query("SELECT * FROM smtp_settings WHERE id = 1");
         $smtp = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -189,7 +204,7 @@ class EmailHelper {
             throw new Exception("SMTP settings not found");
         }
         
-        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        $mail = new PHPMailer(true);
         
         try {
             // SMTP configuration
