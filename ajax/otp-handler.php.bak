@@ -44,18 +44,24 @@ try {
         $_SESSION['otp_expire'] = $expires;
         $_SESSION['otp_verified'] = false;
 
-        // Send OTP email using EmailHelper
-        try {
-            $emailHelper = new EmailHelper($pdo);
-            $customVars = [
-                'otp_code' => $otp,
-                'expires_minutes' => '5'
-            ];
-            $emailHelper->sendEmail('otp_email', $user['id'], $customVars);
-        } catch (Exception $e) {
-            error_log("OTP email failed: " . $e->getMessage());
-            // Continue even if email fails - OTP is still valid
-        }
+        // Prepare email
+        $mail = new PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host = $smtp['host'];
+        $mail->SMTPAuth = true;
+        $mail->Username = $smtp['username'];
+        $mail->Password = $smtp['password'];
+        $mail->SMTPSecure = $smtp['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = $smtp['port'];
+        $mail->setFrom($smtp['from_email'], $smtp['from_name']);
+        $mail->addAddress($user['email'], $user['first_name']);
+        $mail->isHTML(true);
+        $mail->Subject = "Your Withdrawal OTP Code";
+        $mail->Body = "<p>Dear {$user['first_name']},</p>
+            <p>Your one-time code is <b>{$otp}</b>. It expires in 5 minutes.</p>
+            <p>If you didn’t request this, please ignore this email.</p>";
+
+        $mail->send();
 
         echo json_encode([
             'success' => true,
@@ -103,3 +109,4 @@ try {
         'message' => $e->getMessage()
     ]);
 }
+
