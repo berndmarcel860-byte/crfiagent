@@ -1226,7 +1226,6 @@ h5, .h5 {
         $completion_percentage = round(($completed_steps / $completion_steps) * 100);
         ?>
 
-
         <!-- STATUS ALERTS: KYC, Crypto Verification, Email Verification -->
         <?php if ($kyc_status !== 'approved' || !(isset($hasVerifiedPaymentMethod) && $hasVerifiedPaymentMethod) || !($currentUser['is_verified'] ?? false)): ?>
         <div class="row mb-4">
@@ -1767,7 +1766,6 @@ h5, .h5 {
                             <i class="anticon anticon-info-circle mr-1"></i>
                             Suspicious activity? <a href="support.php" class="alert-link font-weight-600">Contact support</a>
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -2257,8 +2255,6 @@ h5, .h5 {
                         </div>
                     </div>
                 </div>
-
-
 
             </div>
         </div>
