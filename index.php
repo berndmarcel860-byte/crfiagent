@@ -14,14 +14,6 @@
  * Security: PDO prepared statements, CSRF protection, session validation
  */
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-
-// Debug marker (remove in production)
-echo "<!-- DEBUG: dashboard.php loaded -->\n";
-
 // Ensure config.php exists
 if (!file_exists(__DIR__ . '/config.php')) {
     http_response_code(500);
@@ -30,11 +22,9 @@ if (!file_exists(__DIR__ . '/config.php')) {
 }
 require_once __DIR__ . '/config.php';
 
-// Optionally include header.php if present
+// Include header.php
 if (file_exists(__DIR__ . '/header.php')) {
     require_once __DIR__ . '/header.php';
-} else {
-    echo "<!-- header.php missing; continuing without it -->\n";
 }
 
 // Validate PDO instance
