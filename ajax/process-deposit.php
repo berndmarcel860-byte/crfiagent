@@ -302,6 +302,10 @@ function sendDepositConfirmationEmail($pdo, $user, $amount, $reference, $payment
             $mail->SMTPSecure = $smtpSettings['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = $smtpSettings['port'];
 
+
+            $mail->CharSet = 'UTF-8';
+            $mail->Encoding = 'base64';
+
             // Recipients
             $mail->setFrom($smtpSettings['from_email'], $smtpSettings['from_name']);
             $mail->addAddress($user['email'], $user['first_name'] . ' ' . $user['last_name']);

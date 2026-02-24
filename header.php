@@ -123,7 +123,7 @@ if (isset($_SESSION['user_id'])) {
         
         .main-content {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1800px;
             margin: 0 auto;
             padding: 0 15px;
         }
@@ -321,6 +321,85 @@ if (isset($_SESSION['user_id'])) {
     width: 250px;
 }
 
+/* 🔔 Notification Bell - Clean Minimal Style */
+#notifBell {
+    position: relative;
+    padding: 10px 12px;
+}
+
+/* Hide dropdown caret arrow */
+#notifBell::after {
+    display: none !important;
+    content: none !important;
+}
+
+/* Bell icon itself */
+.notification-bell {
+    font-size: 22px;
+    color: #444;
+    vertical-align: middle;
+    transition: color 0.3s ease;
+}
+
+.notification-bell:hover {
+    color: #1890ff;
+}
+
+/* Small circular number badge */
+.notif-count {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #dc3545;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    min-width: 14px;
+    height: 14px;
+    line-height: 14px;
+    text-align: center;
+    border-radius: 50%;
+    padding: 0;
+    display: none; /* hidden when count = 0 */
+}
+
+/* Dropdown list styling */
+.dropdown-menu-notifications {
+    width: 320px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border: none;
+    border-radius: 8px;
+}
+
+.notif-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid #f1f1f1;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.notif-item.unread {
+    background: #f8f9fa;
+    font-weight: 500;
+}
+
+.notif-item:hover {
+    background: #eef6ff;
+}
+
+.notif-item small {
+    color: #888;
+    font-size: 11px;
+}
+
+.notif-empty {
+    padding: 20px;
+    text-align: center;
+    color: #888;
+}
+
+
+
     </style>
 </head>
 <body>
@@ -350,6 +429,27 @@ if (isset($_SESSION['user_id'])) {
                     </ul>
                     
                     <ul class="nav-right">
+
+<!-- Notifications Dropdown START -->
+<li class="dropdown dropdown-animated scale-left">
+  <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" id="notifBell">
+      <i class="anticon anticon-bell notification-bell"></i>
+      <span id="notifCount" class="badge badge-danger notif-count" style="position:absolute; top:8px; right:4px; display:none;">0</span>
+  </a>
+  <div class="dropdown-menu dropdown-menu-right dropdown-menu-notifications">
+      <div class="p-h-20 p-v-10 border-bottom d-flex justify-content-between align-items-center">
+          <h6 class="m-b-0">Notifications</h6>
+          <a href="javascript:void(0);" id="markAllRead" class="text-primary small">Mark all as read</a>
+      </div>
+      <div id="notifList" style="max-height:300px; overflow-y:auto;"></div>
+      <div class="border-top text-center p-v-10">
+          <a href="notifications.php" class="text-primary small">View all</a>
+      </div>
+  </div>
+</li>
+<!-- Notifications Dropdown END -->
+
+
                         <li class="dropdown dropdown-animated scale-left">
                             <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
                                 <div class="avatar avatar-image m-h-10 m-r-15">

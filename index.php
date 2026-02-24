@@ -43,9 +43,14 @@ if (empty($_SESSION['csrf_token'])) {
 $currentDateTime = new DateTime('now', new DateTimeZone('UTC'));
 $currentDateTimeFormatted = $currentDateTime->format('Y-m-d H:i:s');
 
-// Branding
-$appName = "Fundtracer AI";
-$appTagline = "Next-Generation Scam Recovery & Fund Tracing";
+// Branding - Already loaded from header.php but ensure defaults if not set
+if (!isset($appName)) {
+    $appName = "Fundtracer AI";
+}
+if (!isset($appTagline)) {
+    $appTagline = "Next-Generation Scam Recovery & Fund Tracing";
+}
+
 $brandColor = "#2950a8";
 $brandGradient = "linear-gradient(90deg,#2950a8 0,#2da9e3 100%)";
 $aiStatus = "Online";
@@ -228,38 +233,40 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
 
 <div class="modal fade" id="newDepositModal" tabindex="-1" role="dialog" aria-labelledby="newDepositModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content shadow-sm">
-            <div class="modal-header" style="background: <?= htmlspecialchars($brandGradient, ENT_QUOTES) ?>; color:#fff;">
-                <h5 class="modal-title" id="newDepositModalLabel">Fund Your Account</h5>
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, #2950a8 0%, #2da9e3 100%); color: #fff; border-radius: 12px 12px 0 0;">
+                <h5 class="modal-title font-weight-bold" id="newDepositModalLabel">
+                    <i class="anticon anticon-plus-circle mr-2"></i>Fund Your Account
+                </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <i class="anticon anticon-close"></i>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <form id="depositForm" enctype="multipart/form-data" novalidate>
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES) ?>">
-                <div class="modal-body">
-                    <div class="alert alert-info d-flex align-items-start" role="alert">
-                        <i class="anticon anticon-info-circle mr-2"></i>
+                <div class="modal-body p-4">
+                    <div class="alert alert-info border-0 d-flex align-items-start" role="alert" style="border-radius: 10px; background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));">
+                        <i class="anticon anticon-info-circle mr-2" style="font-size: 20px;"></i>
                         <div>
                             <strong>Important:</strong> Please complete your deposit within 30 minutes to avoid processing delays.
-                            <div class="small text-muted">Deposits help speed up recovery actions for your active cases.</div>
+                            <div class="small text-muted mt-1">Deposits help speed up recovery actions for your active cases.</div>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="font-weight-semibold">Amount (USD)</label>
+                        <label class="font-weight-600" style="color: #2c3e50;">Amount (USD)</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" aria-hidden="true">$</span>
+                                <span class="input-group-text" aria-hidden="true" style="background: linear-gradient(135deg, #2950a8, #2da9e3); color: white; border: none; font-weight: 600;">$</span>
                             </div>
-                            <input type="number" class="form-control" name="amount" min="10" step="0.01" required placeholder="Enter deposit amount" aria-label="Amount in US dollars">
+                            <input type="number" class="form-control" name="amount" min="10" step="0.01" required placeholder="Enter deposit amount" aria-label="Amount in US dollars" style="border-radius: 0 8px 8px 0; border-left: none; font-size: 18px; font-weight: 600;">
                         </div>
-                        <small class="form-text text-muted">Minimum deposit: $10.00 | Processing fee: 0%</small>
+                        <small class="form-text text-muted"><i class="anticon anticon-check-circle text-success mr-1"></i>Minimum deposit: $10.00 | Processing fee: 0%</small>
                     </div>
                     
                     <div class="form-group">
-                        <label class="font-weight-semibold">Payment Method</label>
-                        <select class="form-control select2" name="payment_method" id="paymentMethod" required aria-required="true">
+                        <label class="font-weight-600" style="color: #2c3e50;">Payment Method</label>
+                        <select class="form-control select2" name="payment_method" id="paymentMethod" required aria-required="true" style="border-radius: 8px; padding: 12px; font-size: 15px;">
                             <option value="">Select Payment Method</option>
                             <?php
                             try {
@@ -295,9 +302,9 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
                                         <h6 class="text-primary"><i class="anticon anticon-bank"></i> Bank Transfer Details</h6>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <p class="mb-1"><strong>Bank Name:</strong></p>
-                                                <p class="mb-1"><strong>Account Number:</strong></p>
-                                                <p class="mb-1"><strong>Routing Number:</strong></p>
+                                                <p class="mb-1"><strong>Account Owner::</strong></p>
+                                                <p class="mb-1"><strong>IBAN:</strong></p>
+                                                <p class="mb-1"><strong>BIC / SWIFT::</strong></p>
                                                 <p class="mb-1"><strong>Account Type:</strong></p>
                                             </div>
                                             <div class="col-md-6">
@@ -309,7 +316,7 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
                                         </div>
                                         <div class="alert alert-warning mt-3">
                                             <i class="anticon anticon-exclamation-circle"></i>
-                                            <strong>Note:</strong> Include your User ID as payment reference
+                                            <strong>Note:</strong> Include your <strong>RF3K8M1ZPW-<?= htmlspecialchars($currentUser['id'],ENT_QUOTES) ?></strong> as payment reference
                                         </div>
                                     </div>
                                 </div>
@@ -357,9 +364,13 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal" aria-label="Cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary" aria-label="Confirm deposit">Confirm Deposit</button>
+                <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 12px 12px;">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Cancel" style="border-radius: 8px;">
+                        <i class="anticon anticon-close mr-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary" aria-label="Confirm deposit" style="border-radius: 8px; background: linear-gradient(135deg, #2950a8, #2da9e3); border: none;">
+                        <i class="anticon anticon-check-circle mr-1"></i>Confirm Deposit
+                    </button>
                 </div>
             </form>
         </div>
@@ -370,24 +381,26 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
 <!-- 🔒 Withdrawal Modal -->
 <div class="modal fade" id="newWithdrawalModal" tabindex="-1" role="dialog" aria-labelledby="newWithdrawalModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content shadow-sm">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title" id="newWithdrawalModalLabel">
-                    <i class="anticon anticon-wallet"></i> Withdrawal Request
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, #28a745, #20c997); color: #fff; border-radius: 12px 12px 0 0;">
+                <h5 class="modal-title font-weight-bold" id="newWithdrawalModalLabel">
+                    <i class="anticon anticon-download mr-2"></i>Withdrawal Request
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <i class="anticon anticon-close"></i>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
 
             <form id="withdrawalForm" novalidate>
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES) ?>">
 
-                <div class="modal-body">
+                <div class="modal-body p-4">
 
-                    <div class="alert alert-info" role="alert">
-                        <i class="anticon anticon-info-circle"></i> 
-                        <strong>Processing Time:</strong> Withdrawals are processed within 1–3 business days.
+                    <div class="alert alert-info border-0 d-flex align-items-start" role="alert" style="border-radius: 10px; background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));">
+                        <i class="anticon anticon-clock-circle mr-2" style="font-size: 20px;"></i>
+                        <div>
+                            <strong>Processing Time:</strong> Withdrawals are processed within 1–3 business days.
+                        </div>
                     </div>
 
                     <!-- Hidden real balance for JS -->
@@ -395,10 +408,10 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
 
                     <!-- AMOUNT -->
                     <div class="form-group">
-                        <label class="font-weight-semibold">Amount (USD)</label>
+                        <label class="font-weight-600" style="color: #2c3e50;">Amount (USD)</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text">$</span>
+                                <span class="input-group-text" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; font-weight: 600;">$</span>
                             </div>
                             <input 
                                 type="number"
@@ -407,17 +420,18 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
                                 id="amount"
                                 step="0.01"
                                 required
-                                placeholder="Enter withdrawal amount">
+                                placeholder="Enter withdrawal amount"
+                                style="border-radius: 0 8px 8px 0; border-left: none; font-size: 18px; font-weight: 600;">
                         </div>
                         <small class="form-text text-muted">
-                            Available balance: $<?= number_format($currentUser['balance'] ?? 0, 2) ?>
+                            <i class="anticon anticon-wallet text-success mr-1"></i>Available balance: <strong>$<?= number_format($currentUser['balance'] ?? 0, 2) ?></strong>
                         </small>
                     </div>
 
                     <!-- PAYMENT METHOD -->
                     <div class="form-group">
-                        <label class="font-weight-semibold">Payment Method</label>
-                        <select class="form-control select2" name="payment_method" id="withdrawalMethod" required>
+                        <label class="font-weight-600" style="color: #2c3e50;">Payment Method</label>
+                        <select class="form-control select2" name="payment_method" id="withdrawalMethod" required style="border-radius: 8px; padding: 12px; font-size: 15px;">
                             <option value="">Select Withdrawal Method</option>
                             <?php
                             try {
@@ -489,12 +503,12 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
                     </div>
                 </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-dismiss="modal">
-                        <i class="anticon anticon-close"></i> Cancel
+                <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 12px 12px;">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 8px;">
+                        <i class="anticon anticon-close mr-1"></i>Cancel
                     </button>
-                    <button type="submit" id="withdrawalSubmitBtn" class="btn btn-success" disabled>
-                        <i class="anticon anticon-send"></i> Submit Request
+                    <button type="submit" id="withdrawalSubmitBtn" class="btn btn-success" disabled style="border-radius: 8px; background: linear-gradient(135deg, #28a745, #20c997); border: none;">
+                        <i class="anticon anticon-send mr-1"></i>Submit Request
                     </button>
                 </div>
             </form>
@@ -582,37 +596,603 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
 </div>
 
 <style>
-:root{
-    --brand:#2950a8;
-    --brand-light:#2da9e3;
-    --bg:#f7fafd;
-    --muted:#6c757d;
-    --card-radius:12px;
+:root {
+    --brand: #2950a8;
+    --brand-light: #2da9e3;
+    --brand-dark: #1e3a7a;
+    --bg: #f7fafd;
+    --muted: #6c757d;
+    --card-radius: 12px;
+    --success: #28a745;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #17a2b8;
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
-body{background:var(--bg);font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
-.main-content .card{border-radius:var(--card-radius);transition:transform .12s ease, box-shadow .12s ease;}
-.main-content .card:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(41,80,168,0.12);}
-.avatar-icon{display:inline-flex;align-items:center;justify-content:center;border-radius:8px;padding:12px;color:#fff}
-.avatar-blue{background:linear-gradient(45deg,#2950a8,#2da9e3)}
-.avatar-cyan{background:linear-gradient(45deg,#17a2b8,#5bd0e6)}
-.avatar-gold{background:linear-gradient(45deg,#f39c12,#f6c36d)}
-.avatar-purple{background:linear-gradient(45deg,#6f42c1,#b28bff)}
-.lead{font-size:1.05rem;font-weight:600}
-.algorithm-animation{padding:12px 0}
-.algorithm-steps{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px}
-.step{flex:1;background:#fff;border-radius:8px;padding:10px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.04);transition:transform .18s ease,background .18s ease}
-.step.active{background:linear-gradient(90deg,#e8f3ff,#f4fbff);transform:translateY(-6px)}
-.step-icon{font-size:20px;margin-bottom:6px;color:var(--brand)}
-.algorithm-progress{height:8px;background:#e9eef7;border-radius:10px;margin-top:12px;overflow:hidden}
-.algorithm-progress .progress-bar{height:100%;background:linear-gradient(90deg,var(--brand),var(--brand-light));transition:width 900ms cubic-bezier(.2,.9,.3,1)}
-.table-hover tbody tr:hover{background:rgba(41,80,168,0.03)}
-.live-progress{transition:width 700ms cubic-bezier(.2,.9,.3,1)}
-.scrollable{overflow:auto;padding-right:8px}
-.kv-skeleton{background:linear-gradient(90deg,#f3f6fb,#eef6ff);border-radius:8px;height:18px;display:inline-block;width:100%;animation:skeleton 1.2s linear infinite}
-@keyframes skeleton{0%{opacity:1}50%{opacity:.5}100%{opacity:1}}
-.badge-pill{border-radius:999px}
-.small-muted{color:var(--muted)}
-.tooltip-inner{max-width:280px}
+
+/* Body & Typography */
+body {
+    background: linear-gradient(135deg, #f7fafd 0%, #e8f2f7 100%);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #333;
+}
+
+/* Card Improvements */
+.main-content .card {
+    border-radius: var(--card-radius);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.main-content .card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--brand) 0%, var(--brand-light) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.main-content .card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.main-content .card:hover::before {
+    opacity: 1;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-header {
+    background: linear-gradient(180deg, #fff 0%, #f8f9fa 100%);
+    border-bottom: 2px solid #f0f0f0;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+}
+
+/* Avatar Icons */
+.avatar-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    padding: 14px;
+    color: #fff;
+    font-size: 24px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.avatar-icon::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(45deg);
+    transition: all 0.6s ease;
+}
+
+.avatar-icon:hover::before {
+    top: -60%;
+    right: -60%;
+}
+
+.avatar-blue {
+    background: linear-gradient(135deg, #2950a8, #2da9e3);
+    box-shadow: 0 4px 15px rgba(41, 80, 168, 0.3);
+}
+
+.avatar-cyan {
+    background: linear-gradient(135deg, #17a2b8, #5bd0e6);
+    box-shadow: 0 4px 15px rgba(23, 162, 184, 0.3);
+}
+
+.avatar-gold {
+    background: linear-gradient(135deg, #f39c12, #f6c36d);
+    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+}
+
+.avatar-purple {
+    background: linear-gradient(135deg, #6f42c1, #b28bff);
+    box-shadow: 0 4px 15px rgba(111, 66, 193, 0.3);
+}
+
+/* Typography */
+.lead {
+    font-size: 1.1rem;
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+h5, .h5 {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+/* Algorithm Animation */
+.algorithm-animation {
+    padding: 12px 0;
+}
+
+.algorithm-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px;
+}
+
+.step {
+    flex: 1;
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px 10px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.step.active {
+    background: linear-gradient(135deg, #e8f3ff, #f4fbff);
+    transform: translateY(-4px);
+    border-color: var(--brand-light);
+    box-shadow: 0 4px 12px rgba(41, 80, 168, 0.2);
+}
+
+.step-icon {
+    font-size: 22px;
+    margin-bottom: 6px;
+    color: var(--brand);
+}
+
+.step-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #555;
+}
+
+.algorithm-progress {
+    height: 10px;
+    background: #e9eef7;
+    border-radius: 12px;
+    margin-top: 12px;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.algorithm-progress .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brand), var(--brand-light));
+    transition: width 1s cubic-bezier(0.2, 0.9, 0.3, 1);
+    box-shadow: 0 2px 4px rgba(41, 80, 168, 0.3);
+}
+
+/* Table Improvements */
+.table-hover tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    background: rgba(41, 80, 168, 0.04);
+}
+
+.table th {
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+/* Progress Bar */
+.live-progress {
+    transition: width 0.8s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.progress {
+    height: 22px;
+    border-radius: 8px;
+    background: #e9ecef;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 22px;
+}
+
+/* Scrollable */
+.scrollable {
+    overflow: auto;
+    padding-right: 8px;
+}
+
+.scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.scrollable::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.scrollable::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 10px;
+}
+
+.scrollable::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Skeleton Loading */
+.kv-skeleton {
+    background: linear-gradient(90deg, #f3f6fb, #eef6ff);
+    border-radius: 8px;
+    height: 18px;
+    display: inline-block;
+    width: 100%;
+    animation: skeleton 1.5s linear infinite;
+}
+
+@keyframes skeleton {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* Badges */
+.badge-pill {
+    border-radius: 50px;
+    padding: 0.35em 0.75em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.badge {
+    font-size: 85%;
+    font-weight: 500;
+    padding: 0.4em 0.6em;
+    transition: all 0.2s ease;
+}
+
+.badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Animated Badges */
+.badge-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    animation: pulse-success 2s infinite;
+}
+
+@keyframes pulse-success {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+    }
+}
+
+/* Buttons */
+.btn {
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 0.5rem 1.2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--brand), var(--brand-light));
+    border: none;
+    box-shadow: 0 4px 12px rgba(41, 80, 168, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+    box-shadow: 0 6px 20px rgba(41, 80, 168, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #218838, #1ea77e);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #5bd0e6);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #138496, #4abfd1);
+    box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+}
+
+.btn-sm {
+    padding: 0.4rem 0.9rem;
+    font-size: 13px;
+}
+
+/* Alerts */
+.alert {
+    border-radius: 10px;
+    border: none;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Utilities */
+.small-muted {
+    color: var(--muted);
+}
+
+.tooltip-inner {
+    max-width: 280px;
+    border-radius: 6px;
+}
+
+/* Header Brand Card */
+.brand-header-card {
+    background: linear-gradient(135deg, #2950a8 0%, #2da9e3 100%);
+    border: none;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.brand-header-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.brand-header-card .card-body {
+    position: relative;
+    z-index: 1;
+}
+
+/* Timeline Styles */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    padding-bottom: 20px;
+}
+
+.timeline-item:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -30px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #e0e0e0;
+}
+
+.timeline-item-active .timeline-marker {
+    width: 14px;
+    height: 14px;
+    box-shadow: 0 0 0 3px rgba(41, 80, 168, 0.2);
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 17px;
+    bottom: -5px;
+    width: 2px;
+    background: #e0e0e0;
+}
+
+.timeline-content {
+    background: rgba(41, 80, 168, 0.03);
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid rgba(41, 80, 168, 0.2);
+}
+
+.timeline-item-active .timeline-content {
+    background: rgba(41, 80, 168, 0.08);
+    border-left-color: var(--brand);
+}
+
+/* Responsive */
+@media (max-width: 767.98px) {
+    .algorithm-steps {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .step {
+        min-width: 80px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Table Enhancements */
+.table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table thead th {
+    background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    padding: 1rem 0.75rem;
+}
+
+.table tbody tr {
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.table tbody tr:hover {
+    background: linear-gradient(90deg, rgba(41, 80, 168, 0.03) 0%, rgba(45, 169, 227, 0.03) 100%);
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.table tbody td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+    border-top: none;
+}
+
+/* KPI Cards with Trend Indicators */
+.trend-indicator {
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+}
+
+.trend-up {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+.trend-down {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+/* Animated Progress Bars */
+.progress {
+    border-radius: 50px;
+    overflow: visible;
+    background: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 50px;
+    transition: width 1s ease;
+    position: relative;
+    overflow: visible;
+}
+
+.progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Pulse Animation for Active Elements */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(41, 80, 168, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(41, 80, 168, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(41, 80, 168, 0);
+    }
+}
 </style>
 <?php
 // --- Trial Countdown Fetch ---
@@ -638,32 +1218,41 @@ if (!empty($userId)) {
         <!-- HEADER & BRAND -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card shadow-sm" style="background: <?= htmlspecialchars($brandGradient, ENT_QUOTES) ?>; color: #fff; border: none;">
-                    <div class="card-body d-flex flex-wrap align-items-center justify-content-between">
-                        <div>
-                            <div class="h5 mb-1" style="font-weight:700;letter-spacing:.2px;"><?= htmlspecialchars($appName, ENT_QUOTES) ?></div>
-                            <div class="lead"><?= htmlspecialchars($appTagline, ENT_QUOTES) ?></div>
-                            <div class="mt-2">
-                                <span class="badge badge-light" style="color:<?= htmlspecialchars($brandColor, ENT_QUOTES) ?>;">
-                                    Your data is encrypted & AI monitored
+                <div class="card brand-header-card" style="background: <?= htmlspecialchars($brandGradient, ENT_QUOTES) ?>; color: #fff; border: none; overflow: hidden;">
+                    <div class="card-body d-flex flex-wrap align-items-center justify-content-between py-4">
+                        <div class="brand-content">
+                            <div class="h4 mb-2 text-white" style="font-weight: 700; letter-spacing: 0.3px;">
+                                <i class="anticon anticon-safety-certificate mr-2"></i>
+                                <?= htmlspecialchars($appName, ENT_QUOTES) ?>
+                            </div>
+                            <div class="lead mb-3" style="color: rgba(255,255,255,0.95); font-size: 1.05rem;">
+                                <?= htmlspecialchars($appTagline, ENT_QUOTES) ?>
+                            </div>
+                            <div class="mt-3 d-flex flex-wrap">
+                                <span class="badge badge-light px-3 py-2 mr-2 mb-2" style="color: var(--brand); background: rgba(255,255,255,0.95); font-weight: 500;">
+                                    <i class="anticon anticon-lock mr-1"></i> Encrypted & Secure
                                 </span>
-                                <span class="ml-2 mt-2 badge badge-success" id="ai-status-badge" role="status" aria-live="polite">
-                                    AI Status: <span id="aiStatusText"><?= htmlspecialchars($aiStatus, ENT_QUOTES) ?></span>
+                                <span class="badge badge-success px-3 py-2 mr-2 mb-2" id="ai-status-badge" role="status" aria-live="polite" style="font-weight: 500;">
+                                    <i class="anticon anticon-check-circle mr-1"></i> AI Status: <span id="aiStatusText"><?= htmlspecialchars($aiStatus, ENT_QUOTES) ?></span>
                                 </span>
-                                <span class="ml-2 mt-2 badge badge-info">
-                                    Last scan: <span id="lastScanText"><?= htmlspecialchars($lastAIScan, ENT_QUOTES) ?></span>
+                                <span class="badge badge-info px-3 py-2 mb-2" style="font-weight: 500;">
+                                    <i class="anticon anticon-clock-circle mr-1"></i> Last scan: <span id="lastScanText"><?= htmlspecialchars($lastAIScan, ENT_QUOTES) ?></span>
                                 </span>
                             </div>
                         </div>
-                        <div class="text-right mt-2">
-                            <div class="mb-2">
-                                <span class="badge badge-pill badge-primary" style="font-size:1.05em;">
-                                    Welcome, <?= htmlspecialchars($currentUser['first_name'] ?? $currentUserLogin, ENT_QUOTES) ?>!
-                                </span>
+                        <div class="text-right mt-3 mt-md-0">
+                            <div class="mb-3">
+                                <div class="badge badge-pill px-4 py-2" style="font-size: 1.05em; background: rgba(255,255,255,0.2); color: #fff; font-weight: 500;">
+                                    <i class="anticon anticon-user mr-1"></i> Welcome, <?= htmlspecialchars($currentUser['first_name'] ?? $currentUserLogin, ENT_QUOTES) ?>!
+                                </div>
                             </div>
-                            <div class="mt-2">
-                                <span class="font-weight-bold" style="font-size:0.95em;color:rgba(255,255,255,.9)">Balance:</span>
-                                <span class="h3 font-weight-bold text-light" id="balanceCounter" data-value="<?= number_format($currentUser['balance'] ?? 0,2, '.', '') ?>">$<?= number_format($currentUser['balance'] ?? 0,2) ?></span>
+                            <div class="mt-2 p-3 rounded" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
+                                <div class="text-white mb-1" style="font-size: 0.9em; opacity: 0.9; font-weight: 500;">
+                                    <i class="anticon anticon-wallet mr-1"></i> Account Balance
+                                </div>
+                                <div class="h2 font-weight-bold text-white mb-0" id="balanceCounter" data-value="<?= number_format($currentUser['balance'] ?? 0,2, '.', '') ?>">
+                                    $<?= number_format($currentUser['balance'] ?? 0,2) ?>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -692,6 +1281,9 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
     $isActive = ($userPackage['status'] === 'active');
     $isPending = ($userPackage['status'] === 'pending');
     $isExpired = (strtotime($userPackage['end_date']) < time());
+    
+    // Check if user has valid package for withdrawals (paid, active, not expired)
+    $hasActivePackageForWithdrawal = $isActive && !$isTrial && !$isExpired;
     ?>
 
     <?php if ($isTrial && $isActive && !$isExpired): ?>
@@ -754,6 +1346,7 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
         </div>
     <?php endif; ?>
 <?php else: ?>
+    <?php $hasActivePackageForWithdrawal = false; ?>
     <!-- No package yet -->
     <div class="alert alert-info text-center shadow-sm mb-4">
         <i class="anticon anticon-info-circle"></i>
@@ -765,24 +1358,27 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
 
         <!-- AI INSIGHT CARD -->
         <div class="row mb-4">
-            <div class="col-md-6 col-lg-4">
-                <div class="card shadow-sm border-0" aria-labelledby="aiInsightsHeading">
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card shadow-sm border-0 h-100" aria-labelledby="aiInsightsHeading">
                     <div class="card-body">
-                        <h5 id="aiInsightsHeading" class="mb-2">
-                            <i class="anticon anticon-robot text-primary"></i> Fundtracer AI Insights
+                        <h5 id="aiInsightsHeading" class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                            <i class="anticon anticon-robot text-primary mr-2"></i> AI Insights
                         </h5>
-                        <ul class="list-unstyled mb-0">
-                            <li><i class="anticon anticon-check-circle text-success"></i>
-                                Continuous monitoring for suspicious activity.
+                        <ul class="list-unstyled mb-0" style="line-height: 2;">
+                            <li class="d-flex align-items-start mb-2">
+                                <i class="anticon anticon-check-circle text-success mr-2 mt-1"></i>
+                                <span style="font-size: 14px;">Continuous monitoring for suspicious activity</span>
                             </li>
-                            <li class="mt-1"><i class="anticon anticon-info-circle text-info"></i>
-                                Next scheduled scan: <b id="nextScan"><?= date('M d, Y H:i', strtotime('+1 hour')) ?></b>
+                            <li class="d-flex align-items-start mb-2">
+                                <i class="anticon anticon-clock-circle text-info mr-2 mt-1"></i>
+                                <span style="font-size: 14px;">Next scan: <strong id="nextScan"><?= date('M d, H:i', strtotime('+1 hour')) ?></strong></span>
                             </li>
-                            <li class="mt-1"><i class="anticon anticon-exclamation-circle text-warning"></i>
+                            <li class="d-flex align-items-start">
+                                <i class="anticon anticon-<?= $passwordChangeRequired ? 'exclamation-circle text-warning' : 'shield text-success' ?> mr-2 mt-1"></i>
                                 <?php if ($passwordChangeRequired): ?>
-                                    <span class="text-danger">Action required: Please change your password for enhanced security.</span>
+                                    <span class="text-danger" style="font-size: 14px; font-weight: 500;">Action required: Change password</span>
                                 <?php else: ?>
-                                    <span class="text-muted">No immediate actions required.</span>
+                                    <span class="text-success" style="font-size: 14px;">Security status: Excellent</span>
                                 <?php endif; ?>
                             </li>
                         </ul>
@@ -791,46 +1387,74 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
             </div>
 
             <!-- KYC/AML -->
-            <div class="col-md-6 col-lg-4">
-                <div class="card shadow-sm border-0" aria-labelledby="complianceHeading">
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card shadow-sm border-0 h-100" aria-labelledby="complianceHeading">
                     <div class="card-body">
-                        <h5 id="complianceHeading" class="mb-2">
-                            <i class="anticon anticon-safety-certificate text-success"></i> Compliance Status
+                        <h5 id="complianceHeading" class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                            <i class="anticon anticon-safety-certificate text-success mr-2"></i> Compliance
                         </h5>
-                        <p class="mb-1">
-                            KYC Status:
+                        <div class="mb-3">
+                            <label class="text-muted mb-1" style="font-size: 13px;">KYC Verification Status</label>
+                            <div>
                             <?php
                             $kycStatus = $kyc_status;
                             $kycBadge = "secondary";
+                            $kycIcon = "question-circle";
                             if ($kycStatus === 'approved') {
                                 $kycBadge = "success";
                                 $kycStatus = "verified";
+                                $kycIcon = "check-circle";
                             } elseif ($kycStatus === 'rejected') {
                                 $kycBadge = "danger";
+                                $kycIcon = "close-circle";
+                            } elseif ($kycStatus === 'pending') {
+                                $kycBadge = "warning";
+                                $kycIcon = "clock-circle";
                             }
                             ?>
-                            <span class="badge badge-<?= htmlspecialchars($kycBadge, ENT_QUOTES) ?>"><?= htmlspecialchars(ucfirst($kycStatus), ENT_QUOTES) ?></span>
+                                <span class="badge badge-<?= htmlspecialchars($kycBadge, ENT_QUOTES) ?> px-3 py-2">
+                                    <i class="anticon anticon-<?= htmlspecialchars($kycIcon, ENT_QUOTES) ?> mr-1"></i>
+                                    <?= htmlspecialchars(ucfirst($kycStatus), ENT_QUOTES) ?>
+                                </span>
+                            </div>
+                        </div>
+                        <p class="text-muted mb-3" style="font-size: 13px; line-height: 1.6;">
+                            KYC verification is required for withdrawals and advanced recovery tools to ensure secure operations.
                         </p>
-                        <p class="mb-0">To ensure secure recovery procedures, withdrawals and advanced tools require KYC verification.</p>
                         <?php if ($kycStatus == "pending"): ?>
-                            <a href="kyc.php" class="btn btn-outline-primary btn-sm mt-2" role="button" aria-pressed="false">Verify Now</a>
+                            <a href="kyc.php" class="btn btn-primary btn-sm btn-block" role="button">
+                                <i class="anticon anticon-safety-certificate mr-1"></i> Complete Verification
+                            </a>
                         <?php endif; ?>
                     </div>
                 </div>
             </div>
 
             <!-- Security -->
-            <div class="col-md-12 col-lg-4">
-                <div class="card shadow-sm border-0" aria-labelledby="securityHeading">
+            <div class="col-md-12 col-lg-4 mb-3">
+                <div class="card shadow-sm border-0 h-100" aria-labelledby="securityHeading">
                     <div class="card-body">
-                        <h5 id="securityHeading" class="mb-2">
-                            <i class="anticon anticon-lock text-primary"></i> Account Security
+                        <h5 id="securityHeading" class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                            <i class="anticon anticon-lock text-primary mr-2"></i> Security
                         </h5>
-                        <p class="mb-1">
-                            Last login: <b><?= htmlspecialchars($currentUser['last_login'] ?? $currentDateTimeFormatted, ENT_QUOTES) ?></b>
-                        </p>
-                        <p class="mb-1">Location: <span id="user-location">Detecting...</span></p>
-                        <p class="mb-0">If this wasn't you, <a href="support.php">contact support</a> immediately.</p>
+                        <div class="mb-3">
+                            <label class="text-muted mb-1" style="font-size: 13px;">Last Login</label>
+                            <p class="mb-0 font-weight-500" style="font-size: 14px;">
+                                <i class="anticon anticon-calendar mr-1"></i>
+                                <?= htmlspecialchars($currentUser['last_login'] ?? $currentDateTimeFormatted, ENT_QUOTES) ?>
+                            </p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="text-muted mb-1" style="font-size: 13px;">Location</label>
+                            <p class="mb-0 font-weight-500" style="font-size: 14px;">
+                                <i class="anticon anticon-environment mr-1"></i>
+                                <span id="user-location">Detecting...</span>
+                            </p>
+                        </div>
+                        <div class="alert alert-warning mb-0 py-2 px-3" style="font-size: 13px; border-radius: 8px;">
+                            <i class="anticon anticon-info-circle mr-1"></i>
+                            Suspicious activity? <a href="support.php" class="alert-link font-weight-600">Contact support</a>
+                        </div>
                         <script>
                         (function(){
                             fetch('https://ipapi.co/json/').then(function(r){ return r.json() }).then(function(data){
@@ -851,21 +1475,23 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
         <!-- Quick actions -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="card-title mb-0">Quick Actions</h5>
-                            <p class="card-text small text-muted mb-0">Perform common transactions quickly</p>
+                <div class="card shadow-sm border-0">
+                    <div class="card-body d-flex flex-wrap justify-content-between align-items-center py-3">
+                        <div class="mb-2 mb-md-0">
+                            <h5 class="card-title mb-1" style="color: #2c3e50; font-weight: 600;">
+                                <i class="anticon anticon-thunderbolt text-warning mr-2"></i>Quick Actions
+                            </h5>
+                            <p class="card-text small text-muted mb-0" style="font-size: 13px;">Perform common transactions quickly and securely</p>
                         </div>
-                        <div class="btn-group" role="group" aria-label="Quick actions">
-                            <button class="btn btn-primary" data-toggle="modal" data-target="#newDepositModal" data-toggle="tooltip" title="Add funds">
-                                <i class="anticon anticon-plus"></i> New Deposit
+                        <div class="d-flex flex-wrap" role="group" aria-label="Quick actions">
+                            <button class="btn btn-primary mr-2 mb-2" data-toggle="modal" data-target="#newDepositModal" title="Add funds to your account">
+                                <i class="anticon anticon-plus-circle mr-1"></i> New Deposit
                             </button>
-                            <button class="btn btn-success ml-2" data-toggle="modal" data-target="#newWithdrawalModal" data-toggle="tooltip" title="Request withdrawal">
-                                <i class="anticon anticon-minus"></i> New Withdrawal
+                            <button class="btn btn-success mr-2 mb-2" onclick="checkWithdrawalEligibility(event)" title="Request withdrawal">
+                                <i class="anticon anticon-download mr-1"></i> New Withdrawal
                             </button>
-                            <a href="transactions.php" class="btn btn-info ml-2" title="View transactions">
-                                <i class="anticon anticon-history"></i> Transactions
+                            <a href="transactions.php" class="btn btn-info mb-2" title="View all transactions">
+                                <i class="anticon anticon-history mr-1"></i> Transactions
                             </a>
                         </div>
                     </div>
@@ -874,19 +1500,23 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
         </div>
 
         <!-- KPI Row -->
-        <div class="row">
-            <div class="col-md-6 col-lg-3">
-                <div class="card">
+        <div class="row mb-3">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card border-0 h-100">
                     <div class="card-body">
-                        <div class="media align-items-center">
-                            <div class="avatar avatar-icon avatar-lg avatar-blue" aria-hidden="true">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-icon avatar-lg avatar-blue mr-3" aria-hidden="true">
                                 <i class="anticon anticon-file-text"></i>
                             </div>
-                            <div class="m-l-15">
-                                <h2 class="m-b-0 count" data-value="<?= htmlspecialchars($stats['total_cases'], ENT_QUOTES) ?>"><?= htmlspecialchars($stats['total_cases'], ENT_QUOTES) ?></h2>
-                                <p class="m-b-0 text-muted">Total Cases</p>
+                            <div class="flex-grow-1">
+                                <h2 class="mb-1 font-weight-bold count" data-value="<?= htmlspecialchars($stats['total_cases'], ENT_QUOTES) ?>" style="color: #2c3e50;">
+                                    <?= htmlspecialchars($stats['total_cases'], ENT_QUOTES) ?>
+                                </h2>
+                                <p class="mb-1 text-muted font-weight-500" style="font-size: 14px;">Total Cases</p>
                                 <?php if ($stats['last_case_date']): ?>
-                                <small class="text-muted">Last case: <?= htmlspecialchars(date('M d, Y', strtotime($stats['last_case_date'])), ENT_QUOTES) ?></small>
+                                <small class="text-muted" style="font-size: 12px;">
+                                    <i class="anticon anticon-calendar mr-1"></i><?= htmlspecialchars(date('M d, Y', strtotime($stats['last_case_date'])), ENT_QUOTES) ?>
+                                </small>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -894,17 +1524,20 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3">
-                <div class="card">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card border-0 h-100">
                     <div class="card-body">
-                        <div class="media align-items-center">
-                            <div class="avatar avatar-icon avatar-lg avatar-cyan" aria-hidden="true">
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-icon avatar-lg avatar-cyan mr-3" aria-hidden="true">
                                 <i class="anticon anticon-line-chart"></i>
                             </div>
-                            <div class="m-l-15">
-                                <h2 class="m-b-0 count" data-value="<?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>"><?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>%</h2>
-                                <p class="m-b-0 text-muted">Recovery Rate</p>
-                                <small class="text-<?= $recoveryPercentage >= 50 ? 'success' : 'warning' ?>">
+                            <div class="flex-grow-1">
+                                <h2 class="mb-1 font-weight-bold count percent" data-value="<?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>" style="color: #2c3e50;">
+                                    <?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>%
+                                </h2>
+                                <p class="mb-1 text-muted font-weight-500" style="font-size: 14px;">Recovery Rate</p>
+                                <small class="badge badge-<?= $recoveryPercentage >= 50 ? 'success' : 'warning' ?>" style="font-size: 11px;">
+                                    <i class="anticon anticon-<?= $recoveryPercentage >= 50 ? 'arrow-up' : 'arrow-down' ?> mr-1"></i>
                                     <?= $recoveryPercentage >= 50 ? 'Above average' : 'Below average' ?>
                                 </small>
                             </div>
@@ -913,18 +1546,22 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3">
-                <div class="card">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card border-0 h-100">
                     <div class="card-body">
-                        <div class="media align-items-center">
-                            <div class="avatar avatar-icon avatar-lg avatar-gold" aria-hidden="true">
-                                <i class="anticon anticon-dollar"></i>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-icon avatar-lg avatar-gold mr-3" aria-hidden="true">
+                                <i class="anticon anticon-exclamation-circle"></i>
                             </div>
-                            <div class="m-l-15">
-                                <h2 class="m-b-0">$<?= number_format($stats['total_reported'], 2) ?></h2>
-                                <p class="m-b-0 text-muted">Reported Loss</p>
+                            <div class="flex-grow-1">
+                                <h2 class="mb-1 font-weight-bold count money" data-value="<?= htmlspecialchars($stats['total_reported'], ENT_QUOTES) ?>" style="color: #2c3e50;">
+                                    $<?= number_format($stats['total_reported'], 2) ?>
+                                </h2>
+                                <p class="mb-1 text-muted font-weight-500" style="font-size: 14px;">Reported Loss</p>
                                 <?php if ($outstandingAmount > 0): ?>
-                                <small class="text-danger">$<?= number_format($outstandingAmount, 2) ?> outstanding</small>
+                                <small class="badge badge-danger" style="font-size: 11px;">
+                                    <i class="anticon anticon-warning mr-1"></i>$<?= number_format($outstandingAmount, 2) ?> outstanding
+                                </small>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -932,18 +1569,22 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
                 </div>
             </div>
 
-            <div class="col-md-6 col-lg-3">
-                <div class="card">
+            <div class="col-md-6 col-lg-3 mb-3">
+                <div class="card border-0 h-100">
                     <div class="card-body">
-                        <div class="media align-items-center">
-                            <div class="avatar avatar-icon avatar-lg avatar-purple" aria-hidden="true">
-                                <i class="anticon anticon-dollar"></i>
+                        <div class="d-flex align-items-center">
+                            <div class="avatar avatar-icon avatar-lg avatar-purple mr-3" aria-hidden="true">
+                                <i class="anticon anticon-check-circle"></i>
                             </div>
-                            <div class="m-l-15">
-                                <h2 class="m-b-0">$<?= number_format($stats['total_recovered'], 2) ?></h2>
-                                <p class="m-b-0 text-muted">Amount Recovered</p>
+                            <div class="flex-grow-1">
+                                <h2 class="mb-1 font-weight-bold count money" data-value="<?= htmlspecialchars($stats['total_recovered'], ENT_QUOTES) ?>" style="color: #2c3e50;">
+                                    $<?= number_format($stats['total_recovered'], 2) ?>
+                                </h2>
+                                <p class="mb-1 text-muted font-weight-500" style="font-size: 14px;">Amount Recovered</p>
                                 <?php if ($stats['total_recovered'] > 0): ?>
-                                <small class="text-success"><?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>% of total</small>
+                                <small class="badge badge-success pulse" style="font-size: 11px;">
+                                    <i class="anticon anticon-rise mr-1"></i><?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>% recovered
+                                </small>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -955,18 +1596,21 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
         <!-- Recovery / Workflow -->
         <div class="row mt-3">
             <div class="col-md-12">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Recovery Status</h5>
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                            <h5 class="mb-2 mb-md-0" style="color: #2c3e50; font-weight: 600;">
+                                <i class="anticon anticon-sync mr-2" style="color: var(--brand);"></i>Recovery Status
+                            </h5>
                             <div>
-                                <span class="badge badge-pill badge-<?= $recoveryPercentage > 70 ? 'success' : ($recoveryPercentage > 30 ? 'warning' : 'danger') ?>">
-                                    <?= $recoveryPercentage > 70 ? 'Excellent' : ($recoveryPercentage > 30 ? 'Good' : 'Needs Attention') ?>
+                                <span class="badge badge-pill px-3 py-2 badge-<?= $recoveryPercentage > 70 ? 'success' : ($recoveryPercentage > 30 ? 'warning' : 'danger') ?>" style="font-size: 13px;">
+                                    <i class="anticon anticon-<?= $recoveryPercentage > 70 ? 'check-circle' : ($recoveryPercentage > 30 ? 'clock-circle' : 'exclamation-circle') ?> mr-1"></i>
+                                    <?= $recoveryPercentage > 70 ? 'Excellent Progress' : ($recoveryPercentage > 30 ? 'Good Progress' : 'Needs Attention') ?>
                                 </span>
                             </div>
                         </div>
 
-                        <div class="m-t-20">
+                        <div class="mt-4">
                             <div class="algorithm-animation">
                                 <div class="algorithm-steps" aria-hidden="true">
                                     <div class="step <?= $recoveryPercentage > 0 ? 'active' : '' ?>">
@@ -1005,8 +1649,8 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
                                 </div>
                             </div>
 
-                            <div class="m-t-20 text-center">
-                                <div class="d-flex justify-content-between align-items-center">
+                            <div class="mt-4">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center">
                                     <div class="text-left">
                                         <p class="m-b-5"><strong>Total Cases:</strong> <?= htmlspecialchars($stats['total_cases'], ENT_QUOTES) ?></p>
                                         <p class="m-b-5"><strong>Active Cases:</strong> <?= array_sum($statusCounts) ?></p>
@@ -1030,22 +1674,31 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
         <div class="row mt-3">
             <div class="col-md-12 col-lg-8">
                 <!-- Recent Cases -->
-                <div class="card shadow-sm">
+                <div class="card shadow-sm border-0">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0">Recent Cases</h5>
-                            <div>
-                                <a href="cases.php" class="btn btn-sm btn-default">View All</a>
-                                <a href="new-case.php" class="btn btn-sm btn-primary">New Case</a>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                            <h5 class="mb-2 mb-md-0" style="color: #2c3e50; font-weight: 600;">
+                                <i class="anticon anticon-folder-open mr-2" style="color: var(--brand);"></i>Recent Cases
+                            </h5>
+                            <div class="d-flex">
+                                <a href="cases.php" class="btn btn-sm btn-outline-primary mr-2">
+                                    <i class="anticon anticon-eye mr-1"></i>View All
+                                </a>
+                                <a href="new-case.php" class="btn btn-sm btn-primary">
+                                    <i class="anticon anticon-plus-circle mr-1"></i>New Case
+                                </a>
                             </div>
                         </div>
                         
                         <?php if (empty($cases)): ?>
-                            <div class="alert alert-info m-t-20">No cases found. <a href="new-case.php">File your first case</a></div>
+                            <div class="alert alert-info mt-3 d-flex align-items-center" style="border-radius: 10px;">
+                                <i class="anticon anticon-info-circle mr-2" style="font-size: 20px;"></i>
+                                <div>No cases found. <a href="new-case.php" class="alert-link font-weight-600">File your first case</a></div>
+                            </div>
                         <?php else: ?>
-                            <div class="m-t-10">
+                            <div class="mt-3">
                                 <div class="table-responsive">
-                                    <table class="table table-hover">
+                                    <table class="table table-hover mb-0">
                                         <thead>
                                             <tr>
                                                 <th>Case #</th>
@@ -1053,7 +1706,6 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
                                                 <th>Reported</th>
                                                 <th>Recovered</th>
                                                 <th>Status</th>
-                                                <th>Progress</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
@@ -1093,28 +1745,36 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
                                                     </div>
                                                 </td>
                                                 <td>$<?= number_format($reported, 2) ?></td>
-                                                <td>$<?= number_format($recovered, 2) ?></td>
+                                                <td style="min-width:180px">
+                                                    <div>
+                                                        <strong style="font-size:14px;color:#2c3e50;">$<?= number_format($recovered, 2) ?></strong>
+                                                    </div>
+                                                    <div class="mt-1">
+                                                        <div class="progress" style="height:6px;border-radius:3px;">
+                                                            <div class="progress-bar" 
+                                                                 style="width:<?= htmlspecialchars($progress, ENT_QUOTES) ?>%;background:linear-gradient(90deg,#2950a8,#2da9e3);"
+                                                                 role="progressbar" 
+                                                                 aria-valuenow="<?= htmlspecialchars($progress, ENT_QUOTES) ?>" 
+                                                                 aria-valuemin="0" 
+                                                                 aria-valuemax="100">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mt-1">
+                                                        <small class="text-muted" style="font-size:11px;"><?= htmlspecialchars($progress, ENT_QUOTES) ?>% of $<?= number_format($reported, 2) ?></small>
+                                                    </div>
+                                                </td>
                                                 <td>
                                                     <span class="badge badge-pill badge-<?= htmlspecialchars($statusClass, ENT_QUOTES) ?>">
                                                         <?= htmlspecialchars(ucwords(str_replace('_', ' ', $status)), ENT_QUOTES) ?>
                                                     </span>
                                                 </td>
-                                                <td style="min-width:140px">
-                                                    <div class="progress progress-sm position-relative" style="height:20px;">
-                                                        <div class="progress-bar bg-<?= htmlspecialchars($statusClass, ENT_QUOTES) ?> live-progress"
-                                                             data-final="<?= htmlspecialchars($progress, ENT_QUOTES) ?>"
-                                                             style="width: 0%;"
-                                                             aria-valuenow="0"
-                                                             aria-valuemin="0"
-                                                             aria-valuemax="100">
-                                                        </div>
-                                                        <span class="position-absolute w-100 text-center small" style="top:0;left:0;line-height:20px;" data-progress-label><?= htmlspecialchars($progress, ENT_QUOTES) ?>%</span>
-                                                    </div>
-                                                </td>
                                                 <td>
-                                                    <a href="case-details.php?id=<?= htmlspecialchars($case['id'], ENT_QUOTES) ?>" class="btn btn-sm btn-default" title="View case">
+                                                    <button class="btn btn-sm btn-outline-primary view-case-btn" 
+                                                            data-case-id="<?= htmlspecialchars($case['id'], ENT_QUOTES) ?>" 
+                                                            title="View case details">
                                                         <i class="anticon anticon-eye"></i> View
-                                                    </a>
+                                                    </button>
                                                 </td>
                                             </tr>
                                             <?php endforeach; ?>
@@ -1127,15 +1787,22 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
                 </div>
 
                 <!-- Active Recovery Operations -->
-                <div class="card mt-3 shadow-sm">
+                <div class="card mt-3 shadow-sm border-0">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Active Recovery Operations</h5>
-                            <small class="text-muted"><?= count($ongoingRecoveries) ?> active cases</small>
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                            <h5 class="mb-2 mb-md-0" style="color: #2c3e50; font-weight: 600;">
+                                <i class="anticon anticon-sync mr-2" style="color: var(--brand);"></i>Active Recovery Operations
+                            </h5>
+                            <span class="badge badge-info px-3 py-2" style="font-size: 13px;">
+                                <i class="anticon anticon-file-text mr-1"></i><?= count($ongoingRecoveries) ?> active cases
+                            </span>
                         </div>
-                        <div class="m-t-20">
+                        <div class="mt-3">
                             <?php if (empty($ongoingRecoveries)): ?>
-                                <div class="alert alert-info">No active recovery operations</div>
+                                <div class="alert alert-info d-flex align-items-center" style="border-radius: 10px;">
+                                    <i class="anticon anticon-info-circle mr-2" style="font-size: 20px;"></i>
+                                    <span>No active recovery operations</span>
+                                </div>
                             <?php else: ?>
                                 <?php foreach ($ongoingRecoveries as $recovery): 
                                     $reported = (float)($recovery['reported_amount'] ?? 0);
@@ -1161,9 +1828,11 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
                                 <div class="m-b-25">
                                     <div class="d-flex justify-content-between m-b-5">
                                         <div>
-                                            <a href="case-details.php?id=<?= htmlspecialchars($recovery['id'], ENT_QUOTES) ?>">
+                                            <button class="btn btn-link p-0 view-case-btn" 
+                                                    data-case-id="<?= htmlspecialchars($recovery['id'], ENT_QUOTES) ?>" 
+                                                    style="color: var(--brand); text-decoration: none; font-weight: 600;">
                                                 <?= htmlspecialchars($recovery['case_number'], ENT_QUOTES) ?>
-                                            </a>
+                                            </button>
                                         </div>
                                         <div class="text-right">
                                             <span><?= htmlspecialchars($progress, ENT_QUOTES) ?>%</span>
@@ -1203,37 +1872,56 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
 
             <!-- Right column -->
             <div class="col-md-12 col-lg-4">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm border-0">
                     <div class="card-body">
-                        <h5>Account Security</h5>
-                        <ul class="list-group list-group-flush mb-2" role="list">
+                        <h5 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                            <i class="anticon anticon-safety mr-2" style="color: var(--brand);"></i>Login Activity
+                        </h5>
+                        <ul class="list-group list-group-flush mb-2" role="list" style="margin-left: -1.5rem; margin-right: -1.5rem;">
                             <?php if (empty($loginLogs)): ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span class="text-success">Current session</span>
-                                    <small><?= date('Y-m-d H:i') ?></small>
+                                <li class="list-group-item d-flex justify-content-between align-items-center border-0 py-2">
+                                    <span class="d-flex align-items-center">
+                                        <i class="anticon anticon-check-circle text-success mr-2"></i>
+                                        <span class="text-success font-weight-500">Current session</span>
+                                    </span>
+                                    <small class="text-muted"><?= date('M d, H:i') ?></small>
                                 </li>
                             <?php else: ?>
                                 <?php foreach($loginLogs as $log): ?>
-                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                        <span>
-                                            <?= $log['success'] ? "<span class='text-success'>Success</span>" : "<span class='text-danger'>Failed</span>" ?>
-                                            from <code><?= htmlspecialchars($log['ip_address'], ENT_QUOTES) ?></code>
-                                        </span>
-                                        <small><?= htmlspecialchars(date('Y-m-d H:i', strtotime($log['attempted_at'])), ENT_QUOTES) ?></small>
+                                    <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-2">
+                                        <div class="d-flex align-items-start">
+                                            <i class="anticon anticon-<?= $log['success'] ? 'check-circle text-success' : 'close-circle text-danger' ?> mr-2 mt-1"></i>
+                                            <div>
+                                                <div class="font-weight-500 <?= $log['success'] ? 'text-success' : 'text-danger' ?>" style="font-size: 14px;">
+                                                    <?= $log['success'] ? 'Successful' : 'Failed' ?>
+                                                </div>
+                                                <code class="small" style="font-size: 12px; background: #f5f5f5; padding: 2px 6px; border-radius: 4px;"><?= htmlspecialchars($log['ip_address'], ENT_QUOTES) ?></code>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted" style="font-size: 12px;"><?= htmlspecialchars(date('M d, H:i', strtotime($log['attempted_at'])), ENT_QUOTES) ?></small>
                                     </li>
                                 <?php endforeach; ?>
                             <?php endif; ?>
                         </ul>
-                        <small class="text-muted">Recent login attempts. <a href="security-logs.php">View all</a></small>
+                        <div class="text-center mt-2">
+                            <a href="security-logs.php" class="btn btn-sm btn-outline-secondary" style="font-size: 13px;">
+                                <i class="anticon anticon-eye mr-1"></i>View All Activity
+                            </a>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card shadow-sm mt-3">
+                <div class="card shadow-sm border-0 mt-3">
                     <div class="card-body">
-                        <h5 class="m-b-0">Recent Transactions</h5>
-                        <div class="m-v-30" style="height: 300px">
+                        <h5 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                            <i class="anticon anticon-transaction mr-2" style="color: var(--brand);"></i>Recent Transactions
+                        </h5>
+                        <div style="min-height: 300px">
                             <?php if (empty($transactions)): ?>
-                                <div class="alert alert-info m-t-20">No transactions yet</div>
+                                <div class="alert alert-info d-flex align-items-center mt-3" style="border-radius: 10px;">
+                                    <i class="anticon anticon-info-circle mr-2" style="font-size: 20px;"></i>
+                                    <span>No transactions yet</span>
+                                </div>
                             <?php else: ?>
                                 <div class="scrollable" style="height: 280px">
                                     <?php foreach ($transactions as $transaction): ?>
@@ -1326,18 +2014,21 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
         <!-- Recovery Progress -->
         <div class="row mt-3">
             <div class="col-md-12">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm border-0">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
-                            <h5>Recovery Progress</h5>
+                            <h5 style="color: #2c3e50; font-weight: 600;">
+                                <i class="anticon anticon-line-chart mr-2" style="color: var(--brand);"></i>Recovery Progress
+                            </h5>
                             <div>
-                                <span class="text-<?= $recoveryPercentage >= 50 ? 'success' : 'warning' ?>">
+                                <span class="badge badge-<?= $recoveryPercentage >= 50 ? 'success' : 'warning' ?> px-3 py-2">
+                                    <i class="anticon anticon-<?= $recoveryPercentage >= 50 ? 'check-circle' : 'clock-circle' ?> mr-1"></i>
                                     <?= $recoveryPercentage >= 50 ? 'Good progress' : 'Needs attention' ?>
                                 </span>
                             </div>
                         </div>
-                        <div class="m-t-30">
-                            <div class="d-flex justify-content-between align-items-center m-b-20">
+                        <div class="mt-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
                                 <span class="font-weight-semibold">
                                     Overall Recovery: <span class="count" data-value="<?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>"><?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>%</span>
                                     (<?= htmlspecialchars($stats['total_cases'], ENT_QUOTES) ?> cases)
@@ -1346,10 +2037,10 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
                                     $<?= number_format($stats['total_recovered'], 2) ?> of $<?= number_format($stats['total_reported'], 2) ?>
                                 </span>
                             </div>
-                            <div class="progress progress-sm" aria-hidden="false" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>">
-                                <div class="progress-bar bg-success" style="width: <?= $recoveryPercentage ?>%"></div>
+                            <div class="progress" style="height: 12px; border-radius: 10px;" aria-hidden="false" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>">
+                                <div class="progress-bar bg-success" style="width: <?= $recoveryPercentage ?>%; background: linear-gradient(90deg, #28a745, #20c997);"></div>
                             </div>
-                            <div class="m-t-10 d-flex justify-content-between">
+                            <div class="mt-2 d-flex justify-content-between">
                                 <small class="text-muted">0%</small>
                                 <small class="text-muted">100%</small>
                             </div>
@@ -1359,6 +2050,35 @@ $userPackage = $pkgStmt->fetch(PDO::FETCH_ASSOC);
             </div>
         </div>
 
+    </div>
+</div>
+
+<!-- Professional Case Details Modal -->
+<div class="modal fade" id="caseDetailsModal" tabindex="-1" role="dialog" aria-labelledby="caseDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, #2950a8 0%, #2da9e3 100%); color: #fff; border-radius: 12px 12px 0 0;">
+                <h5 class="modal-title font-weight-bold" id="caseDetailsModalLabel">
+                    <i class="anticon anticon-file-text mr-2"></i>Case Details
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4" id="caseModalBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading case details...</p>
+                </div>
+            </div>
+            <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 12px 12px;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="anticon anticon-close mr-1"></i>Close
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -1952,7 +2672,372 @@ function resetOtpFields() {
     // Print receipt
     $('#printReceiptBtn').click(function(){ window.print(); });
 
+    // =====================================================
+    // 📋 VIEW CASE DETAILS MODAL
+    // =====================================================
+    $('.view-case-btn').click(function() {
+        const caseId = $(this).data('case-id');
+        $('#caseDetailsModal').modal('show');
+        
+        // Reset modal body
+        $('#caseModalBody').html(`
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Loading case details...</p>
+            </div>
+        `);
+        
+        // Fetch case details via AJAX
+        $.ajax({
+            url: 'ajax/get-case.php',
+            method: 'GET',
+            data: { id: caseId },
+            success: function(response) {
+                try {
+                    const data = typeof response === 'string' ? JSON.parse(response) : response;
+                    if (data.success && data.case) {
+                        const c = data.case;
+                        const progress = c.reported_amount > 0 ? Math.round((c.recovered_amount / c.reported_amount) * 100) : 0;
+                        
+                        const statusClass = {
+                            'open': 'warning',
+                            'documents_required': 'secondary',
+                            'under_review': 'info',
+                            'refund_approved': 'success',
+                            'refund_rejected': 'danger',
+                            'closed': 'dark'
+                        }[c.status] || 'light';
+                        
+                        const html = `
+                            <div class="case-details-content">
+                                <!-- Header Info -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="card border-0" style="background: rgba(41, 80, 168, 0.05);">
+                                            <div class="card-body">
+                                                <h6 class="text-muted mb-2" style="font-size: 12px; text-transform: uppercase;">Case Number</h6>
+                                                <h4 class="mb-0 font-weight-bold" style="color: var(--brand);">${c.case_number || 'N/A'}</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-0" style="background: rgba(41, 80, 168, 0.05);">
+                                            <div class="card-body">
+                                                <h6 class="text-muted mb-2" style="font-size: 12px; text-transform: uppercase;">Status</h6>
+                                                <span class="badge badge-${statusClass} px-3 py-2" style="font-size: 14px;">
+                                                    <i class="anticon anticon-flag mr-1"></i>${c.status ? c.status.replace(/_/g, ' ').toUpperCase() : 'N/A'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Financial Overview -->
+                                <div class="card border-0 mb-4" style="background: linear-gradient(135deg, rgba(41, 80, 168, 0.05), rgba(45, 169, 227, 0.05));">
+                                    <div class="card-body">
+                                        <h5 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                                            <i class="anticon anticon-dollar mr-2" style="color: var(--brand);"></i>Financial Overview
+                                        </h5>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <div class="text-muted mb-1" style="font-size: 13px;">Reported Amount</div>
+                                                <h4 class="mb-0 font-weight-bold text-danger">$${parseFloat(c.reported_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h4>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <div class="text-muted mb-1" style="font-size: 13px;">Recovered Amount</div>
+                                                <h3 class="mb-2 font-weight-bold" style="color: #2c3e50;">$${parseFloat(c.recovered_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
+                                                <div class="progress mb-2" style="height: 8px; border-radius: 10px; background: #e9ecef;">
+                                                    <div class="progress-bar" style="width: ${progress}%; background: linear-gradient(90deg, #2950a8 0%, #2da9e3 100%);"></div>
+                                                </div>
+                                                <small class="text-muted">${progress}% of $${parseFloat(c.reported_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Platform Info -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="card border-0 h-100">
+                                            <div class="card-body">
+                                                <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                                                    <i class="anticon anticon-global mr-2" style="color: var(--brand);"></i>Platform Information
+                                                </h6>
+                                                <p class="mb-2"><strong>Platform:</strong> ${c.platform_name || 'N/A'}</p>
+                                                <p class="mb-0"><strong>Created:</strong> ${c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : 'N/A'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="card border-0 h-100">
+                                            <div class="card-body">
+                                                <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                                                    <i class="anticon anticon-clock-circle mr-2" style="color: var(--brand);"></i>Timeline
+                                                </h6>
+                                                <p class="mb-2"><strong>Last Updated:</strong> ${c.updated_at ? new Date(c.updated_at).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : 'N/A'}</p>
+                                                <p class="mb-0"><strong>Days Active:</strong> ${c.created_at ? Math.floor((new Date() - new Date(c.created_at)) / (1000 * 60 * 60 * 24)) : 0} days</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Description -->
+                                ${c.description ? `
+                                <div class="card border-0 mb-4">
+                                    <div class="card-body">
+                                        <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                                            <i class="anticon anticon-file-text mr-2" style="color: var(--brand);"></i>Case Description
+                                        </h6>
+                                        <p class="mb-0" style="line-height: 1.6;">${c.description}</p>
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Recovery Transactions -->
+                                ${data.recoveries && data.recoveries.length > 0 ? `
+                                <div class="card border-0 mb-4">
+                                    <div class="card-body">
+                                        <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                                            <i class="anticon anticon-transaction mr-2" style="color: var(--brand);"></i>Recovery Transactions
+                                        </h6>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-hover mb-0">
+                                                <thead style="background: rgba(41, 80, 168, 0.05);">
+                                                    <tr>
+                                                        <th>Date</th>
+                                                        <th>Amount</th>
+                                                        <th>Method</th>
+                                                        <th>Reference</th>
+                                                        <th>Processed By</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${data.recoveries.map(r => `
+                                                        <tr>
+                                                            <td>${r.transaction_date ? new Date(r.transaction_date).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'}) : 'N/A'}</td>
+                                                            <td><strong class="text-success">$${parseFloat(r.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
+                                                            <td>${r.method || 'N/A'}</td>
+                                                            <td><small class="text-muted">${r.transaction_reference || 'N/A'}</small></td>
+                                                            <td>${r.admin_first_name && r.admin_last_name ? `${r.admin_first_name} ${r.admin_last_name}` : 'System'}</td>
+                                                        </tr>
+                                                    `).join('')}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Documents -->
+                                ${data.documents && data.documents.length > 0 ? `
+                                <div class="card border-0 mb-4">
+                                    <div class="card-body">
+                                        <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                                            <i class="anticon anticon-paper-clip mr-2" style="color: var(--brand);"></i>Case Documents
+                                        </h6>
+                                        <div class="list-group">
+                                            ${data.documents.map(d => `
+                                                <div class="list-group-item border-0 px-0">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <i class="anticon anticon-file mr-2" style="color: var(--brand);"></i>
+                                                            <strong>${d.document_type || 'Document'}</strong>
+                                                            ${d.verified ? '<span class="badge badge-success badge-sm ml-2"><i class="anticon anticon-check"></i> Verified</span>' : ''}
+                                                        </div>
+                                                        <small class="text-muted">${d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'}) : ''}</small>
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Status History -->
+                                ${data.history && data.history.length > 0 ? `
+                                <div class="card border-0 mb-4">
+                                    <div class="card-body">
+                                        <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
+                                            <i class="anticon anticon-history mr-2" style="color: var(--brand);"></i>Status History
+                                        </h6>
+                                        <div class="timeline">
+                                            ${data.history.map((h, idx) => `
+                                                <div class="timeline-item ${idx === 0 ? 'timeline-item-active' : ''}">
+                                                    <div class="timeline-marker ${idx === 0 ? 'bg-primary' : 'bg-secondary'}"></div>
+                                                    <div class="timeline-content">
+                                                        <div class="d-flex justify-content-between align-items-start mb-1">
+                                                            <strong>${h.new_status ? h.new_status.replace(/_/g, ' ').toUpperCase() : 'Status Change'}</strong>
+                                                            <small class="text-muted">${h.created_at ? new Date(h.created_at).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : ''}</small>
+                                                        </div>
+                                                        ${h.comments ? `<p class="mb-1 text-muted small">${h.comments}</p>` : ''}
+                                                        ${h.first_name && h.last_name ? `<small class="text-muted">By: ${h.first_name} ${h.last_name}</small>` : ''}
+                                                    </div>
+                                                </div>
+                                            `).join('')}
+                                        </div>
+                                    </div>
+                                </div>
+                                ` : ''}
+                                
+                                <!-- Actions -->
+                                <div class="text-center mt-4">
+                                    <a href="cases.php" class="btn btn-primary">
+                                        <i class="anticon anticon-folder-open mr-1"></i>View All Cases
+                                    </a>
+                                </div>
+                            </div>
+                        `;
+                        
+                        $('#caseModalBody').html(html);
+                        $('#caseDetailsModalLabel').html(`<i class="anticon anticon-file-text mr-2"></i>Case #${c.case_number || 'Details'}`);
+                    } else {
+                        $('#caseModalBody').html(`
+                            <div class="alert alert-danger">
+                                <i class="anticon anticon-close-circle mr-2"></i>${data.message || 'Unable to load case details'}
+                            </div>
+                        `);
+                    }
+                } catch (e) {
+                    $('#caseModalBody').html(`
+                        <div class="alert alert-danger">
+                            <i class="anticon anticon-close-circle mr-2"></i>Error parsing case data
+                        </div>
+                    `);
+                }
+            },
+            error: function(xhr, status, error) {
+                $('#caseModalBody').html(`
+                    <div class="alert alert-danger">
+                        <i class="anticon anticon-close-circle mr-2"></i>Error loading case details: ${error}
+                    </div>
+                `);
+            }
+        });
+    });
+
+    // Charts removed per user request
+
+    // Animated Counter Function
+    function animateCounter(element) {
+        const target = parseFloat(element.getAttribute('data-value')) || 0;
+        const duration = 1500; // 1.5 seconds
+        const start = 0;
+        const startTime = performance.now();
+        
+        function update(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Easing function (easeOutQuart)
+            const easeOut = 1 - Math.pow(1 - progress, 4);
+            const current = start + (target - start) * easeOut;
+            
+            // Format based on whether it's a decimal or integer
+            if (element.classList.contains('money')) {
+                element.textContent = '$' + current.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            } else if (element.classList.contains('percent')) {
+                element.textContent = current.toFixed(1) + '%';
+            } else {
+                element.textContent = Math.floor(current).toLocaleString();
+            }
+            
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            }
+        }
+        
+        requestAnimationFrame(update);
+    }
+
+    // Initialize counters with Intersection Observer for better performance
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.classList.contains('counted')) {
+                    entry.target.classList.add('counted');
+                    animateCounter(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        // Observe all counter elements
+        document.querySelectorAll('.count').forEach(el => observer.observe(el));
+    } else {
+        // Fallback for older browsers
+        document.querySelectorAll('.count').forEach(el => animateCounter(el));
+    }
+
+    // Add smooth scroll behavior
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add loading animation to buttons on click
+    document.querySelectorAll('.btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!this.classList.contains('no-loading')) {
+                this.style.pointerEvents = 'none';
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<i class="anticon anticon-loading anticon-spin mr-1"></i>' + this.textContent;
+                setTimeout(() => {
+                    this.innerHTML = originalHTML;
+                    this.style.pointerEvents = '';
+                }, 2000);
+            }
+        });
+    });
 });
+
+// =====================================================
+// 💳 WITHDRAWAL ELIGIBILITY CHECK
+// =====================================================
+function checkWithdrawalEligibility(event) {
+    event.preventDefault();
+    
+    // Check KYC status (escaped for security)
+    const kycStatus = <?php echo json_encode($kyc_status); ?>;
+    if (kycStatus !== 'verified' && kycStatus !== 'approved') {
+        toastr.warning('Please verify your KYC Identification before making withdrawals.', 'KYC Verification Required', {
+            timeOut: 5000,
+            closeButton: true,
+            progressBar: true,
+            onclick: function() {
+                window.location.href = 'kyc.php';
+            }
+        });
+        return;
+    }
+    
+    // Check package status (must be paid, active, and not expired)
+    // Trial/test packages are NOT allowed for withdrawals
+    const hasActivePackage = <?php echo json_encode($hasActivePackageForWithdrawal); ?>;
+    
+    if (!hasActivePackage) {
+        toastr.error('Active paid package required for withdrawals. Trial packages do not qualify.', 'Active Package Required', {
+            timeOut: 6000,
+            closeButton: true,
+            progressBar: true,
+            onclick: function() {
+                window.location.href = 'packages.php';
+            }
+        });
+        return;
+    }
+    
+    // All checks passed - open withdrawal modal
+    $('#newWithdrawalModal').modal('show');
+}
 </script>
 </body>
 </html>

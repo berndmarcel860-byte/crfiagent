@@ -1,14 +1,25 @@
 <?php
+/**
+ * Withdrawal Processing Script – Kryptox
+ * ---------------------------------------------------------
+ * Handles withdrawal requests securely with:
+ *  - CSRF + OTP validation
+ *  - Transactional DB writes
+ *  - Balance update
+ *  - Email confirmation
+ *  - Notification (User + Admin)
+ */
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../session.php';
+require_once __DIR__ . '/../notify_user.php'; // ✅ Include notification helper
 
 // Check PHPMailer
 $phpMailerAvailable = false;
@@ -30,44 +41,37 @@ try {
         throw new Exception('Unauthorized access - Please login', 401);
     }
 
-    // 3️⃣ CSRF token
-    if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    // 3️⃣ CSRF token check
+    if (empty($_POST['csrf_token']) || $_POST['csrf_token'] !== ($_SESSION['csrf_token'] ?? '')) {
         throw new Exception('Security error - Invalid CSRF token', 403);
     }
 
-    // 4️⃣ OTP Verification (from indexotp.php)
+    // 4️⃣ OTP Verification
     if (empty($_SESSION['otp_verified']) || $_SESSION['otp_verified'] !== true) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Please verify your email OTP before submitting a withdrawal request.'
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
+        throw new Exception('Please verify your email OTP before submitting a withdrawal request.', 400);
     }
 
-    // Check expiry
     if (isset($_SESSION['otp_expire']) && time() > $_SESSION['otp_expire']) {
         unset($_SESSION['otp_verified'], $_SESSION['withdraw_otp'], $_SESSION['otp_expire']);
         throw new Exception('Your OTP has expired. Please request a new one.', 400);
     }
 
     // Invalidate OTP after use
-    unset($_SESSION['otp_verified']);
-    unset($_SESSION['withdraw_otp']);
-    unset($_SESSION['otp_expire']);
+    unset($_SESSION['otp_verified'], $_SESSION['withdraw_otp'], $_SESSION['otp_expire']);
 
     // 5️⃣ Validate inputs
     $amount = filter_input(INPUT_POST, 'amount', FILTER_VALIDATE_FLOAT);
-    $methodCode = isset($_POST['payment_method']) ? htmlspecialchars($_POST['payment_method'], ENT_QUOTES, 'UTF-8') : null;
-    $details = isset($_POST['payment_details']) ? htmlspecialchars($_POST['payment_details'], ENT_QUOTES, 'UTF-8') : null;
+    $methodCode = htmlspecialchars(trim($_POST['payment_method'] ?? ''), ENT_QUOTES, 'UTF-8');
+    $details = htmlspecialchars(trim($_POST['payment_details'] ?? ''), ENT_QUOTES, 'UTF-8');
 
     if (!$amount || $amount <= 0) throw new Exception('Please enter a valid withdrawal amount', 400);
     if ($amount < 10) throw new Exception('Minimum withdrawal amount is $10', 400);
     if (empty($methodCode)) throw new Exception('Please select a payment method', 400);
     if (empty($details)) throw new Exception('Please provide payment details', 400);
 
-    // Prevent double submit
-    if (isset($_SESSION['withdraw_in_progress']) && $_SESSION['withdraw_in_progress'] === true) {
-        throw new Exception('Withdrawal already in progress. Please wait a moment before submitting again.', 429);
+    // Prevent duplicate submission
+    if (!empty($_SESSION['withdraw_in_progress'])) {
+        throw new Exception('A withdrawal is already in progress. Please wait a few seconds before retrying.', 429);
     }
     $_SESSION['withdraw_in_progress'] = true;
 
@@ -75,52 +79,74 @@ try {
     $userStmt = $pdo->prepare("SELECT id, email, first_name, last_name, balance FROM users WHERE id = ?");
     $userStmt->execute([$_SESSION['user_id']]);
     $user = $userStmt->fetch();
-
     if (!$user) throw new Exception('User not found', 404);
 
-    // 7️⃣ Payment method
-    $stmt = $pdo->prepare("SELECT id, method_name FROM payment_methods WHERE method_code = ? AND is_active = 1 AND allows_withdrawal = 1");
-    $stmt->execute([$methodCode]);
-    $paymentMethod = $stmt->fetch();
+    // 7️⃣ Payment method validation
+    $methodStmt = $pdo->prepare("SELECT id, method_name FROM payment_methods WHERE method_code = ? AND is_active = 1 AND allows_withdrawal = 1");
+    $methodStmt->execute([$methodCode]);
+    $paymentMethod = $methodStmt->fetch();
     if (!$paymentMethod) throw new Exception('Invalid or inactive payment method selected', 400);
     $paymentMethodId = $paymentMethod['id'];
 
-    // 8️⃣ Balance check
+    // 8️⃣ Check balance
     if ($user['balance'] < $amount) {
         throw new Exception('Insufficient balance. Available: $' . number_format($user['balance'], 2), 400);
     }
 
     // 9️⃣ Process withdrawal
     $reference = 'WDR-' . time() . '-' . strtoupper(substr(uniqid(), -6));
+
     $pdo->beginTransaction();
 
     try {
-        // Insert withdrawal
-        $stmt = $pdo->prepare("INSERT INTO withdrawals 
-            (user_id, amount, method_code, payment_details, reference, status) 
-            VALUES (?, ?, ?, ?, ?, 'pending')");
-        $stmt->execute([$_SESSION['user_id'], $amount, $methodCode, $details, $reference]);
+        // a) Insert withdrawal
+        $stmt = $pdo->prepare("
+            INSERT INTO withdrawals (user_id, amount, method_code, payment_details, reference, status)
+            VALUES (?, ?, ?, ?, ?, 'pending')
+        ");
+        $stmt->execute([$user['id'], $amount, $methodCode, $details, $reference]);
 
-        // Insert transaction
-        $stmt = $pdo->prepare("INSERT INTO transactions 
-            (user_id, type, amount, payment_method_id, reference, status, payment_details) 
-            VALUES (?, 'withdrawal', ?, ?, ?, 'pending', ?)");
-        $stmt->execute([$_SESSION['user_id'], $amount, $paymentMethodId, $reference, $details]);
+        // b) Insert transaction
+        $stmt = $pdo->prepare("
+            INSERT INTO transactions (user_id, type, amount, payment_method_id, reference, status, payment_details)
+            VALUES (?, 'withdrawal', ?, ?, ?, 'pending', ?)
+        ");
+        $stmt->execute([$user['id'], $amount, $paymentMethodId, $reference, $details]);
 
-        // Deduct balance
+        // c) Deduct balance
         $stmt = $pdo->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
-        $stmt->execute([$amount, $_SESSION['user_id']]);
+        $stmt->execute([$amount, $user['id']]);
 
-        // Get new balance
+        // d) Get updated balance
         $stmt = $pdo->prepare("SELECT balance FROM users WHERE id = ?");
-        $stmt->execute([$_SESSION['user_id']]);
+        $stmt->execute([$user['id']]);
         $newBalance = $stmt->fetchColumn();
 
-        // Email confirmation
+        // e) ✅ Add user notification
+        addUserNotification(
+            $pdo,
+            $user['id'],
+            'Withdrawal Request Submitted',
+            "Your withdrawal of $" . number_format($amount, 2) . " via {$paymentMethod['method_name']} has been received and is now processing. Reference: {$reference}.",
+            'success',
+            'withdrawal',
+            $reference
+        );
+
+        // f) ✅ Add admin notification (first admin)
+        addAdminNotification(
+            $pdo,
+            1,
+            'New Withdrawal Request',
+            "User {$user['email']} requested a withdrawal of $" . number_format($amount, 2) . " ({$paymentMethod['method_name']}, Ref: {$reference}).",
+            'info'
+        );
+
+        // g) Send confirmation email
         try {
             sendWithdrawalConfirmationEmail($pdo, $user, $amount, $reference, $paymentMethod['method_name'], $details);
-        } catch (Exception $mailError) {
-            error_log("[Withdrawal Email Error] " . $mailError->getMessage());
+        } catch (Exception $mailErr) {
+            error_log('[Withdrawal Email Error] ' . $mailErr->getMessage());
         }
 
         $pdo->commit();
@@ -128,7 +154,7 @@ try {
 
         echo json_encode([
             'success' => true,
-            'message' => 'Withdrawal request submitted successfully! A confirmation email has been sent.',
+            'message' => 'Withdrawal request submitted successfully! A confirmation email and notification have been sent.',
             'data' => [
                 'reference' => $reference,
                 'amount' => number_format($amount, 2),
@@ -137,14 +163,15 @@ try {
             ]
         ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-    } catch (PDOException $e) {
+    } catch (Exception $inner) {
         $pdo->rollBack();
         unset($_SESSION['withdraw_in_progress']);
-        throw new Exception('Database error: ' . $e->getMessage(), 500);
+        throw $inner;
     }
 
 } catch (Exception $e) {
     http_response_code($e->getCode() ?: 500);
+    unset($_SESSION['withdraw_in_progress']);
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage(),
@@ -153,19 +180,18 @@ try {
 }
 
 /**
- * 📧 Send withdrawal confirmation email
+ * ---------------------------------------------------------
+ * 📧 Send Withdrawal Confirmation Email
+ * ---------------------------------------------------------
  */
 function sendWithdrawalConfirmationEmail($pdo, $user, $amount, $reference, $paymentMethod, $paymentDetails) {
     global $phpMailerAvailable;
+    if (!$phpMailerAvailable) throw new Exception('Mailer not available');
 
-    $smtpStmt = $pdo->prepare("SELECT * FROM smtp_settings WHERE is_active = 1 LIMIT 1");
-    $smtpStmt->execute();
-    $smtp = $smtpStmt->fetch();
+    // SMTP + System
+    $smtp = $pdo->query("SELECT * FROM smtp_settings WHERE is_active = 1 LIMIT 1")->fetch();
     if (!$smtp) throw new Exception('No active SMTP configuration found');
-
-    $sysStmt = $pdo->prepare("SELECT * FROM system_settings WHERE id = 1");
-    $sysStmt->execute();
-    $system = $sysStmt->fetch();
+    $system = $pdo->query("SELECT * FROM system_settings WHERE id = 1")->fetch();
 
     $subject = "Withdrawal Confirmation - {$reference}";
     $body = getDefaultWithdrawalTemplate();
@@ -178,9 +204,10 @@ function sendWithdrawalConfirmationEmail($pdo, $user, $amount, $reference, $paym
         '{payment_method}' => $paymentMethod,
         '{payment_details}' => $paymentDetails,
         '{date}' => date('Y-m-d H:i:s'),
-        '{site_name}' => $system['brand_name'] ?? 'TradeVest Crypto',
-        '{support_email}' => $system['contact_email'] ?? 'support@tradevestcrypto.de',
-        '{current_year}' => date('Y')
+        '{site_name}' => $system['brand_name'] ?? 'KryptoX',
+        '{support_email}' => $system['contact_email'] ?? 'support@kryptox.co.uk',
+        '{current_year}' => date('Y'),
+        '{site_url}' => $system['domain'] ?? 'https://kryptox.co.uk'
     ];
 
     foreach ($replacements as $k => $v) {
@@ -188,37 +215,35 @@ function sendWithdrawalConfirmationEmail($pdo, $user, $amount, $reference, $paym
         $body = str_replace($k, $v, $body);
     }
 
-    if ($phpMailerAvailable) {
-        $mail = new PHPMailer(true);
-        $mail->isSMTP();
-        $mail->Host = $smtp['host'];
-        $mail->SMTPAuth = true;
-        $mail->Username = $smtp['username'];
-        $mail->Password = $smtp['password'];
-        $mail->SMTPSecure = $smtp['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = $smtp['port'];
-        $mail->setFrom($smtp['from_email'], $smtp['from_name']);
-        $mail->addAddress($user['email']);
-        $mail->isHTML(true);
-        $mail->Subject = $subject;
-        $mail->Body = $body;
-        $mail->send();
+    $mail = new PHPMailer(true);
+    $mail->isSMTP();
+    $mail->Host = $smtp['host'];
+    $mail->SMTPAuth = true;
+    $mail->Username = $smtp['username'];
+    $mail->Password = $smtp['password'];
+    $mail->SMTPSecure = $smtp['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port = $smtp['port'];
 
-        // Log email
-        try {
-            $logStmt = $pdo->prepare("INSERT INTO email_logs (template_id, recipient, subject, content, sent_at, status)
-                                      VALUES (NULL, ?, ?, ?, NOW(), 'sent')");
-            $logStmt->execute([$user['email'], $subject, $body]);
-        } catch (Exception $logErr) {
-            error_log("Email log failed: " . $logErr->getMessage());
-        }
-    } else {
-        throw new Exception('Mailer not available');
-    }
+            $mail->CharSet = 'UTF-8';
+            $mail->Encoding = 'base64';
+    $mail->setFrom($smtp['from_email'], $smtp['from_name']);
+    $mail->addAddress($user['email']);
+    $mail->isHTML(true);
+    $mail->Subject = $subject;
+    $mail->Body = $body;
+    $mail->send();
+
+    $logStmt = $pdo->prepare("
+        INSERT INTO email_logs (template_id, recipient, subject, content, sent_at, status)
+        VALUES (NULL, ?, ?, ?, NOW(), 'sent')
+    ");
+    $logStmt->execute([$user['email'], $subject, $body]);
 }
 
 /**
- * 📄 Default email template
+ * ---------------------------------------------------------
+ * 📄 Default HTML Email Template
+ * ---------------------------------------------------------
  */
 function getDefaultWithdrawalTemplate() {
     return '
@@ -229,69 +254,45 @@ function getDefaultWithdrawalTemplate() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Withdrawal Confirmation</title>
         <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(90deg,#2950a8 0,#2da9e3 100%); color: white; padding: 20px; text-align: center; border-radius: 5px; }
-            .content { padding: 20px; background: #f9f9f9; }
-            .details { background: white; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #28a745; }
-            .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
-            .success-badge { background: #28a745; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; }
-            .warning-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 10px; margin: 10px 0; }
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f4f6f8; }
+            .container { max-width: 600px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; }
+            .header { background: linear-gradient(90deg,#2950a8 0,#2da9e3 100%); color: #fff; text-align: center; padding: 25px; }
+            .header h1 { margin: 0; font-size: 24px; }
+            .content { padding: 20px; }
+            .details { background: #fafafa; border-left: 4px solid #28a745; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+            .footer { background: #f8f9fa; text-align: center; font-size: 12px; color: #777; padding: 15px; }
+            table { width: 100%; border-collapse: collapse; }
+            td { padding: 6px; }
         </style>
     </head>
     <body>
         <div class="container">
             <div class="header">
                 <h1>{site_name}</h1>
-                <h2>💰 Withdrawal Request Received</h2>
-                <span class="success-badge">✅ Request Submitted</span>
+                <p>💰 Withdrawal Request Received</p>
             </div>
             <div class="content">
-                <h3>Dear {first_name} {last_name},</h3>
-                <p>We have received your withdrawal request from your <strong>Fundtracer AI</strong> account. Your request is now being processed by our financial team.</p>
-                
+                <p>Dear {first_name} {last_name},</p>
+                <p>We have received your withdrawal request and it is now being processed by our financial team.</p>
+
                 <div class="details">
-                    <h4>💳 Withdrawal Details:</h4>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr><td style="padding: 5px; font-weight: bold;">Reference Number:</td><td style="padding: 5px;">{reference}</td></tr>
-                        <tr><td style="padding: 5px; font-weight: bold;">Amount:</td><td style="padding: 5px; color: #dc3545; font-weight: bold;">{amount}</td></tr>
-                        <tr><td style="padding: 5px; font-weight: bold;">Payment Method:</td><td style="padding: 5px;">{payment_method}</td></tr>
-                        <tr><td style="padding: 5px; font-weight: bold;">Payment Details:</td><td style="padding: 5px;">{payment_details}</td></tr>
-                        <tr><td style="padding: 5px; font-weight: bold;">Date & Time:</td><td style="padding: 5px;">{date}</td></tr>
-                        <tr><td style="padding: 5px; font-weight: bold;">Status:</td><td style="padding: 5px;"><span style="background: #17a2b8; color: white; padding: 2px 8px; border-radius: 10px;">🔄 Processing</span></td></tr>
+                    <table>
+                        <tr><td><strong>Reference:</strong></td><td>{reference}</td></tr>
+                        <tr><td><strong>Amount:</strong></td><td>{amount}</td></tr>
+                        <tr><td><strong>Method:</strong></td><td>{payment_method}</td></tr>
+                        <tr><td><strong>Details:</strong></td><td>{payment_details}</td></tr>
+                        <tr><td><strong>Date:</strong></td><td>{date}</td></tr>
                     </table>
                 </div>
-                
-                <div style="background: #e1f5fe; border: 1px solid #0288d1; border-radius: 8px; padding: 15px; margin: 15px 0;">
-                    <h4 style="color: #0288d1; margin-top: 0;">⏱️ Processing Timeline:</h4>
-                    <ul style="margin: 0; padding-left: 20px;">
-                        <li><strong>Verification:</strong> We will verify your withdrawal details within 2-4 hours</li>
-                        <li><strong>Security Check:</strong> Standard security verification process</li>
-                        <li><strong>Payment Processing:</strong> Funds will be transferred to your specified account</li>
-                        <li><strong>Completion Time:</strong> Typically completes within 1-3 business days</li>
-                        <li><strong>Final Notification:</strong> You will receive confirmation when payment is sent</li>
-                    </ul>
-                </div>
-                
-                <div class="warning-box">
-                    <p style="margin: 0;"><strong>⚠️ Important Notice:</strong> The requested amount has been temporarily deducted from your account balance. If the withdrawal fails, the amount will be automatically refunded to your balance.</p>
-                </div>
-                
-                <div style="background: #f8f9fa; border-left: 4px solid #6c757d; padding: 15px; margin: 15px 0;">
-                    <h4 style="color: #495057; margin-top: 0;">📞 Need Assistance?</h4>
-                    <p style="margin-bottom: 5px;">Contact our support team if you have any questions:</p>
-                    <p style="margin: 0;"><strong>Email:</strong> {support_email}</p>
-                    <p style="margin: 0;"><strong>Reference:</strong> {reference}</p>
-                </div>
-                
-                <p>We appreciate your trust in <strong>Fundtracer AI</strong> for your financial transactions and fund recovery needs.</p>
-                
-                <p style="margin-bottom: 0;"><strong>Best regards,</strong><br>The Fundtracer AI Team<br>Next-Generation Scam Recovery & Fund Tracing</p>
+
+                <p><strong>Processing time:</strong> 1–3 business days.<br>
+                You’ll be notified once your withdrawal is completed.</p>
+
+                <p>Kind regards,<br><strong>{site_name} Team</strong></p>
             </div>
             <div class="footer">
-                <p>&copy; {current_year} {site_name}. All rights reserved.</p>
-                <p>🔒 This is an automated secure message. Please do not reply directly to this email.</p>
-                <p>Contact Support: {support_email} | Visit: {site_url}</p>
+                <p>&copy; {current_year} {site_name}. All rights reserved.<br>
+                Contact: {support_email} – <a href="{site_url}">{site_url}</a></p>
             </div>
         </div>
     </body>
