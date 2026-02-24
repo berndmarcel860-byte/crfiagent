@@ -1755,13 +1755,7 @@ h5, .h5 {
                                 <?= htmlspecialchars($currentUser['last_login'] ?? $currentDateTimeFormatted, ENT_QUOTES) ?>
                             </p>
                         </div>
-                        <div class="mb-3">
-                            <label class="text-muted mb-1" style="font-size: 13px;">Location</label>
-                            <p class="mb-0 font-weight-500" style="font-size: 14px;">
-                                <i class="anticon anticon-environment mr-1"></i>
-                                <span id="user-location">Detecting...</span>
-                            </p>
-                        </div>
+
                         <div class="alert alert-warning mb-0 py-2 px-3" style="font-size: 13px; border-radius: 8px;">
                             <i class="anticon anticon-info-circle mr-1"></i>
                             Suspicious activity? <a href="support.php" class="alert-link font-weight-600">Contact support</a>
