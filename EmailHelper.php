@@ -48,7 +48,7 @@ class EmailHelper {
     public function sendEmail($templateKey, $userId, $customVariables = []) {
         try {
             // Get template
-            $stmt = $this->pdo->prepare("SELECT * FROM email_templates WHERE template_key = ? AND is_active = 1");
+            $stmt = $this->pdo->prepare("SELECT * FROM email_templates WHERE template_key = ?");
             $stmt->execute([$templateKey]);
             $template = $stmt->fetch(PDO::FETCH_ASSOC);
             
@@ -162,21 +162,21 @@ class EmailHelper {
     }
     
     /**
-     * Replace {{variable}} placeholders
+     * Replace {variable} placeholders (single braces to match template format)
      */
     private function replaceVariables($text, $variables) {
         foreach ($variables as $key => $value) {
-            $text = str_replace('{{' . $key . '}}', $value, $text);
+            $text = str_replace('{' . $key . '}', $value, $text);
         }
         return $text;
     }
     
     /**
-     * Handle conditional blocks {{#if variable}}...{{/if}}
+     * Handle conditional blocks {#if variable}...{/if} (single braces to match template format)
      */
     private function handleConditionals($content, $variables) {
         // Simple if condition handler
-        $pattern = '/\{\{#if\s+(\w+)\}\}(.*?)\{\{\/if\}\}/s';
+        $pattern = '/\{#if\s+(\w+)\}(.*?)\{\/if\}/s';
         
         $content = preg_replace_callback($pattern, function($matches) use ($variables) {
             $varName = $matches[1];

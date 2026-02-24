@@ -1,19 +1,14 @@
 -- Email Verification Template
 -- Based on welcome_email format from email_templates (11).sql
+-- Compatible with cryptofinanze (5).sql email_templates table structure
 
 INSERT INTO email_templates (
     template_key,
-    template_name,
     subject,
     content,
-    variables,
-    category,
-    is_active,
-    created_at,
-    updated_at
+    variables
 ) VALUES (
     'email_verification',
-    'Email Verification',
     'Bestätigen Sie Ihre E-Mail-Adresse bei {brand_name}!',
     '<!DOCTYPE html>
 <html>
@@ -101,9 +96,5 @@ INSERT INTO email_templates (
   </div>
 </body>
 </html>',
-    '[\"user_first_name\",\"verification_link\",\"brand_name\",\"site_url\",\"company_address\",\"contact_email\",\"fca_reference_number\",\"current_year\"]',
-    'account',
-    1,
-    NOW(),
-    NOW()
+    '[\"user_first_name\",\"verification_link\",\"brand_name\",\"site_url\",\"company_address\",\"contact_email\",\"fca_reference_number\",\"current_year\"]'
 );
