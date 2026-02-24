@@ -68,12 +68,14 @@ try {
     // Create verification URL
     $siteUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") 
                 . "://" . $_SERVER['HTTP_HOST'];
-    $verificationUrl = $siteUrl . "/verify_email.php?token=" . $token;
+    $verificationLink = $siteUrl . "/verify_email.php?token=" . $token;
     
+    // Custom variables for email template
+    // Template expects: user_first_name, verification_link, brand_name, site_url, 
+    // company_address, contact_email, fca_reference_number, current_year
+    // Note: EmailHelper auto-populates most system variables
     $customVars = [
-        'verification_url' => $verificationUrl,
-        'verification_token' => $token,
-        'expires_in' => '1 hour'
+        'verification_link' => $verificationLink
     ];
     
     $emailSent = $emailHelper->sendEmail('email_verification', $userId, $customVars);
