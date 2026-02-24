@@ -1436,13 +1436,13 @@ h5, .h5 {
         </div>
         <?php endif; ?>
 
-        <!-- STATUS ALERTS: KYC, Crypto Verification, etc. -->
-        <?php if ($kyc_status !== 'approved' || !(isset($hasVerifiedPaymentMethod) && $hasVerifiedPaymentMethod)): ?>
+        <!-- STATUS ALERTS: KYC, Crypto Verification, Email Verification -->
+        <?php if ($kyc_status !== 'approved' || !(isset($hasVerifiedPaymentMethod) && $hasVerifiedPaymentMethod) || !($currentUser['is_verified'] ?? false)): ?>
         <div class="row mb-4">
             
             <!-- KYC Verification Alert -->
             <?php if ($kyc_status !== 'approved'): ?>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #ffc107;">
                     <div class="card-body">
                         <div class="d-flex align-items-start">
@@ -1488,7 +1488,7 @@ h5, .h5 {
             
             <!-- Crypto Verification Alert -->
             <?php if (!(isset($hasVerifiedPaymentMethod) && $hasVerifiedPaymentMethod)): ?>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #17a2b8;">
                     <div class="card-body">
                         <div class="d-flex align-items-start">
@@ -1514,6 +1514,42 @@ h5, .h5 {
                                         <i class="anticon anticon-arrow-right mr-1"></i>Verify Now
                                     </a>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <!-- Email Verification Alert (Step 3) -->
+            <?php if (!($currentUser['is_verified'] ?? false)): ?>
+            <div class="col-md-4 mb-3">
+                <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #dc3545;">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start">
+                            <div class="avatar-icon avatar-lg mr-3" style="background: linear-gradient(135deg, #dc3545, #e74c5d); font-size: 28px;">
+                                <i class="anticon anticon-mail"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <h5 class="mb-0" style="font-weight: 600; color: #2c3e50;">Email Verification</h5>
+                                    <button class="btn btn-link p-0 text-info" data-toggle="modal" data-target="#emailVerifyInfoModal" 
+                                            title="Why verify email?" style="font-size: 20px;">
+                                        <i class="anticon anticon-info-circle"></i>
+                                    </button>
+                                </div>
+                                <p class="text-muted mb-3" style="font-size: 14px; line-height: 1.6;">
+                                    Verify your email address to complete your account setup and enable all platform features.
+                                </p>
+                                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                                    <span class="badge badge-danger px-3 py-2 mb-2">
+                                        <i class="anticon anticon-exclamation-circle mr-1"></i>Not Verified
+                                    </span>
+                                    <button id="sendVerificationEmailBtn" class="btn btn-danger btn-sm mb-2" style="font-weight: 500;">
+                                        <i class="anticon anticon-mail mr-1"></i>Send Verification Email
+                                    </button>
+                                </div>
+                                <div id="verificationEmailStatus" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -1708,6 +1744,87 @@ h5, .h5 {
                         <a href="payment-methods.php" class="btn btn-info" style="border-radius: 8px; font-weight: 500;">
                             <i class="anticon anticon-arrow-right mr-1"></i>Verify Crypto Address
                         </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Verification Info Modal -->
+        <div class="modal fade" id="emailVerifyInfoModal" tabindex="-1" role="dialog" aria-labelledby="emailVerifyInfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                    <div class="modal-header border-0" style="background: linear-gradient(135deg, #dc3545, #e74c5d); color: #fff; border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title font-weight-bold" id="emailVerifyInfoModalLabel">
+                            <i class="anticon anticon-mail mr-2"></i>Why Verify Your Email Address?
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-4">
+                            <h6 class="text-primary mb-3" style="font-weight: 600;">
+                                <i class="anticon anticon-safety-certificate mr-2"></i>Account Security & Communication
+                            </h6>
+                            <p style="line-height: 1.8; color: #555;">
+                                Email verification confirms that you have access to the email address associated with your account. 
+                                This is essential for secure communications, password recovery, and receiving important notifications about your fund recovery cases.
+                            </p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h6 class="text-success mb-3" style="font-weight: 600;">
+                                <i class="anticon anticon-check-circle mr-2"></i>Benefits of Email Verification
+                            </h6>
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="anticon anticon-mail text-success mr-3 mt-1" style="font-size: 20px;"></i>
+                                    <div>
+                                        <strong>Critical Notifications:</strong> Receive instant updates about your case status, withdrawals, and fund recoveries.
+                                    </div>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="anticon anticon-lock text-success mr-3 mt-1" style="font-size: 20px;"></i>
+                                    <div>
+                                        <strong>Account Recovery:</strong> Enable password reset and account recovery options if you lose access.
+                                    </div>
+                                </li>
+                                <li class="mb-3 d-flex align-items-start">
+                                    <i class="anticon anticon-check text-success mr-3 mt-1" style="font-size: 20px;"></i>
+                                    <div>
+                                        <strong>Complete Profile:</strong> Final step to unlock all platform features and full functionality.
+                                    </div>
+                                </li>
+                                <li class="d-flex align-items-start">
+                                    <i class="anticon anticon-shield text-success mr-3 mt-1" style="font-size: 20px;"></i>
+                                    <div>
+                                        <strong>Security Alerts:</strong> Get notified of any suspicious activity or login attempts on your account.
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="alert alert-info border-0" style="background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05)); border-radius: 10px;">
+                            <div class="d-flex align-items-start">
+                                <i class="anticon anticon-info-circle mr-3" style="font-size: 24px; color: #17a2b8;"></i>
+                                <div>
+                                    <strong style="color: #17a2b8;">Quick Verification Process</strong>
+                                    <p class="mb-0 mt-2" style="color: #555;">
+                                        Click the "Send Verification Email" button above, check your inbox for our email, 
+                                        and click the verification link. The process takes less than 1 minute to complete.
+                                        The verification link expires after 1 hour for security.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 8px;">
+                            <i class="anticon anticon-close mr-1"></i>Close
+                        </button>
+                        <button type="button" class="btn btn-danger" data-dismiss="modal" style="border-radius: 8px; font-weight: 500;" onclick="$('#sendVerificationEmailBtn').click();">
+                            <i class="anticon anticon-mail mr-1"></i>Send Verification Email
+                        </button>
                     </div>
                 </div>
             </div>
@@ -3366,6 +3483,73 @@ function resetOtpFields() {
                     this.innerHTML = originalHTML;
                     this.style.pointerEvents = '';
                 }, 2000);
+            }
+        });
+    });
+
+    // =====================================================
+    // 📧 EMAIL VERIFICATION - AJAX HANDLER
+    // =====================================================
+    let emailVerificationCooldown = false;
+    
+    $('#sendVerificationEmailBtn').on('click', function(e) {
+        e.preventDefault();
+        
+        if (emailVerificationCooldown) {
+            return;
+        }
+        
+        const $btn = $(this);
+        const $statusDiv = $('#verificationEmailStatus');
+        const originalBtnText = $btn.html();
+        
+        // Disable button and show loading
+        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin mr-1"></i>Sending...');
+        $statusDiv.empty();
+        
+        $.ajax({
+            url: 'ajax/send_verification_email.php',
+            method: 'POST',
+            dataType: 'json',
+            success: function(response) {
+                if (response.success) {
+                    $statusDiv.html(`
+                        <div class="alert alert-success alert-sm border-0 mt-2" style="font-size: 13px;">
+                            <i class="anticon anticon-check-circle mr-1"></i>${response.message}
+                        </div>
+                    `);
+                    
+                    // Set cooldown for 60 seconds
+                    emailVerificationCooldown = true;
+                    let countdown = 60;
+                    $btn.html(`<i class="anticon anticon-clock-circle mr-1"></i>Resend in ${countdown}s`);
+                    
+                    const countdownInterval = setInterval(() => {
+                        countdown--;
+                        if (countdown <= 0) {
+                            clearInterval(countdownInterval);
+                            emailVerificationCooldown = false;
+                            $btn.prop('disabled', false).html(originalBtnText);
+                        } else {
+                            $btn.html(`<i class="anticon anticon-clock-circle mr-1"></i>Resend in ${countdown}s`);
+                        }
+                    }, 1000);
+                } else {
+                    $statusDiv.html(`
+                        <div class="alert alert-danger alert-sm border-0 mt-2" style="font-size: 13px;">
+                            <i class="anticon anticon-close-circle mr-1"></i>${response.message}
+                        </div>
+                    `);
+                    $btn.prop('disabled', false).html(originalBtnText);
+                }
+            },
+            error: function(xhr, status, error) {
+                $statusDiv.html(`
+                    <div class="alert alert-danger alert-sm border-0 mt-2" style="font-size: 13px;">
+                        <i class="anticon anticon-close-circle mr-1"></i>Error sending email. Please try again later.
+                    </div>
+                `);
+                $btn.prop('disabled', false).html(originalBtnText);
             }
         });
     });
