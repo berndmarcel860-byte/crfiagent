@@ -55,7 +55,7 @@ try {
     
     // Store token in database
     // Note: Using verification_token column from database
-    // Token expires in 1 hour (stored as comment, checked in verify_email.php)
+    // Token expiration time is stored in session for validation in verify_email.php
     $stmt = $pdo->prepare("
         UPDATE users 
         SET verification_token = ?

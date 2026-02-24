@@ -99,10 +99,10 @@ $stmt = $pdo->prepare("
     WHERE verification_token = ?
 ");
 
-// Check expiration from session or use default 1 hour
-$tokenCreatedAt = isset($_SESSION['verification_token_expires_' . $user['id']]) 
+// Check expiration from session or use default 1 hour from current time
+$tokenExpiresAt = isset($_SESSION['verification_token_expires_' . $user['id']]) 
     ? $_SESSION['verification_token_expires_' . $user['id']]
-    : date('Y-m-d H:i:s', strtotime($user['created_at'] . ' +1 hour'));
+    : date('Y-m-d H:i:s', strtotime('+1 hour')); // Default: valid for 1 hour from now
 ```
 
 **Before (Broken UPDATE):**

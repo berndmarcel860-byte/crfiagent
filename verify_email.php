@@ -38,13 +38,13 @@ if (!isset($_GET['token']) || empty($_GET['token'])) {
             $success = true;
             $message = 'Your email has already been verified!';
         } else {
-            // Check token expiration (stored in session or default 1 hour from token creation)
+            // Check token expiration (stored in session or default to 1 hour from now as fallback)
             // Tokens are valid for 1 hour from when they were sent
-            $tokenCreatedAt = isset($_SESSION['verification_token_expires_' . $user['id']]) 
+            $tokenExpiresAt = isset($_SESSION['verification_token_expires_' . $user['id']]) 
                 ? $_SESSION['verification_token_expires_' . $user['id']]
-                : date('Y-m-d H:i:s', strtotime($user['created_at'] . ' +1 hour'));
+                : date('Y-m-d H:i:s', strtotime('+1 hour')); // Default: tokens valid for 1 hour
             
-            if (strtotime($tokenCreatedAt) < time()) {
+            if (strtotime($tokenExpiresAt) < time()) {
                 $error = true;
                 $message = 'Verification link has expired. Please request a new one from your profile.';
             } else {
