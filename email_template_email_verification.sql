@@ -1,11 +1,12 @@
 -- Email Verification Template
--- Insert email template for email verification
+-- Based on welcome_email format from email_templates (11).sql
 
 INSERT INTO email_templates (
     template_key,
     template_name,
     subject,
     content,
+    variables,
     category,
     is_active,
     created_at,
@@ -13,143 +14,96 @@ INSERT INTO email_templates (
 ) VALUES (
     'email_verification',
     'Email Verification',
-    'Verify Your Email Address - {{brand_name}}',
+    'Bestätigen Sie Ihre E-Mail-Adresse bei {brand_name}!',
     '<!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Email Verification</title>
+    <title>Email Verification - {brand_name}</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f8f9fa; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 30px auto; background: #fff; border-radius: 10px; box-shadow: 0 3px 10px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(90deg, #2950a8 0%, #2da9e3 100%); color: white; text-align: center; padding: 30px 20px; }
+        .header h1 { margin: 0; font-size: 24px; }
+        .content { padding: 25px; background: #f9f9f9; }
+        .details { background: #fff; padding: 20px; border-left: 4px solid #007bff; border-radius: 6px; margin: 20px 0; }
+        .btn { display: inline-block; background: #007bff; color: white; padding: 10px 18px; border-radius: 5px; text-decoration: none; font-weight: bold; }
+        .footer { text-align: center; font-size: 12px; color: #666; padding: 20px; background: #f1f1f1; }
+        .highlight { color: #007bff; font-weight: bold; }
+        .signature { margin-top: 30px; border-top: 1px solid #e0e0e0; padding-top: 20px; font-size: 14px; color: #555; }
+        .signature img { height: 45px; margin-bottom: 10px; }
+        .signature p { margin: 4px 0; }
+        @media only screen and (max-width: 600px) {
+            .container { width: 95%; }
+            .content { padding: 15px; }
+        }
+    </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
-        <tr>
-            <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                    
-                    <!-- Header with Gradient -->
-                    <tr>
-                        <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
-                            <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
-                                {{brand_name}}
-                            </h1>
-                        </td>
-                    </tr>
-                    
-                    <!-- Main Content -->
-                    <tr>
-                        <td style="padding: 40px 30px;">
-                            <h2 style="color: #333333; margin-top: 0; font-size: 24px;">
-                                Verify Your Email Address
-                            </h2>
-                            
-                            <p style="color: #666666; font-size: 16px; line-height: 1.6; margin: 20px 0;">
-                                Hello {{user_first_name}},
-                            </p>
-                            
-                            <p style="color: #666666; font-size: 16px; line-height: 1.6; margin: 20px 0;">
-                                Thank you for registering with {{brand_name}}. To complete your registration and access all features, please verify your email address by clicking the button below.
-                            </p>
-                            
-                            <!-- Verification Button -->
-                            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
-                                <tr>
-                                    <td align="center">
-                                        <a href="{{verification_url}}" style="display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 50px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
-                                            Verify Email Address
-                                        </a>
-                                    </td>
-                                </tr>
-                            </table>
-                            
-                            <!-- Alternative Link -->
-                            <div style="background-color: #f8f9fa; border-left: 4px solid #667eea; padding: 20px; margin: 30px 0; border-radius: 4px;">
-                                <p style="color: #666666; font-size: 14px; margin: 0 0 10px 0;">
-                                    <strong>If the button doesn''t work, copy and paste this link into your browser:</strong>
-                                </p>
-                                <p style="color: #667eea; font-size: 14px; margin: 0; word-break: break-all;">
-                                    {{verification_url}}
-                                </p>
-                            </div>
-                            
-                            <!-- Important Info -->
-                            <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; border-radius: 4px;">
-                                <p style="color: #856404; font-size: 14px; margin: 0;">
-                                    <strong>⚠️ Important:</strong> This verification link will expire in {{expires_in}}. If it expires, you can request a new one from your profile page.
-                                </p>
-                            </div>
-                            
-                            <p style="color: #666666; font-size: 16px; line-height: 1.6; margin: 20px 0;">
-                                If you didn''t create an account with {{brand_name}}, please ignore this email or contact our support team if you have concerns.
-                            </p>
-                            
-                            <!-- Benefits Section -->
-                            <div style="margin-top: 30px;">
-                                <h3 style="color: #333333; font-size: 18px; margin-bottom: 15px;">
-                                    Why verify your email?
-                                </h3>
-                                <ul style="color: #666666; font-size: 14px; line-height: 1.8; padding-left: 20px;">
-                                    <li>Secure your account</li>
-                                    <li>Receive important notifications</li>
-                                    <li>Access all platform features</li>
-                                    <li>Enhance account recovery options</li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                    
-                    <!-- Support Section -->
-                    <tr>
-                        <td style="background-color: #f8f9fa; padding: 30px; border-top: 1px solid #e9ecef;">
-                            <p style="color: #666666; font-size: 14px; text-align: center; margin: 0 0 10px 0;">
-                                Need help? Contact our support team:
-                            </p>
-                            <p style="color: #667eea; font-size: 14px; text-align: center; margin: 0;">
-                                <a href="mailto:{{contact_email}}" style="color: #667eea; text-decoration: none;">
-                                    {{contact_email}}
-                                </a>
-                            </p>
-                        </td>
-                    </tr>
-                    
-                    <!-- Footer -->
-                    <tr>
-                        <td style="background-color: #2c3e50; padding: 30px; text-align: center;">
-                            <p style="color: #ffffff; font-size: 14px; margin: 0 0 10px 0;">
-                                <strong>{{brand_name}}</strong>
-                            </p>
-                            <p style="color: #bdc3c7; font-size: 12px; margin: 5px 0;">
-                                {{company_address}}
-                            </p>
-                            <p style="color: #bdc3c7; font-size: 12px; margin: 5px 0;">
-                                {{contact_email}} | {{contact_phone}}
-                            </p>
-                            <p style="color: #bdc3c7; font-size: 12px; margin: 5px 0;">
-                                FCA Reference: {{fca_reference_number}}
-                            </p>
-                            <p style="color: #95a5a6; font-size: 11px; margin: 15px 0 0 0;">
-                                © {{current_year}} {{brand_name}}. All rights reserved.
-                            </p>
-                        </td>
-                    </tr>
-                    
-                </table>
-            </td>
-        </tr>
-    </table>
-    
-    <!-- Tracking Pixel -->
-    <img src="{{site_url}}/track_email.php?token={{tracking_token}}" width="1" height="1" style="display:none;" alt="" />
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>E-Mail-Adresse bestätigen</h1>
+            <p>Verifizieren Sie Ihre E-Mail bei {brand_name}</p>
+        </div>
+
+        <div class="content">
+            <p>Sehr geehrte/r {user_first_name},</p>
+            <p>Vielen Dank für Ihre Registrierung bei <strong>{brand_name}</strong>! Um Ihren Account zu aktivieren, bestätigen Sie bitte Ihre E-Mail-Adresse.</p>
+
+            <div class="details">
+                <h4>✅ E-Mail-Adresse bestätigen</h4>
+                <p>Klicken Sie auf den Button unten, um Ihre E-Mail-Adresse zu verifizieren:</p>
+                <p style="margin-top: 15px; text-align: center;">
+                    <a href="{verification_link}" class="btn">E-Mail jetzt bestätigen</a>
+                </p>
+            </div>
+
+            <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 6px;">
+                <p style="margin: 0;"><strong>⚠️ Wichtig:</strong> Dieser Link ist aus Sicherheitsgründen nur <strong>1 Stunde</strong> gültig.</p>
+            </div>
+
+            <p style="margin-top: 20px;"><strong>Warum ist die Verifizierung wichtig?</strong></p>
+            <ul style="color: #666; line-height: 1.8;">
+                <li>✓ Zugang zu allen Funktionen Ihres Accounts</li>
+                <li>✓ Sicherheit: Schutz vor unbefugtem Zugriff</li>
+                <li>✓ Benachrichtigungen über wichtige Account-Aktivitäten</li>
+                <li>✓ Wiederherstellung Ihres Passworts bei Bedarf</li>
+            </ul>
+
+            <p style="margin-top: 20px; font-size: 13px; color: #666;">
+                <em>Falls der Button nicht funktioniert, kopieren Sie bitte diesen Link in Ihren Browser:</em><br>
+                <a href="{verification_link}" style="color: #007bff; word-break: break-all;">{verification_link}</a>
+            </p>
+
+            <p style="margin-top: 20px; font-size: 13px; color: #999;">
+                Falls Sie diese E-Mail nicht angefordert haben, können Sie sie einfach ignorieren. Ihr Account wird ohne Bestätigung nicht aktiviert.
+            </p>
+
+            <p>Mit freundlichen Grüßen,</p>
+
+            <div class="signature">
+    <img src="{site_url}/assets/images/logo/logo.png" alt="{brand_name} Logo"><br>
+    <strong>{brand_name} – Fallmanagement-Team</strong><br>
+    {company_address}<br>
+    E: <a href="mailto:{contact_email}">{contact_email}</a> | 
+    W: <a href="{site_url}">{brand_name}</a>
+    <p>
+      BaFin Referenc Nr: {fca_reference_number}<br>
+      <em>Hinweis:</em> Diese E-Mail kann vertrauliche oder rechtlich geschützte Informationen enthalten.  
+      Wenn Sie nicht der richtige Adressat sind, informieren Sie uns bitte und löschen Sie diese Nachricht.
+    </p>
+</div>
+
+<div class="footer">
+    © {current_year} {brand_name}. Alle Rechte vorbehalten.
+</div>
+  </div>
 </body>
 </html>',
+    '[\"user_first_name\",\"verification_link\",\"brand_name\",\"site_url\",\"company_address\",\"contact_email\",\"fca_reference_number\",\"current_year\"]',
     'account',
     1,
     NOW(),
     NOW()
-) ON DUPLICATE KEY UPDATE
-    template_name = VALUES(template_name),
-    subject = VALUES(subject),
-    content = VALUES(content),
-    category = VALUES(category),
-    is_active = VALUES(is_active),
-    updated_at = NOW();
+);
