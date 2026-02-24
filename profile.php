@@ -2,26 +2,7 @@
 require_once 'config.php';
 require_once 'header.php';
 
-// Handle email verification resend
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['resend_verification'])) {
-    // Generate new verification token
-    $token = bin2hex(random_bytes(32));
-    $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
-    
-    try {
-        $stmt = $pdo->prepare("UPDATE users SET verification_token = ?, reset_expires = ? WHERE id = ?");
-        $stmt->execute([$token, $expires, $_SESSION['user_id']]);
-        
-        // Send verification email (implementation depends on your email system)
-        // sendVerificationEmail($user['email'], $token);
-        
-        $_SESSION['success'] = "Verification email sent! Please check your inbox.";
-        header("Location: profile.php");
-        exit();
-    } catch (PDOException $e) {
-        $_SESSION['error'] = "Error resending verification: " . $e->getMessage();
-    }
-}
+// Email verification is now handled via Ajax - see JavaScript at bottom of page
 
 // Get user data with onboarding info
 $user = [];
@@ -71,11 +52,12 @@ try {
                                                     <span class="badge badge-success">Verified</span>
                                                 <?php else: ?>
                                                     <span class="badge badge-warning">Unverified</span>
-                                                    <form method="POST" class="m-t-10">
-                                                        <button type="submit" name="resend_verification" class="btn btn-sm btn-primary">
-                                                            Resend Verification Email
+                                                    <div class="m-t-10">
+                                                        <button type="button" id="resendVerificationBtn" class="btn btn-sm btn-primary">
+                                                            <i class="fa fa-envelope"></i> Resend Verification Email
                                                         </button>
-                                                    </form>
+                                                        <div id="verificationMessage" class="m-t-10" style="display: none;"></div>
+                                                    </div>
                                                 <?php endif; ?>
                                             </p>
                                             
@@ -189,5 +171,66 @@ try {
         </div>
     </div>
 <!--</div>-->
+
+<script>
+// Email Verification Ajax Handler
+document.addEventListener('DOMContentLoaded', function() {
+    const resendBtn = document.getElementById('resendVerificationBtn');
+    const messageDiv = document.getElementById('verificationMessage');
+    
+    if (resendBtn) {
+        resendBtn.addEventListener('click', function() {
+            // Disable button to prevent double-clicking
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Sending...';
+            
+            // Hide previous message
+            messageDiv.style.display = 'none';
+            
+            // Send Ajax request
+            fetch('ajax/send_verification_email.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Show message
+                messageDiv.style.display = 'block';
+                
+                if (data.success) {
+                    messageDiv.className = 'alert alert-success m-t-10';
+                    messageDiv.innerHTML = '<i class="fa fa-check-circle"></i> ' + data.message;
+                    
+                    // Keep button disabled for 60 seconds
+                    setTimeout(function() {
+                        resendBtn.disabled = false;
+                        resendBtn.innerHTML = '<i class="fa fa-envelope"></i> Resend Verification Email';
+                    }, 60000);
+                } else {
+                    messageDiv.className = 'alert alert-danger m-t-10';
+                    messageDiv.innerHTML = '<i class="fa fa-exclamation-circle"></i> ' + data.message;
+                    
+                    // Re-enable button after error
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fa fa-envelope"></i> Resend Verification Email';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                messageDiv.style.display = 'block';
+                messageDiv.className = 'alert alert-danger m-t-10';
+                messageDiv.innerHTML = '<i class="fa fa-exclamation-circle"></i> An error occurred. Please try again.';
+                
+                // Re-enable button after error
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = '<i class="fa fa-envelope"></i> Resend Verification Email';
+            });
+        });
+    }
+});
+</script>
 
 <?php require_once 'footer.php'; ?>
