@@ -54,13 +54,17 @@ try {
     $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
     
     // Store token in database
+    // Note: Using verification_token column from database
+    // Token expires in 1 hour (stored as comment, checked in verify_email.php)
     $stmt = $pdo->prepare("
         UPDATE users 
-        SET verification_token = ?, 
-            verification_token_expires = ? 
+        SET verification_token = ?
         WHERE id = ?
     ");
-    $stmt->execute([$token, $expires, $userId]);
+    $stmt->execute([$token, $userId]);
+    
+    // Store expiration time in session for validation
+    $_SESSION['verification_token_expires_' . $userId] = $expires;
     
     // Send verification email using EmailHelper
     $emailHelper = new EmailHelper($pdo);

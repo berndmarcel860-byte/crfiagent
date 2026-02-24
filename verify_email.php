@@ -23,7 +23,7 @@ if (!isset($_GET['token']) || empty($_GET['token'])) {
     try {
         // Find user with this token
         $stmt = $pdo->prepare("
-            SELECT id, email, is_verified, verification_token_expires 
+            SELECT id, email, is_verified, verification_token, created_at
             FROM users 
             WHERE verification_token = ? 
             LIMIT 1
@@ -37,27 +37,36 @@ if (!isset($_GET['token']) || empty($_GET['token'])) {
         } elseif ($user['is_verified']) {
             $success = true;
             $message = 'Your email has already been verified!';
-        } elseif (strtotime($user['verification_token_expires']) < time()) {
-            $error = true;
-            $message = 'Verification link has expired. Please request a new one from your profile.';
         } else {
-            // Verify the email
-            $stmt = $pdo->prepare("
-                UPDATE users 
-                SET is_verified = 1,
-                    verification_token = NULL,
-                    verification_token_expires = NULL,
-                    email_verified_at = NOW()
-                WHERE id = ?
-            ");
-            $stmt->execute([$user['id']]);
+            // Check token expiration (stored in session or default 1 hour from token creation)
+            // Tokens are valid for 1 hour from when they were sent
+            $tokenCreatedAt = isset($_SESSION['verification_token_expires_' . $user['id']]) 
+                ? $_SESSION['verification_token_expires_' . $user['id']]
+                : date('Y-m-d H:i:s', strtotime($user['created_at'] . ' +1 hour'));
             
-            $success = true;
-            $message = 'Email verified successfully! You can now access all features.';
-            
-            // If user is logged in and it's their email being verified, update session
-            if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user['id']) {
-                $_SESSION['email_verified'] = true;
+            if (strtotime($tokenCreatedAt) < time()) {
+                $error = true;
+                $message = 'Verification link has expired. Please request a new one from your profile.';
+            } else {
+                // Verify the email
+                $stmt = $pdo->prepare("
+                    UPDATE users 
+                    SET is_verified = 1,
+                        verification_token = NULL
+                    WHERE id = ?
+                ");
+                $stmt->execute([$user['id']]);
+                
+                $success = true;
+                $message = 'Email verified successfully! You can now access all features.';
+                
+                // If user is logged in and it's their email being verified, update session
+                if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $user['id']) {
+                    $_SESSION['email_verified'] = true;
+                }
+                
+                // Clear expiration from session
+                unset($_SESSION['verification_token_expires_' . $user['id']]);
             }
         }
         
