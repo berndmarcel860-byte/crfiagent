@@ -1225,206 +1225,7 @@ h5, .h5 {
         
         $completion_percentage = round(($completed_steps / $completion_steps) * 100);
         ?>
-        
-        <?php if ($completion_percentage < 100): ?>
-        <!-- Account Completion Progress Bar (Show only when not 100% complete) -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm border-0" style="border-left: 4px solid #2950a8;">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between flex-wrap mb-3">
-                            <div>
-                                <h5 class="mb-1" style="color: #2c3e50; font-weight: 600;">
-                                    <i class="anticon anticon-dashboard mr-2 text-primary"></i>Account Setup Progress
-                                </h5>
-                                <p class="text-muted mb-0" style="font-size: 13px;">Complete your profile for full platform access</p>
-                            </div>
-                            <div class="text-right">
-                                <h3 class="mb-0 font-weight-bold" style="color: #2950a8;"><?= $completion_percentage ?>%</h3>
-                                <small class="text-muted">Complete</small>
-                            </div>
-                        </div>
-                        
-                        <div class="progress" style="height: 10px; border-radius: 10px;">
-                            <div class="progress-bar" role="progressbar" 
-                                 style="width: <?= $completion_percentage ?>%; background: linear-gradient(90deg, #2950a8, #2da9e3);"
-                                 aria-valuenow="<?= $completion_percentage ?>" aria-valuemin="0" aria-valuemax="100">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php else: ?>
-        <!-- Account 100% Complete Success Message -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card shadow-sm border-0" style="border-left: 4px solid #28a745; background: linear-gradient(135deg, #f8fff9 0%, #e8f5e9 100%);">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center flex-wrap">
-                            <div class="avatar-icon avatar-lg mr-3" style="background: linear-gradient(135deg, #28a745, #5cb85c); font-size: 32px;">
-                                <i class="anticon anticon-check-circle text-white"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h5 class="mb-2" style="color: #155724; font-weight: 600;">
-                                    <i class="anticon anticon-trophy mr-2"></i>Herzlichen Glückwunsch!
-                                </h5>
-                                <p class="text-success mb-2" style="font-size: 14px; line-height: 1.6;">
-                                    Ihr Konto ist vollständig verifiziert und einsatzbereit. Sie haben nun Zugriff auf alle Premium-Funktionen.
-                                </p>
-                                <div class="d-flex align-items-center flex-wrap mt-3">
-                                    <span class="badge badge-success px-3 py-2 mr-2 mb-2" style="font-size: 13px;">
-                                        <i class="anticon anticon-check mr-1"></i>KYC Verifiziert
-                                    </span>
-                                    <span class="badge badge-success px-3 py-2 mr-2 mb-2" style="font-size: 13px;">
-                                        <i class="anticon anticon-check mr-1"></i>Wallet Verifiziert
-                                    </span>
-                                    <span class="badge badge-success px-3 py-2 mb-2" style="font-size: 13px;">
-                                        <i class="anticon anticon-check mr-1"></i>E-Mail Bestätigt
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="text-right ml-auto">
-                                <h2 class="mb-0" style="color: #28a745; font-weight: bold;">100%</h2>
-                                <small class="text-success font-weight-bold">ABGESCHLOSSEN</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Account Overview & Recent Activity for Verified Users -->
-        <div class="row mb-4">
-            <!-- Left: Account Statistics -->
-            <div class="col-lg-6 mb-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="mb-4" style="color: #2c3e50; font-weight: 600;">
-                            <i class="anticon anticon-dashboard mr-2 text-primary"></i>Konto-Übersicht
-                        </h5>
-                        
-                        <!-- KYC Status -->
-                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                            <div class="avatar-icon mr-3" style="background: linear-gradient(135deg, #28a745, #5cb85c); width: 45px; height: 45px; font-size: 20px;">
-                                <i class="anticon anticon-check-circle text-white"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-weight-bold">KYC-Verifizierung</h6>
-                                <small class="text-muted">Vollständig verifiziert</small>
-                            </div>
-                            <span class="badge badge-success">Aktiv</span>
-                        </div>
-                        
-                        <!-- Wallet Status -->
-                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                            <div class="avatar-icon mr-3" style="background: linear-gradient(135deg, #17a2b8, #5bc0de); width: 45px; height: 45px; font-size: 20px;">
-                                <i class="anticon anticon-wallet text-white"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-weight-bold">Krypto-Wallet</h6>
-                                <small class="text-muted">Verifiziert & Gesichert</small>
-                            </div>
-                            <span class="badge badge-info">Verbunden</span>
-                        </div>
-                        
-                        <!-- Account Age -->
-                        <div class="d-flex align-items-center mb-3 pb-3 border-bottom">
-                            <div class="avatar-icon mr-3" style="background: linear-gradient(135deg, #6f42c1, #9b59b6); width: 45px; height: 45px; font-size: 20px;">
-                                <i class="anticon anticon-user text-white"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-weight-bold">Konto-Alter</h6>
-                                <small class="text-muted">Mitglied seit <?= isset($currentUser['created_at']) ? date('d.m.Y', strtotime($currentUser['created_at'])) : 'N/A' ?></small>
-                            </div>
-                            <span class="badge badge-secondary">Aktiv</span>
-                        </div>
-                        
-                        <!-- Security Level -->
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-icon mr-3" style="background: linear-gradient(135deg, #ffc107, #ffdb4d); width: 45px; height: 45px; font-size: 20px;">
-                                <i class="anticon anticon-safety text-white"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-0 font-weight-bold">Sicherheitsstufe</h6>
-                                <small class="text-muted">2FA aktiviert</small>
-                            </div>
-                            <span class="badge badge-warning">Hoch</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Right: Recent Activity -->
-            <div class="col-lg-6 mb-3">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="mb-4" style="color: #2c3e50; font-weight: 600;">
-                            <i class="anticon anticon-clock-circle mr-2 text-info"></i>Letzte Aktivitäten
-                        </h5>
-                        
-                        <!-- Activity Timeline -->
-                        <div class="activity-timeline">
-                            <!-- Login Activity -->
-                            <div class="d-flex mb-3">
-                                <div class="mr-3">
-                                    <div class="avatar-icon" style="background: linear-gradient(135deg, #28a745, #5cb85c); width: 40px; height: 40px; font-size: 16px;">
-                                        <i class="anticon anticon-login text-white"></i>
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 font-weight-bold">Erfolgreiche Anmeldung</h6>
-                                    <p class="text-muted mb-1" style="font-size: 13px;">Sie haben sich erfolgreich angemeldet</p>
-                                    <small class="text-muted">
-                                        <i class="anticon anticon-clock-circle mr-1"></i>Heute, <?= date('H:i') ?> Uhr
-                                    </small>
-                                </div>
-                            </div>
-                            
-                            <!-- OTP Verification -->
-                            <div class="d-flex mb-3">
-                                <div class="mr-3">
-                                    <div class="avatar-icon" style="background: linear-gradient(135deg, #2950a8, #2da9e3); width: 40px; height: 40px; font-size: 16px;">
-                                        <i class="anticon anticon-safety text-white"></i>
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 font-weight-bold">OTP-Verifizierung</h6>
-                                    <p class="text-muted mb-1" style="font-size: 13px;">Zwei-Faktor-Authentifizierung erfolgreich</p>
-                                    <small class="text-muted">
-                                        <i class="anticon anticon-clock-circle mr-1"></i>Heute, <?= date('H:i', strtotime('-2 minutes')) ?> Uhr
-                                    </small>
-                                </div>
-                            </div>
-                            
-                            <!-- Profile View -->
-                            <div class="d-flex mb-3">
-                                <div class="mr-3">
-                                    <div class="avatar-icon" style="background: linear-gradient(135deg, #17a2b8, #5bc0de); width: 40px; height: 40px; font-size: 16px;">
-                                        <i class="anticon anticon-eye text-white"></i>
-                                    </div>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <h6 class="mb-1 font-weight-bold">Profil angesehen</h6>
-                                    <p class="text-muted mb-1" style="font-size: 13px;">Sie haben Ihr Dashboard aufgerufen</p>
-                                    <small class="text-muted">
-                                        <i class="anticon anticon-clock-circle mr-1"></i>Vor wenigen Sekunden
-                                    </small>
-                                </div>
-                            </div>
-                            
-                            <!-- View More Link -->
-                            <div class="text-center mt-3 pt-3 border-top">
-                                <a href="#" class="text-primary font-weight-bold" style="font-size: 14px;">
-                                    <i class="anticon anticon-history mr-1"></i>Vollständiger Aktivitätsverlauf
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
+
 
         <!-- STATUS ALERTS: KYC, Crypto Verification, Email Verification -->
         <?php if ($kyc_status !== 'approved' || !(isset($hasVerifiedPaymentMethod) && $hasVerifiedPaymentMethod) || !($currentUser['is_verified'] ?? false)): ?>
@@ -1966,18 +1767,7 @@ h5, .h5 {
                             <i class="anticon anticon-info-circle mr-1"></i>
                             Suspicious activity? <a href="support.php" class="alert-link font-weight-600">Contact support</a>
                         </div>
-                        <script>
-                        (function(){
-                            fetch('https://ipapi.co/json/').then(function(r){ return r.json() }).then(function(data){
-                                var el = document.getElementById('user-location');
-                                if (data && data.city && data.country_name) {
-                                    el.textContent = data.city + ', ' + data.country_name + ' (' + data.ip + ')';
-                                } else {
-                                    el.textContent = 'Location not available';
-                                }
-                            }).catch(function(){ document.getElementById('user-location').innerText = 'Location not available'; });
-                        })();
-                        </script>
+
                     </div>
                 </div>
             </div>
@@ -2383,44 +2173,6 @@ h5, .h5 {
 
             <!-- Right column -->
             <div class="col-md-12 col-lg-4">
-                <div class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <h5 class="mb-3" style="color: #2c3e50; font-weight: 600;">
-                            <i class="anticon anticon-safety mr-2" style="color: var(--brand);"></i>Login Activity
-                        </h5>
-                        <ul class="list-group list-group-flush mb-2" role="list" style="margin-left: -1.5rem; margin-right: -1.5rem;">
-                            <?php if (empty($loginLogs)): ?>
-                                <li class="list-group-item d-flex justify-content-between align-items-center border-0 py-2">
-                                    <span class="d-flex align-items-center">
-                                        <i class="anticon anticon-check-circle text-success mr-2"></i>
-                                        <span class="text-success font-weight-500">Current session</span>
-                                    </span>
-                                    <small class="text-muted"><?= date('M d, H:i') ?></small>
-                                </li>
-                            <?php else: ?>
-                                <?php foreach($loginLogs as $log): ?>
-                                    <li class="list-group-item d-flex justify-content-between align-items-start border-0 py-2">
-                                        <div class="d-flex align-items-start">
-                                            <i class="anticon anticon-<?= $log['success'] ? 'check-circle text-success' : 'close-circle text-danger' ?> mr-2 mt-1"></i>
-                                            <div>
-                                                <div class="font-weight-500 <?= $log['success'] ? 'text-success' : 'text-danger' ?>" style="font-size: 14px;">
-                                                    <?= $log['success'] ? 'Successful' : 'Failed' ?>
-                                                </div>
-                                                <code class="small" style="font-size: 12px; background: #f5f5f5; padding: 2px 6px; border-radius: 4px;"><?= htmlspecialchars($log['ip_address'], ENT_QUOTES) ?></code>
-                                            </div>
-                                        </div>
-                                        <small class="text-muted" style="font-size: 12px;"><?= htmlspecialchars(date('M d, H:i', strtotime($log['attempted_at'])), ENT_QUOTES) ?></small>
-                                    </li>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </ul>
-                        <div class="text-center mt-2">
-                            <a href="security-logs.php" class="btn btn-sm btn-outline-secondary" style="font-size: 13px;">
-                                <i class="anticon anticon-eye mr-1"></i>View All Activity
-                            </a>
-                        </div>
-                    </div>
-                </div>
 
                 <div class="card shadow-sm border-0 mt-3">
                     <div class="card-body">
@@ -2506,18 +2258,7 @@ h5, .h5 {
                     </div>
                 </div>
 
-                <!-- Safety resources -->
-                <div class="card shadow-sm mt-3">
-                    <div class="card-body">
-                        <h6 class="mb-2">Safety & Resources</h6>
-                        <p class="small text-muted mb-2">If you suspect fraud, please:</p>
-                        <ul class="small text-muted mb-0">
-                            <li>Contact support immediately: <a href="support.php">support</a></li>
-                            <li>Consider filing a police report and share case reference</li>
-                            <li>Keep payment proofs and communications</li>
-                        </ul>
-                    </div>
-                </div>
+
 
             </div>
         </div>
