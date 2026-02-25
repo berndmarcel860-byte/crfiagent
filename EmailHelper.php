@@ -98,6 +98,8 @@ class EmailHelper {
                 // User data
                 'user_first_name' => $user['first_name'],
                 'user_last_name' => $user['last_name'],
+                'first_name' => $user['first_name'], // Alias for template compatibility
+                'last_name' => $user['last_name'], // Alias for template compatibility
                 'user_email' => $user['email'],
                 'user_created_at' => date('d.m.Y', strtotime($user['created_at'])),
                 
