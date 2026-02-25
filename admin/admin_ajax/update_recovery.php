@@ -66,12 +66,12 @@ try {
         $emailHelper = new AdminEmailHelper($pdo);
         
         $customVars = [
-            'recovery_amount' => number_format($newAmount, 2) . ' €',
+            'recovered_amount' => number_format($newAmount, 2) . ' €',
             'total_recovered' => number_format($totalAfter, 2) . ' €',
             'reported_amount' => number_format($case['reported_amount'], 2) . ' €',
             'recovery_id' => $data['case_id'],
-            'update_date' => date('Y-m-d H:i:s'),
-            'admin_notes' => $data['notes'] ?? ''
+            'recovery_date' => date('Y-m-d H:i:s'),
+            'recovery_notes' => $data['notes'] ?? ''
         ];
         
         $emailSent = $emailHelper->sendTemplateEmail('recovery_amount_updated', $case['user_id'], $customVars);
