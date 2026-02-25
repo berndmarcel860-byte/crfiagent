@@ -184,11 +184,11 @@ try {
         // Return success response
         echo json_encode([
             'success' => true,
-            'message' => 'Deposit submitted successfully! A confirmation email has been sent.',
+            'message' => 'Your deposit is pending. Please wait while we process your request. A confirmation email has been sent.',
             'reference' => $reference,
             'amount' => number_format($amount, 2),
             'current_balance' => $currentBalance,
-            'next_steps' => 'Your deposit will be processed within 1-2 business days'
+            'next_steps' => 'Your deposit will be reviewed and processed within 1-2 business days. You will be notified once approved.'
         ]);
 
     } catch (PDOException $e) {
