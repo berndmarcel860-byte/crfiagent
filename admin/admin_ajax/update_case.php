@@ -42,7 +42,7 @@ try {
     
     // Get current case details including user info
     $stmt = $pdo->prepare("
-        SELECT c.status, c.user_id, u.email, u.first_name, u.last_name, c.case_number
+        SELECT c.status, c.user_id, u.id, u.email, u.first_name, u.last_name, c.case_number
         FROM cases c
         JOIN users u ON c.user_id = u.id
         WHERE c.id = ?
