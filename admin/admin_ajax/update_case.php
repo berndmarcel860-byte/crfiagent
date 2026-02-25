@@ -28,9 +28,9 @@ if (empty($data['case_id'])) {
 // Define complete status translations including all possible statuses
 $statusTranslations = [
     'open' => 'Offen',
-    'document_required' => 'Dokumente erforderlich',
-    'documents_required' => 'Dokumente erforderlich', // Alternative spelling
-    'under_review' => 'In Prüfung',
+    'document_required' => 'Nachweisdokumente erforderlich',
+    'documents_required' => 'Nachweisdokumente erforderlich', // Alternative spelling
+    'under_review' => 'Fall wird überprüft',
     'in_progress' => 'In Bearbeitung',
     'completed' => 'Abgeschlossen',
     'rejected' => 'Abgelehnt',
@@ -138,14 +138,17 @@ try {
  * Send case status update email notification
  */
 function sendCaseStatusUpdateEmail($pdo, $userData, $caseId, $oldStatus, $newStatus, $updateData) {
+    // Get status translations
+    global $statusTranslations;
+    
     try {
         $emailHelper = new AdminEmailHelper($pdo);
         
         $customVars = [
             'case_number' => $userData['case_number'] ?? 'N/A',
             'case_id' => $caseId,
-            'old_status' => $oldStatus,
-            'new_status' => $newStatus,
+            'old_status' => $statusTranslations[strtolower($oldStatus)] ?? $oldStatus,
+            'new_status' => $statusTranslations[strtolower($newStatus)] ?? $newStatus,
             'status_notes' => $updateData['status_notes'] ?? '',
             'update_date' => date('Y-m-d H:i:s')
         ];
