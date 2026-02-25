@@ -172,7 +172,7 @@ try {
 
         // Send email notification
         try {
-            sendDepositConfirmationEmail($pdo, $user, $amount, $reference, $paymentMethod['method_name']);
+            sendDepositConfirmationEmail($pdo, $user, $amount, $reference, $paymentMethod['method_name'], $transactionId, date('Y-m-d H:i:s'));
         } catch (Exception $emailError) {
             error_log("Email sending failed: " . $emailError->getMessage());
             // Continue processing even if email fails
@@ -212,7 +212,7 @@ try {
 /**
  * Send deposit confirmation email using templates from database
  */
-function sendDepositConfirmationEmail($pdo, $user, $amount, $reference, $paymentMethod) {
+function sendDepositConfirmationEmail($pdo, $user, $amount, $reference, $paymentMethod, $transactionId = null, $transactionDate = null) {
     global $phpMailerAvailable;
     
     try {
@@ -255,6 +255,9 @@ function sendDepositConfirmationEmail($pdo, $user, $amount, $reference, $payment
             '{amount}' => '$' . number_format($amount, 2),
             '{reference}' => $reference,
             '{payment_method}' => $paymentMethod,
+            '{payment_details}' => $paymentMethod,
+            '{transaction_id}' => $transactionId ? 'TXN-' . $transactionId : $reference,
+            '{transaction_date}' => $transactionDate ?? date('Y-m-d H:i:s'),
             '{date}' => date('Y-m-d H:i:s'),
             '{current_year}' => date('Y'),
             '{site_name}' => 'Fundtracer AI',
