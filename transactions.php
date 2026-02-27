@@ -148,4 +148,182 @@
 }
 </style>
 
+<script>
+$(document).ready(function() {
+    // Initialize DataTable
+    var table = $('#transactionsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: 'ajax/transactions.php',
+            type: 'POST',
+            data: function(d) {
+                return JSON.stringify(d);
+            },
+            contentType: 'application/json',
+            error: function(xhr, error, thrown) {
+                console.error('DataTable Ajax error:', error, thrown);
+                $('#transactionError').removeClass('d-none').text('Error loading transactions. Please refresh the page.');
+            }
+        },
+        columns: [
+            { 
+                data: 'type',
+                render: function(data, type, row) {
+                    const typeLabels = {
+                        'deposit': '<span class="badge badge-info">Deposit</span>',
+                        'withdrawal': '<span class="badge badge-warning">Withdrawal</span>',
+                        'refund': '<span class="badge badge-success">Refund</span>'
+                    };
+                    return typeLabels[data] || data;
+                }
+            },
+            { 
+                data: 'amount',
+                render: function(data, type, row) {
+                    return '€' + parseFloat(data).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                }
+            },
+            { 
+                data: 'method',
+                render: function(data, type, row) {
+                    return data || 'N/A';
+                }
+            },
+            { 
+                data: 'status',
+                render: function(data, type, row) {
+                    const statusBadges = {
+                        'pending': '<span class="badge badge-warning">Pending</span>',
+                        'completed': '<span class="badge badge-success">Completed</span>',
+                        'approved': '<span class="badge badge-success">Approved</span>',
+                        'rejected': '<span class="badge badge-danger">Rejected</span>',
+                        'processing': '<span class="badge badge-info">Processing</span>',
+                        'failed': '<span class="badge badge-danger">Failed</span>'
+                    };
+                    return statusBadges[data.toLowerCase()] || '<span class="badge badge-secondary">' + data + '</span>';
+                }
+            },
+            { 
+                data: 'reference',
+                render: function(data, type, row) {
+                    return '<code style="font-size: 11px;">' + (data || 'N/A') + '</code>';
+                }
+            },
+            { 
+                data: 'created_at',
+                render: function(data, type, row) {
+                    if (!data) return 'N/A';
+                    const date = new Date(data);
+                    return date.toLocaleDateString('de-DE', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+            },
+            {
+                data: null,
+                orderable: false,
+                render: function(data, type, row) {
+                    if (row.type === 'withdrawal' && row.withdrawal_id) {
+                        return '<button class="btn btn-sm btn-primary view-details" data-id="' + row.withdrawal_id + '" data-row=\'' + JSON.stringify(row) + '\'><i class="anticon anticon-eye"></i> Details</button>';
+                    }
+                    return '<span class="text-muted">N/A</span>';
+                }
+            }
+        ],
+        order: [[5, 'desc']], // Order by date descending
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        language: {
+            emptyTable: "No transactions found",
+            info: "Showing _START_ to _END_ of _TOTAL_ transactions",
+            infoEmpty: "Showing 0 to 0 of 0 transactions",
+            infoFiltered: "(filtered from _MAX_ total transactions)",
+            lengthMenu: "Show _MENU_ transactions",
+            loadingRecords: "Loading...",
+            processing: "Processing...",
+            search: "Search:",
+            zeroRecords: "No matching transactions found"
+        }
+    });
+
+    // Refresh button
+    $('#refreshTransactions').on('click', function() {
+        table.ajax.reload(null, false);
+    });
+
+    // View details button click handler
+    $('#transactionsTable').on('click', '.view-details', function() {
+        const rowData = JSON.parse($(this).attr('data-row'));
+        
+        // Populate modal with withdrawal data
+        $('#detail-reference').text(rowData.reference || 'N/A');
+        $('#detail-amount').html('<strong>€' + parseFloat(rowData.amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '</strong>');
+        $('#detail-method').text(rowData.method || 'N/A');
+        $('#detail-payment-details').text(rowData.details || 'No details available');
+        $('#detail-created').text(formatDate(rowData.created_at));
+        $('#detail-otp').html(rowData.otp_verified == 1 ? '<span class="badge badge-success">✓ Verified</span>' : '<span class="badge badge-warning">Not Verified</span>');
+        
+        // Status with color
+        const statusBadges = {
+            'pending': '<span class="badge badge-warning">Pending</span>',
+            'approved': '<span class="badge badge-success">Approved</span>',
+            'rejected': '<span class="badge badge-danger">Rejected</span>',
+            'processing': '<span class="badge badge-info">Processing</span>',
+            'completed': '<span class="badge badge-success">Completed</span>'
+        };
+        $('#detail-status').html(statusBadges[rowData.status.toLowerCase()] || rowData.status);
+        
+        // Conditional fields
+        if (rowData.approved_at) {
+            $('#approved-date-group').show();
+            $('#detail-approved').text(formatDate(rowData.approved_at));
+        } else {
+            $('#approved-date-group').hide();
+        }
+        
+        if (rowData.rejected_at) {
+            $('#rejected-date-group').show();
+            $('#detail-rejected').text(formatDate(rowData.rejected_at));
+        } else {
+            $('#rejected-date-group').hide();
+        }
+        
+        if (rowData.admin_notes) {
+            $('#admin-notes-group').show();
+            $('#detail-admin-notes').text(rowData.admin_notes);
+        } else {
+            $('#admin-notes-group').hide();
+        }
+        
+        if (rowData.rejected_reason) {
+            $('#rejected-reason-group').show();
+            $('#detail-rejected-reason').text(rowData.rejected_reason);
+        } else {
+            $('#rejected-reason-group').hide();
+        }
+        
+        // Show modal
+        $('#withdrawalDetailsModal').modal('show');
+    });
+    
+    // Helper function to format dates
+    function formatDate(dateString) {
+        if (!dateString) return 'N/A';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('de-DE', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+});
+</script>
+
 <?php include 'footer.php'; ?>
