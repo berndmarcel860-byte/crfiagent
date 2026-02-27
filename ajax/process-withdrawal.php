@@ -85,12 +85,11 @@ try {
 
     if (!$user) throw new Exception('User not found', 404);
 
-    // 7️⃣ Payment method
-    $stmt = $pdo->prepare("SELECT id, method_name FROM payment_methods WHERE method_code = ? AND is_active = 1 AND allows_withdrawal = 1");
-    $stmt->execute([$methodCode]);
-    $paymentMethod = $stmt->fetch();
-    if (!$paymentMethod) throw new Exception('Invalid or inactive payment method selected', 400);
-    $paymentMethodId = $paymentMethod['id'];
+    // 7️⃣ Payment method - already validated in user_payment_methods above
+    // Use the payment method name from user's payment method
+    $paymentMethodName = $userPaymentMethod['label'] ?: 
+                        ($userPaymentMethod['type'] === 'crypto' ? $userPaymentMethod['cryptocurrency'] : $userPaymentMethod['bank_name']) ?: 
+                        'Bank Transfer';
 
     // 8️⃣ Balance check
     if ($user['balance'] < $amount) {
@@ -129,7 +128,7 @@ try {
             $customVars = [
                 'amount' => '€' . number_format($amount, 2),
                 'reference' => $reference,
-                'payment_method' => $paymentMethod['method_name'],
+                'payment_method' => $paymentMethodName,
                 'payment_details' => $details,
                 'transaction_id' => isset($withdrawalId) ? 'TXN-' . $withdrawalId : $reference,
                 'transaction_date' => date('Y-m-d H:i:s'),
