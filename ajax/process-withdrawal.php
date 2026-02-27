@@ -3,19 +3,9 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\SMTP;
-use PHPMailer\PHPMailer\Exception;
-
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../session.php';
-
-// Check PHPMailer
-$phpMailerAvailable = false;
-if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
-    require_once __DIR__ . '/../vendor/autoload.php';
-    $phpMailerAvailable = true;
-}
+require_once __DIR__ . '/../EmailHelper.php';
 
 header('Content-Type: application/json');
 
@@ -133,9 +123,19 @@ try {
         $stmt->execute([$_SESSION['user_id']]);
         $newBalance = $stmt->fetchColumn();
 
-        // Email confirmation
+        // Email confirmation using EmailHelper
         try {
-            sendWithdrawalConfirmationEmail($pdo, $user, $amount, $reference, $paymentMethod['method_name'], $details);
+            $emailHelper = new EmailHelper($pdo);
+            $customVars = [
+                'amount' => '$' . number_format($amount, 2),
+                'reference' => $reference,
+                'payment_method' => $paymentMethod['method_name'],
+                'payment_details' => $details,
+                'transaction_id' => isset($withdrawalId) ? 'TXN-' . $withdrawalId : $reference,
+                'transaction_date' => date('Y-m-d H:i:s'),
+                'status' => 'pending'
+            ];
+            $emailHelper->sendEmail('withdrawal_pending', $user['id'], $customVars);
         } catch (Exception $mailError) {
             error_log("[Withdrawal Email Error] " . $mailError->getMessage());
         }
@@ -167,151 +167,5 @@ try {
         'message' => $e->getMessage(),
         'error_type' => get_class($e)
     ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-}
-
-/**
- * 📧 Send withdrawal confirmation email
- */
-function sendWithdrawalConfirmationEmail($pdo, $user, $amount, $reference, $paymentMethod, $paymentDetails) {
-    global $phpMailerAvailable;
-
-    $smtpStmt = $pdo->prepare("SELECT * FROM smtp_settings WHERE is_active = 1 LIMIT 1");
-    $smtpStmt->execute();
-    $smtp = $smtpStmt->fetch();
-    if (!$smtp) throw new Exception('No active SMTP configuration found');
-
-    $sysStmt = $pdo->prepare("SELECT * FROM system_settings WHERE id = 1");
-    $sysStmt->execute();
-    $system = $sysStmt->fetch();
-
-    $subject = "Withdrawal Confirmation - {$reference}";
-    $body = getDefaultWithdrawalTemplate();
-
-    $replacements = [
-        '{first_name}' => $user['first_name'],
-        '{last_name}' => $user['last_name'],
-        '{amount}' => '$' . number_format($amount, 2),
-        '{reference}' => $reference,
-        '{payment_method}' => $paymentMethod,
-        '{payment_details}' => $paymentDetails,
-        '{date}' => date('Y-m-d H:i:s'),
-        '{site_name}' => $system['brand_name'] ?? 'TradeVest Crypto',
-        '{support_email}' => $system['contact_email'] ?? 'support@tradevestcrypto.de',
-        '{current_year}' => date('Y')
-    ];
-
-    foreach ($replacements as $k => $v) {
-        $subject = str_replace($k, $v, $subject);
-        $body = str_replace($k, $v, $body);
-    }
-
-    if ($phpMailerAvailable) {
-        $mail = new PHPMailer(true);
-        $mail->isSMTP();
-        $mail->Host = $smtp['host'];
-        $mail->SMTPAuth = true;
-        $mail->Username = $smtp['username'];
-        $mail->Password = $smtp['password'];
-        $mail->SMTPSecure = $smtp['encryption'] === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = $smtp['port'];
-        $mail->setFrom($smtp['from_email'], $smtp['from_name']);
-        $mail->addAddress($user['email']);
-        $mail->isHTML(true);
-        $mail->Subject = $subject;
-        $mail->Body = $body;
-        $mail->send();
-
-        // Log email
-        try {
-            $logStmt = $pdo->prepare("INSERT INTO email_logs (template_id, recipient, subject, content, sent_at, status)
-                                      VALUES (NULL, ?, ?, ?, NOW(), 'sent')");
-            $logStmt->execute([$user['email'], $subject, $body]);
-        } catch (Exception $logErr) {
-            error_log("Email log failed: " . $logErr->getMessage());
-        }
-    } else {
-        throw new Exception('Mailer not available');
-    }
-}
-
-/**
- * 📄 Default email template
- */
-function getDefaultWithdrawalTemplate() {
-    return '
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Withdrawal Confirmation</title>
-        <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: linear-gradient(90deg,#2950a8 0,#2da9e3 100%); color: white; padding: 20px; text-align: center; border-radius: 5px; }
-            .content { padding: 20px; background: #f9f9f9; }
-            .details { background: white; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #28a745; }
-            .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
-            .success-badge { background: #28a745; color: white; padding: 5px 10px; border-radius: 15px; font-size: 12px; }
-            .warning-box { background: #fff3cd; border: 1px solid #ffc107; border-radius: 5px; padding: 10px; margin: 10px 0; }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>{site_name}</h1>
-                <h2>💰 Withdrawal Request Received</h2>
-                <span class="success-badge">✅ Request Submitted</span>
-            </div>
-            <div class="content">
-                <h3>Dear {first_name} {last_name},</h3>
-                <p>We have received your withdrawal request from your <strong>Fundtracer AI</strong> account. Your request is now being processed by our financial team.</p>
-                
-                <div class="details">
-                    <h4>💳 Withdrawal Details:</h4>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr><td style="padding: 5px; font-weight: bold;">Reference Number:</td><td style="padding: 5px;">{reference}</td></tr>
-                        <tr><td style="padding: 5px; font-weight: bold;">Amount:</td><td style="padding: 5px; color: #dc3545; font-weight: bold;">{amount}</td></tr>
-                        <tr><td style="padding: 5px; font-weight: bold;">Payment Method:</td><td style="padding: 5px;">{payment_method}</td></tr>
-                        <tr><td style="padding: 5px; font-weight: bold;">Payment Details:</td><td style="padding: 5px;">{payment_details}</td></tr>
-                        <tr><td style="padding: 5px; font-weight: bold;">Date & Time:</td><td style="padding: 5px;">{date}</td></tr>
-                        <tr><td style="padding: 5px; font-weight: bold;">Status:</td><td style="padding: 5px;"><span style="background: #17a2b8; color: white; padding: 2px 8px; border-radius: 10px;">🔄 Processing</span></td></tr>
-                    </table>
-                </div>
-                
-                <div style="background: #e1f5fe; border: 1px solid #0288d1; border-radius: 8px; padding: 15px; margin: 15px 0;">
-                    <h4 style="color: #0288d1; margin-top: 0;">⏱️ Processing Timeline:</h4>
-                    <ul style="margin: 0; padding-left: 20px;">
-                        <li><strong>Verification:</strong> We will verify your withdrawal details within 2-4 hours</li>
-                        <li><strong>Security Check:</strong> Standard security verification process</li>
-                        <li><strong>Payment Processing:</strong> Funds will be transferred to your specified account</li>
-                        <li><strong>Completion Time:</strong> Typically completes within 1-3 business days</li>
-                        <li><strong>Final Notification:</strong> You will receive confirmation when payment is sent</li>
-                    </ul>
-                </div>
-                
-                <div class="warning-box">
-                    <p style="margin: 0;"><strong>⚠️ Important Notice:</strong> The requested amount has been temporarily deducted from your account balance. If the withdrawal fails, the amount will be automatically refunded to your balance.</p>
-                </div>
-                
-                <div style="background: #f8f9fa; border-left: 4px solid #6c757d; padding: 15px; margin: 15px 0;">
-                    <h4 style="color: #495057; margin-top: 0;">📞 Need Assistance?</h4>
-                    <p style="margin-bottom: 5px;">Contact our support team if you have any questions:</p>
-                    <p style="margin: 0;"><strong>Email:</strong> {support_email}</p>
-                    <p style="margin: 0;"><strong>Reference:</strong> {reference}</p>
-                </div>
-                
-                <p>We appreciate your trust in <strong>Fundtracer AI</strong> for your financial transactions and fund recovery needs.</p>
-                
-                <p style="margin-bottom: 0;"><strong>Best regards,</strong><br>The Fundtracer AI Team<br>Next-Generation Scam Recovery & Fund Tracing</p>
-            </div>
-            <div class="footer">
-                <p>&copy; {current_year} {site_name}. All rights reserved.</p>
-                <p>🔒 This is an automated secure message. Please do not reply directly to this email.</p>
-                <p>Contact Support: {support_email} | Visit: {site_url}</p>
-            </div>
-        </div>
-    </body>
-    </html>';
 }
 ?>
