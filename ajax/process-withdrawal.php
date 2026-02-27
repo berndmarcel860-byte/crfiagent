@@ -110,8 +110,8 @@ try {
         // Insert transaction
         $stmt = $pdo->prepare("INSERT INTO transactions 
             (user_id, type, amount, payment_method_id, reference, status, payment_details) 
-            VALUES (?, 'withdrawal', ?, ?, ?, 'pending', ?)");
-        $stmt->execute([$_SESSION['user_id'], $amount, $paymentMethodId, $reference, $details]);
+            VALUES (?, 'withdrawal', ?, NULL, ?, 'pending', ?)");
+        $stmt->execute([$_SESSION['user_id'], $amount, $reference, $details]);
 
         // Deduct balance
         $stmt = $pdo->prepare("UPDATE users SET balance = balance - ? WHERE id = ?");
