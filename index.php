@@ -445,22 +445,44 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
                             <?php
                             try {
                                 // Load only user's verified payment methods
-                                $stmt = $pdo->prepare("SELECT upm.id, upm.type, upm.cryptocurrency, upm.account_details, pm.method_name 
+                                $stmt = $pdo->prepare("SELECT upm.id, upm.type, upm.payment_method, upm.cryptocurrency, 
+                                    upm.wallet_address, upm.iban, upm.account_number, upm.bank_name, 
+                                    upm.label, pm.method_name 
                                     FROM user_payment_methods upm
                                     LEFT JOIN payment_methods pm ON (
-                                        (upm.type = 'crypto' AND pm.method_code = LOWER(upm.cryptocurrency))
-                                        OR (upm.type = 'bank' AND pm.method_code = 'bank_transfer')
+                                        (upm.type = 'crypto' AND pm.method_code = UPPER(upm.cryptocurrency))
+                                        OR (upm.type = 'fiat' AND pm.method_code = UPPER(upm.payment_method))
                                     )
                                     WHERE upm.user_id = ? AND upm.verification_status = 'verified'
                                     ORDER BY upm.created_at DESC");
                                 $stmt->execute([$_SESSION['user_id']]);
                                 while ($userMethod = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                    $displayName = $userMethod['method_name'] ?? ($userMethod['type'] === 'crypto' ? ucfirst($userMethod['cryptocurrency']) : 'Bank Transfer');
-                                    $details = $userMethod['account_details'] ?? '';
-                                    // Show masked version for selection
-                                    if ($userMethod['type'] === 'crypto' && strlen($details) > 10) {
-                                        $displayName .= ' (...' . substr($details, -6) . ')';
+                                    // Determine display name
+                                    if ($userMethod['label']) {
+                                        $displayName = $userMethod['label'];
+                                    } elseif ($userMethod['method_name']) {
+                                        $displayName = $userMethod['method_name'];
+                                    } elseif ($userMethod['type'] === 'crypto') {
+                                        $displayName = ucfirst($userMethod['cryptocurrency']);
+                                    } else {
+                                        $displayName = $userMethod['bank_name'] ?? 'Bank Transfer';
                                     }
+                                    
+                                    // Get account details based on type
+                                    if ($userMethod['type'] === 'crypto') {
+                                        $details = $userMethod['wallet_address'] ?? '';
+                                        // Show masked version for crypto
+                                        if (strlen($details) > 10) {
+                                            $displayName .= ' (...' . substr($details, -6) . ')';
+                                        }
+                                    } else {
+                                        // For bank: prefer IBAN, fallback to account_number
+                                        $details = $userMethod['iban'] ?? $userMethod['account_number'] ?? '';
+                                        if (strlen($details) > 10) {
+                                            $displayName .= ' (...' . substr($details, -4) . ')';
+                                        }
+                                    }
+                                    
                                     echo '<option value="' . htmlspecialchars($userMethod['id'], ENT_QUOTES) 
                                          . '" data-details="' . htmlspecialchars($details, ENT_QUOTES) 
                                          . '" data-type="' . htmlspecialchars($userMethod['type'], ENT_QUOTES) . '">' 
