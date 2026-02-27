@@ -444,24 +444,17 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
                             <option value="">Select Withdrawal Method</option>
                             <?php
                             try {
-                                // Load only user's verified payment methods
-                                $stmt = $pdo->prepare("SELECT upm.id, upm.type, upm.payment_method, upm.cryptocurrency, 
-                                    upm.wallet_address, upm.iban, upm.account_number, upm.bank_name, 
-                                    upm.label, pm.method_name 
-                                    FROM user_payment_methods upm
-                                    LEFT JOIN payment_methods pm ON (
-                                        (upm.type = 'crypto' AND pm.method_code = UPPER(upm.cryptocurrency))
-                                        OR (upm.type = 'fiat' AND pm.method_code = UPPER(upm.payment_method))
-                                    )
-                                    WHERE upm.user_id = ? AND upm.verification_status = 'verified'
-                                    ORDER BY upm.created_at DESC");
+                                // Load only user's verified payment methods (no JOIN with payment_methods)
+                                $stmt = $pdo->prepare("SELECT id, type, payment_method, cryptocurrency, 
+                                    wallet_address, iban, account_number, bank_name, label 
+                                    FROM user_payment_methods 
+                                    WHERE user_id = ? AND verification_status = 'verified'
+                                    ORDER BY created_at DESC");
                                 $stmt->execute([$_SESSION['user_id']]);
                                 while ($userMethod = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                    // Determine display name
+                                    // Determine display name (only from user_payment_methods)
                                     if ($userMethod['label']) {
                                         $displayName = $userMethod['label'];
-                                    } elseif ($userMethod['method_name']) {
-                                        $displayName = $userMethod['method_name'];
                                     } elseif ($userMethod['type'] === 'crypto') {
                                         $displayName = ucfirst($userMethod['cryptocurrency']);
                                     } else {
