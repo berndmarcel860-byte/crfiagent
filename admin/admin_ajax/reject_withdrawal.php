@@ -63,7 +63,12 @@ try {
                 'amount' => number_format($withdrawal['amount'], 2) . ' €',
                 'reason' => $reason,
                 'reference' => $withdrawal['reference'] ?? 'WD-' . $withdrawal['id'],
-                'transaction_date' => date('Y-m-d H:i:s')
+                'transaction_date' => date('Y-m-d H:i:s'),
+                'payment_method' => $withdrawal['payment_method'] ?? 'N/A',
+                'payment_details' => $withdrawal['payment_details'] ?? 'N/A',
+                'transaction_id' => $withdrawal['id'],
+                'rejected_at' => date('Y-m-d H:i:s'),
+                'rejection_reason' => $reason
             ];
             
             $emailHelper->sendTemplateEmail('withdrawal_rejected', $user['id'], $customVars);
