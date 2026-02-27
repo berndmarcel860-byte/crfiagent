@@ -53,6 +53,27 @@ try {
     $stmt->execute([$withdrawal['user_id']]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
+    // === GET PAYMENT METHOD NAME ===
+    // Query user_payment_methods to get proper display name
+    $paymentMethodName = $withdrawal['method_code'] ?? 'N/A';
+    if ($withdrawal['method_code']) {
+        $stmt = $pdo->prepare("SELECT label, cryptocurrency, bank_name, type 
+                               FROM user_payment_methods 
+                               WHERE user_id = ? AND payment_method = ? 
+                               LIMIT 1");
+        $stmt->execute([$withdrawal['user_id'], $withdrawal['method_code']]);
+        $paymentMethodData = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($paymentMethodData) {
+            // Use label first, then cryptocurrency or bank_name
+            $paymentMethodName = $paymentMethodData['label'] ?: 
+                                ($paymentMethodData['type'] === 'crypto' ? 
+                                    $paymentMethodData['cryptocurrency'] : 
+                                    $paymentMethodData['bank_name']) ?: 
+                                $withdrawal['method_code'];
+        }
+    }
+
     if ($user) {
         // --- SEND EMAIL NOTIFICATION ---
         try {
@@ -63,8 +84,8 @@ try {
                 'amount' => number_format($withdrawal['amount'], 2) . ' €',
                 'reason' => $reason,
                 'reference' => $withdrawal['reference'] ?? 'WD-' . $withdrawal['id'],
-                'transaction_date' => date('Y-m-d H:i:s'),
-                'payment_method' => $withdrawal['payment_method'] ?? 'N/A',
+                'transaction_date' => $withdrawal['created_at'] ?? date('Y-m-d H:i:s'),
+                'payment_method' => $paymentMethodName,
                 'payment_details' => $withdrawal['payment_details'] ?? 'N/A',
                 'transaction_id' => $withdrawal['id'],
                 'rejected_at' => date('Y-m-d H:i:s'),
