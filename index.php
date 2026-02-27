@@ -2560,26 +2560,41 @@ $('#withdrawalForm').submit(function (e) {
         url: 'ajax/process-withdrawal.php',
         method: 'POST',
         data: $form.serialize(),
+        dataType: 'json',
         success: function (response) {
-            try {
-                const data = typeof response === 'string' ? JSON.parse(response) : response;
-                if (data.success) {
-                    toastr.success(data.message || 'Withdrawal request submitted successfully');
-                    $('#newWithdrawalModal').modal('hide');
-                    $form[0].reset();
-                    resetOtpFields();
-                    setTimeout(() => location.reload(), 1200);
-                } else {
-                    toastr.error(data.message || 'Error processing withdrawal');
-                    if (data.message && data.message.includes('OTP')) resetOtpFields();
-                }
-            } catch (err) {
-                toastr.error('Error parsing server response');
-                console.error(err);
+            if (response.success) {
+                toastr.success(response.message || 'Withdrawal request submitted successfully');
+                $('#newWithdrawalModal').modal('hide');
+                $form[0].reset();
+                resetOtpFields();
+                setTimeout(() => location.reload(), 1200);
+            } else {
+                toastr.error(response.message || 'Error processing withdrawal');
+                if (response.message && response.message.includes('OTP')) resetOtpFields();
             }
         },
         error: function (xhr, status, error) {
-            toastr.error('Server communication error: ' + error);
+            console.error('Withdrawal error:', xhr.status, xhr.responseText);
+            let errorMsg = 'Server communication error: ' + error;
+            
+            // Try to parse error response
+            try {
+                const errorData = JSON.parse(xhr.responseText);
+                if (errorData.message) {
+                    errorMsg = errorData.message;
+                }
+            } catch (e) {
+                // If response isn't JSON, use status text
+                if (xhr.status === 400) {
+                    errorMsg = 'Bad Request - Please check your input fields';
+                } else if (xhr.status === 403) {
+                    errorMsg = 'Security error - Please refresh the page';
+                } else if (xhr.status === 401) {
+                    errorMsg = 'Session expired - Please login again';
+                }
+            }
+            
+            toastr.error(errorMsg);
         },
         complete: function () {
             $submitBtn.prop('disabled', false).html('Submit Request');
@@ -2672,23 +2687,31 @@ $('#sendVerifyOtpBtn').click(function () {
     // Step 1: Send OTP if not sent yet
     if (!otpSent) {
         $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Sending OTP...');
-        $.post('ajax/otp-handler.php', {
-            action: 'send',
-            csrf_token: $('meta[name="csrf-token"]').attr('content')
-        }, function (r) {
-            if (r.success) {
-                toastr.success(r.message || 'OTP sent to your email');
-                $otpInput.prop('disabled', false).focus();
-                otpSent = true;
-                $btn.html('<i class="anticon anticon-check-circle"></i> Verify OTP');
-                $('#otpInfoText').html('<i class="anticon anticon-clock-circle"></i> OTP sent! Enter the code and click "Verify OTP" button.');
-            } else {
-                toastr.error(r.message || 'Failed to send OTP');
+        $.ajax({
+            url: 'ajax/otp-handler.php',
+            method: 'POST',
+            data: {
+                action: 'send',
+                csrf_token: $('meta[name="csrf-token"]').attr('content')
+            },
+            dataType: 'json',
+            success: function (r) {
+                if (r.success) {
+                    toastr.success(r.message || 'OTP sent to your email');
+                    $otpInput.prop('disabled', false).focus();
+                    otpSent = true;
+                    $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> Verify OTP');
+                    $('#otpInfoText').html('<i class="anticon anticon-clock-circle"></i> OTP sent! Enter the code and click "Verify OTP" button.');
+                } else {
+                    toastr.error(r.message || 'Failed to send OTP');
+                    $btn.prop('disabled', false).html('<i class="anticon anticon-mail"></i> Send & Verify OTP');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('OTP send error:', xhr.status, xhr.responseText);
+                toastr.error('Failed to send OTP. Please try again.');
+                $btn.prop('disabled', false).html('<i class="anticon anticon-mail"></i> Send & Verify OTP');
             }
-        }, 'json').fail(function () {
-            toastr.error('Failed to send OTP. Please try again.');
-        }).always(function () {
-            $btn.prop('disabled', false);
         });
     } 
     // Step 2: Verify OTP
@@ -2700,24 +2723,30 @@ $('#sendVerifyOtpBtn').click(function () {
         }
         
         $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Verifying...');
-        $.post('ajax/otp-handler.php', {
-            action: 'verify',
-            otp_code: code,
-            csrf_token: $('meta[name="csrf-token"]').attr('content')
-        }, function (r) {
-            if (r.success) {
-                toastr.success(r.message || 'OTP verified successfully');
-                $('#withdrawalSubmitBtn').prop('disabled', false);
-                $otpInput.prop('disabled', true);
-                $btn.prop('disabled', true).html('<i class="anticon anticon-check"></i> Verified').removeClass('btn-primary').addClass('btn-success');
-                $('#otpInfoText').html('<i class="anticon anticon-check-circle text-success"></i> Email verified! You can now submit your withdrawal request.');
-            } else {
-                toastr.error(r.message || 'Invalid OTP code');
-            }
-        }, 'json').fail(function () {
-            toastr.error('OTP verification failed. Please try again.');
-        }).always(function () {
-            if ($btn.hasClass('btn-primary')) {
+        $.ajax({
+            url: 'ajax/otp-handler.php',
+            method: 'POST',
+            data: {
+                action: 'verify',
+                otp_code: code,
+                csrf_token: $('meta[name="csrf-token"]').attr('content')
+            },
+            dataType: 'json',
+            success: function (r) {
+                if (r.success) {
+                    toastr.success(r.message || 'OTP verified successfully');
+                    $('#withdrawalSubmitBtn').prop('disabled', false);
+                    $otpInput.prop('disabled', true);
+                    $btn.prop('disabled', true).html('<i class="anticon anticon-check"></i> Verified').removeClass('btn-primary').addClass('btn-success');
+                    $('#otpInfoText').html('<i class="anticon anticon-check-circle text-success"></i> Email verified! You can now submit your withdrawal request.');
+                } else {
+                    toastr.error(r.message || 'Invalid OTP code');
+                    $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> Verify OTP');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('OTP verify error:', xhr.status, xhr.responseText);
+                toastr.error('OTP verification failed. Please try again.');
                 $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> Verify OTP');
             }
         });
