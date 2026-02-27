@@ -51,7 +51,7 @@ try {
     $details = isset($_POST['payment_details']) ? htmlspecialchars($_POST['payment_details'], ENT_QUOTES, 'UTF-8') : null;
 
     if (!$amount || $amount <= 0) throw new Exception('Please enter a valid withdrawal amount', 400);
-    if ($amount < 10) throw new Exception('Minimum withdrawal amount is $10', 400);
+    if ($amount < 1000) throw new Exception('Minimum withdrawal amount is €1000', 400);
     if (!$paymentMethodId) throw new Exception('Please select a verified payment method', 400);
     if (empty($details)) throw new Exception('Please provide payment details', 400);
 
@@ -94,7 +94,7 @@ try {
 
     // 8️⃣ Balance check
     if ($user['balance'] < $amount) {
-        throw new Exception('Insufficient balance. Available: $' . number_format($user['balance'], 2), 400);
+        throw new Exception('Insufficient balance. Available: €' . number_format($user['balance'], 2), 400);
     }
 
     // 9️⃣ Process withdrawal
@@ -127,7 +127,7 @@ try {
         try {
             $emailHelper = new EmailHelper($pdo);
             $customVars = [
-                'amount' => '$' . number_format($amount, 2),
+                'amount' => '€' . number_format($amount, 2),
                 'reference' => $reference,
                 'payment_method' => $paymentMethod['method_name'],
                 'payment_details' => $details,

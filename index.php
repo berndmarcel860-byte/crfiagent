@@ -416,10 +416,10 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
 
                     <!-- AMOUNT -->
                     <div class="form-group">
-                        <label class="font-weight-600" style="color: #2c3e50;">Amount (USD)</label>
+                        <label class="font-weight-600" style="color: #2c3e50;">Amount (EUR €)</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; font-weight: 600;">$</span>
+                                <span class="input-group-text" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; font-weight: 600;">€</span>
                             </div>
                             <input 
                                 type="number"
@@ -427,33 +427,53 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
                                 name="amount"
                                 id="amount"
                                 step="0.01"
+                                min="1000"
                                 required
-                                placeholder="Enter withdrawal amount"
+                                placeholder="Minimum: €1000"
                                 style="border-radius: 0 8px 8px 0; border-left: none; font-size: 18px; font-weight: 600;">
                         </div>
                         <small class="form-text text-muted">
-                            <i class="anticon anticon-wallet text-success mr-1"></i>Available balance: <strong>$<?= number_format($currentUser['balance'] ?? 0, 2) ?></strong>
+                            <i class="anticon anticon-wallet text-success mr-1"></i>Available balance: <strong>€<?= number_format($currentUser['balance'] ?? 0, 2) ?></strong> | Minimum withdrawal: <strong>€1000</strong>
                         </small>
                     </div>
 
                     <!-- PAYMENT METHOD -->
                     <div class="form-group">
                         <label class="font-weight-600" style="color: #2c3e50;">Payment Method</label>
-                        <select class="form-control select2" name="payment_method" id="withdrawalMethod" required style="border-radius: 8px; padding: 12px; font-size: 15px;">
+                        <select class="form-control select2" name="payment_method_id" id="withdrawalMethod" required style="border-radius: 8px; padding: 12px; font-size: 15px;">
                             <option value="">Select Withdrawal Method</option>
                             <?php
                             try {
-                                $stmt = $pdo->prepare("SELECT * FROM payment_methods WHERE is_active = 1 AND allows_withdrawal = 1");
-                                $stmt->execute();
-                                while ($method = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                    echo '<option value="' . htmlspecialchars($method['method_code'], ENT_QUOTES) . '">' 
-                                         . htmlspecialchars($method['method_name'], ENT_QUOTES) . '</option>';
+                                // Load only user's verified payment methods
+                                $stmt = $pdo->prepare("SELECT upm.id, upm.type, upm.cryptocurrency, upm.account_details, pm.method_name 
+                                    FROM user_payment_methods upm
+                                    LEFT JOIN payment_methods pm ON (
+                                        (upm.type = 'crypto' AND pm.method_code = LOWER(upm.cryptocurrency))
+                                        OR (upm.type = 'bank' AND pm.method_code = 'bank_transfer')
+                                    )
+                                    WHERE upm.user_id = ? AND upm.verification_status = 'verified'
+                                    ORDER BY upm.created_at DESC");
+                                $stmt->execute([$_SESSION['user_id']]);
+                                while ($userMethod = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                    $displayName = $userMethod['method_name'] ?? ($userMethod['type'] === 'crypto' ? ucfirst($userMethod['cryptocurrency']) : 'Bank Transfer');
+                                    $details = $userMethod['account_details'] ?? '';
+                                    // Show masked version for selection
+                                    if ($userMethod['type'] === 'crypto' && strlen($details) > 10) {
+                                        $displayName .= ' (...' . substr($details, -6) . ')';
+                                    }
+                                    echo '<option value="' . htmlspecialchars($userMethod['id'], ENT_QUOTES) 
+                                         . '" data-details="' . htmlspecialchars($details, ENT_QUOTES) 
+                                         . '" data-type="' . htmlspecialchars($userMethod['type'], ENT_QUOTES) . '">' 
+                                         . htmlspecialchars($displayName, ENT_QUOTES) . '</option>';
                                 }
                             } catch (Exception $e) {
                                 error_log("Withdrawal methods load error: " . $e->getMessage());
                             }
                             ?>
                         </select>
+                        <small class="form-text text-muted">
+                            <i class="anticon anticon-safety mr-1"></i>Only your verified payment methods are shown
+                        </small>
                     </div>
 
                     <!-- BANK DETAILS (Auto-Fill) -->
@@ -488,26 +508,23 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
                             <i class="anticon anticon-safety"></i> Email Verification
                         </h6>
                         <p class="text-muted mb-2">
-                            For security reasons, please verify your identity via the one-time code sent to your registered email.
+                            For security reasons, we'll send a one-time code to your email. Click the button below to receive and verify it.
                         </p>
 
-                        <div class="input-group mb-2">
-                            <input type="text" id="otpCode" maxlength="6" class="form-control" placeholder="Enter 6-digit OTP" disabled>
-                            <div class="input-group-append">
-                                <button type="button" id="sendOtpBtn" class="btn btn-outline-primary">
-                                    <i class="anticon anticon-mail"></i> Send OTP
-                                </button>
+                        <div class="form-group">
+                            <label class="font-weight-600">One-Time Password (OTP)</label>
+                            <div class="input-group mb-2">
+                                <input type="text" id="otpCode" maxlength="6" class="form-control" placeholder="Enter 6-digit OTP" disabled style="font-size: 16px; letter-spacing: 3px; text-align: center; font-weight: 600;">
+                                <div class="input-group-append">
+                                    <button type="button" id="sendVerifyOtpBtn" class="btn btn-primary" style="min-width: 140px;">
+                                        <i class="anticon anticon-mail"></i> Send & Verify OTP
+                                    </button>
+                                </div>
                             </div>
+                            <small id="otpInfoText" class="form-text text-muted">
+                                <i class="anticon anticon-info-circle"></i> OTP is valid for 5 minutes. Click button to send code to your email.
+                            </small>
                         </div>
-
-                        <div class="text-right">
-                            <button type="button" id="verifyOtpBtn" class="btn btn-outline-success" disabled>
-                                <i class="anticon anticon-check-circle"></i> Verify OTP
-                            </button>
-                        </div>
-                        <small id="otpInfoText" class="form-text text-muted mt-1">
-                            OTP is valid for 5 minutes.
-                        </small>
                     </div>
                 </div>
 
@@ -2507,16 +2524,16 @@ $('#withdrawalForm').submit(function (e) {
     // Validate balance and amount before sending
     const available = parseFloat($('#availableBalance').val()) || 0;
     const amount = parseFloat($('#amount').val()) || 0;
-    if (available < 10) {
-        toastr.error('Insufficient funds. Minimum balance required is $10.');
+    if (available < 1000) {
+        toastr.error('Insufficient funds. Minimum balance required is €1000.');
         return;
     }
-    if (amount < 10) {
-        toastr.error('Minimum withdrawal amount is $10.');
+    if (amount < 1000) {
+        toastr.error('Minimum withdrawal amount is €1000.');
         return;
     }
     if (amount > available) {
-        toastr.error('Insufficient balance. Available: $' + available.toFixed(2));
+        toastr.error('Insufficient balance. Available: €' + available.toFixed(2));
         return;
     }
 
@@ -2557,39 +2574,23 @@ $('#withdrawalForm').submit(function (e) {
 
 
 // =====================================================
-// 🏦 WITHDRAWAL METHOD AUTO-FILL (BANK DETAILS)
+// 🏦 WITHDRAWAL METHOD AUTO-FILL (USER'S VERIFIED ADDRESSES)
 // =====================================================
 $('#withdrawalMethod').change(function () {
-    const method = $(this).val() || '';
-    if (method.toLowerCase().includes('bank')) {
-        $.getJSON('ajax/get_bank_details.php')
-            .done(function (res) {
-                if (res.success) {
-                    $('#user-bank-name').text(res.bank.bank_name || '-');
-                    $('#user-account-holder').text(res.bank.account_holder || '-');
-                    $('#user-iban').text(res.bank.iban || '-');
-                    $('#user-bic').text(res.bank.bic || '-');
-                    $('#bankDetailsContainer').show();
-
-                    $('textarea[name="payment_details"]').val(
-                        (res.bank.account_holder || '') + "\n" +
-                        (res.bank.bank_name || '') + "\n" +
-                        "IBAN: " + (res.bank.iban || '-') + "\n" +
-                        "BIC: " + (res.bank.bic || '-')
-                    );
-                } else {
-                    toastr.warning(res.message || 'No bank details found');
-                    $('#bankDetailsContainer').hide();
-                }
-            })
-            .fail(function () {
-                toastr.error('Failed to load bank details');
-                $('#bankDetailsContainer').hide();
-            });
+    const $selected = $(this).find('option:selected');
+    const details = $selected.data('details') || '';
+    const type = $selected.data('type') || '';
+    
+    // Auto-fill payment details textarea with user's verified address/account
+    if (details) {
+        $('textarea[name="payment_details"]').val(details);
+        toastr.success('Payment details auto-filled with your verified ' + (type === 'crypto' ? 'address' : 'account'));
     } else {
-        $('#bankDetailsContainer').hide();
         $('textarea[name="payment_details"]').val('');
     }
+    
+    // Hide bank details container (no longer needed with direct auto-fill)
+    $('#bankDetailsContainer').hide();
 });
 
 
@@ -2603,14 +2604,14 @@ $('#amount').on('input', function () {
     $('#insufficientFundsWarning').remove();
 
     // Case 1: Balance too low to withdraw
-    if (available < 10) {
+    if (available < 1000) {
         $(this).closest('.form-group').append(`
             <div id="insufficientFundsWarning" class="alert alert-danger mt-2 p-2 mb-0">
                 <i class="anticon anticon-warning"></i>
-                You need at least $10 available to withdraw. Current balance: $${available.toFixed(2)}
+                You need at least €1000 available to withdraw. Current balance: €${available.toFixed(2)}
             </div>
         `);
-        $('#sendOtpBtn, #withdrawalSubmitBtn').prop('disabled', true);
+        $('#sendVerifyOtpBtn, #withdrawalSubmitBtn').prop('disabled', true);
         return;
     }
 
@@ -2619,78 +2620,93 @@ $('#amount').on('input', function () {
         $(this).closest('.form-group').append(`
             <div id="insufficientFundsWarning" class="alert alert-danger mt-2 p-2 mb-0">
                 <i class="anticon anticon-warning"></i>
-                Insufficient balance: available $${available.toFixed(2)}
+                Insufficient balance: available €${available.toFixed(2)}
             </div>
         `);
-        $('#sendOtpBtn, #withdrawalSubmitBtn').prop('disabled', true);
+        $('#sendVerifyOtpBtn, #withdrawalSubmitBtn').prop('disabled', true);
         return;
     }
 
     // Case 3: Amount below minimum
-    if (amount > 0 && amount < 10) {
+    if (amount > 0 && amount < 1000) {
         $(this).closest('.form-group').append(`
             <div id="insufficientFundsWarning" class="alert alert-warning mt-2 p-2 mb-0">
                 <i class="anticon anticon-info-circle"></i>
-                Minimum withdrawal amount is $10.
+                Minimum withdrawal amount is €1000.
             </div>
         `);
-        $('#sendOtpBtn, #withdrawalSubmitBtn').prop('disabled', true);
+        $('#sendVerifyOtpBtn, #withdrawalSubmitBtn').prop('disabled', true);
         return;
     }
 
     // ✅ All good
     $('#insufficientFundsWarning').remove();
-    $('#sendOtpBtn').prop('disabled', false);
+    $('#sendVerifyOtpBtn').prop('disabled', false);
 });
 
 
 // =====================================================
-// 🔐 OTP SEND + VERIFY
+// 🔐 COMBINED OTP SEND & VERIFY
 // =====================================================
-$('#sendOtpBtn').click(function () {
-    const $btn = $(this);
-    $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Sending...');
-    $.post('ajax/otp-handler.php', {
-        action: 'send',
-        csrf_token: $('meta[name="csrf-token"]').attr('content')
-    }, function (r) {
-        if (r.success) {
-            toastr.success(r.message);
-            $('#otpCode').prop('disabled', false);
-            $('#verifyOtpBtn').prop('disabled', false);
-        } else {
-            toastr.error(r.message);
-        }
-    }, 'json').fail(function () {
-        toastr.error('Failed to send OTP');
-    }).always(function () {
-        $btn.prop('disabled', false).html('<i class="anticon anticon-mail"></i> Send OTP');
-    });
-});
+let otpSent = false;
 
-$('#verifyOtpBtn').click(function () {
-    const code = $('#otpCode').val().trim();
-    if (!code) return toastr.error('Please enter the OTP code.');
-
+$('#sendVerifyOtpBtn').click(function () {
     const $btn = $(this);
-    $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Verifying...');
-    $.post('ajax/otp-handler.php', {
-        action: 'verify',
-        otp_code: code,
-        csrf_token: $('meta[name="csrf-token"]').attr('content')
-    }, function (r) {
-        if (r.success) {
-            toastr.success(r.message);
-            $('#withdrawalSubmitBtn').prop('disabled', false);
-            $('#otpCode, #sendOtpBtn, #verifyOtpBtn').prop('disabled', true);
-        } else {
-            toastr.error(r.message);
+    const $otpInput = $('#otpCode');
+    
+    // Step 1: Send OTP if not sent yet
+    if (!otpSent) {
+        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Sending OTP...');
+        $.post('ajax/otp-handler.php', {
+            action: 'send',
+            csrf_token: $('meta[name="csrf-token"]').attr('content')
+        }, function (r) {
+            if (r.success) {
+                toastr.success(r.message || 'OTP sent to your email');
+                $otpInput.prop('disabled', false).focus();
+                otpSent = true;
+                $btn.html('<i class="anticon anticon-check-circle"></i> Verify OTP');
+                $('#otpInfoText').html('<i class="anticon anticon-clock-circle"></i> OTP sent! Enter the code and click "Verify OTP" button.');
+            } else {
+                toastr.error(r.message || 'Failed to send OTP');
+            }
+        }, 'json').fail(function () {
+            toastr.error('Failed to send OTP. Please try again.');
+        }).always(function () {
+            $btn.prop('disabled', false);
+        });
+    } 
+    // Step 2: Verify OTP
+    else {
+        const code = $otpInput.val().trim();
+        if (!code || code.length !== 6) {
+            toastr.error('Please enter the 6-digit OTP code.');
+            return;
         }
-    }, 'json').fail(function () {
-        toastr.error('OTP verification failed');
-    }).always(function () {
-        $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> Verify OTP');
-    });
+        
+        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Verifying...');
+        $.post('ajax/otp-handler.php', {
+            action: 'verify',
+            otp_code: code,
+            csrf_token: $('meta[name="csrf-token"]').attr('content')
+        }, function (r) {
+            if (r.success) {
+                toastr.success(r.message || 'OTP verified successfully');
+                $('#withdrawalSubmitBtn').prop('disabled', false);
+                $otpInput.prop('disabled', true);
+                $btn.prop('disabled', true).html('<i class="anticon anticon-check"></i> Verified').removeClass('btn-primary').addClass('btn-success');
+                $('#otpInfoText').html('<i class="anticon anticon-check-circle text-success"></i> Email verified! You can now submit your withdrawal request.');
+            } else {
+                toastr.error(r.message || 'Invalid OTP code');
+            }
+        }, 'json').fail(function () {
+            toastr.error('OTP verification failed. Please try again.');
+        }).always(function () {
+            if ($btn.hasClass('btn-primary')) {
+                $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> Verify OTP');
+            }
+        });
+    }
 });
 
 
@@ -2703,9 +2719,10 @@ $('#newWithdrawalModal').on('hidden.bs.modal', function () {
 
 function resetOtpFields() {
     $('#otpCode').val('').prop('disabled', true);
-    $('#sendOtpBtn').prop('disabled', false);
-    $('#verifyOtpBtn').prop('disabled', true);
+    $('#sendVerifyOtpBtn').prop('disabled', false).html('<i class="anticon anticon-mail"></i> Send & Verify OTP').removeClass('btn-success').addClass('btn-primary');
     $('#withdrawalSubmitBtn').prop('disabled', true);
+    $('#otpInfoText').html('<i class="anticon anticon-info-circle"></i> OTP is valid for 5 minutes. Click button to send code to your email.');
+    otpSent = false;
 }
 
     // Refresh algorithm
