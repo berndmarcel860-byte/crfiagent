@@ -27,41 +27,49 @@ try {
     $columns = [
         0 => 't.type',
         1 => 't.amount',
-        2 => 'COALESCE(pm.method_name, t.payment_method_id)',
+        2 => 'method_display',
         3 => 't.status',
         4 => 't.created_at',
         5 => 't.reference'
     ];
     $orderBy = $columns[$orderColumn] ?? 't.created_at';
 
-    // Prepare base query
+    // Prepare base query - use withdrawals table for withdrawal transactions
     $query = "SELECT 
                 t.id,
                 t.type,
                 t.amount,
-                COALESCE(pm.method_name, t.payment_method_id) as method,
                 t.status,
                 t.reference,
                 t.created_at,
-                t.wallet_address,
-                t.bank_details,
-                t.proof_path,
+                CASE 
+                    WHEN t.type = 'withdrawal' THEN 
+                        COALESCE(upm.label, upm.cryptocurrency, upm.bank_name, w.method_code)
+                    ELSE 'N/A'
+                END as method_display,
                 CASE 
                     WHEN t.type = 'withdrawal' THEN w.payment_details
                     WHEN t.type = 'deposit' THEN d.proof_path
                     WHEN t.type = 'refund' THEN crt.notes
                     ELSE NULL
-                END as details
+                END as details,
+                w.id as withdrawal_id,
+                w.method_code,
+                w.otp_verified,
+                w.admin_notes,
+                w.rejected_reason,
+                w.approved_at,
+                w.rejected_at
               FROM transactions t
-              LEFT JOIN payment_methods pm ON t.payment_method_id = pm.id
               LEFT JOIN withdrawals w ON t.reference = w.reference AND t.type = 'withdrawal'
+              LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id AND w.method_code = upm.payment_method AND t.type = 'withdrawal'
               LEFT JOIN deposits d ON t.reference = d.reference AND t.type = 'deposit'
               LEFT JOIN case_recovery_transactions crt ON t.case_id = crt.case_id AND t.type = 'refund'
               WHERE t.user_id = :user_id";
 
     // Add search filter if provided
     if (!empty($search)) {
-        $query .= " AND (t.type LIKE :search OR t.status LIKE :search OR pm.method_name LIKE :search OR t.reference LIKE :search)";
+        $query .= " AND (t.type LIKE :search OR t.status LIKE :search OR t.reference LIKE :search OR w.method_code LIKE :search)";
     }
 
     // Add ordering and pagination
@@ -86,14 +94,18 @@ try {
             'id' => $transaction['id'],
             'type' => $transaction['type'],
             'amount' => $transaction['amount'],
-            'method' => $transaction['method'],
+            'method' => $transaction['method_display'],
             'status' => $transaction['status'],
             'reference' => $transaction['reference'],
             'created_at' => $transaction['created_at'],
             'details' => $transaction['details'],
-            'proof_path' => $transaction['proof_path'],
-            'wallet_address' => $transaction['wallet_address'],
-            'bank_details' => $transaction['bank_details']
+            'withdrawal_id' => $transaction['withdrawal_id'],
+            'method_code' => $transaction['method_code'],
+            'otp_verified' => $transaction['otp_verified'],
+            'admin_notes' => $transaction['admin_notes'],
+            'rejected_reason' => $transaction['rejected_reason'],
+            'approved_at' => $transaction['approved_at'],
+            'rejected_at' => $transaction['rejected_at']
         ];
     }, $transactions);
 
@@ -108,9 +120,10 @@ try {
     $filteredRecords = $totalRecords;
     if (!empty($search)) {
         $filteredQuery = "SELECT COUNT(*) FROM transactions t
-                         LEFT JOIN payment_methods pm ON t.payment_method_id = pm.id
+                         LEFT JOIN withdrawals w ON t.reference = w.reference AND t.type = 'withdrawal'
+                         LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id AND w.method_code = upm.payment_method
                          WHERE t.user_id = :user_id
-                         AND (t.type LIKE :search OR t.status LIKE :search OR pm.method_name LIKE :search OR t.reference LIKE :search)";
+                         AND (t.type LIKE :search OR t.status LIKE :search OR t.reference LIKE :search OR w.method_code LIKE :search)";
         $filteredStmt = $pdo->prepare($filteredQuery);
         $filteredStmt->bindValue(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
         $filteredStmt->bindValue(':search', "%$search%");
