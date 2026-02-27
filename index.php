@@ -451,9 +451,9 @@ $outstandingAmount = max(0, $reportedTotal - $recoveredTotal);
                                     FROM user_payment_methods upm
                                     LEFT JOIN payment_methods pm ON (
                                         (upm.type = 'crypto' AND pm.method_code = UPPER(upm.cryptocurrency))
-                                        OR (upm.type = 'fiat' AND pm.method_code = UPPER(upm.payment_method))
+                                        OR (upm.type = 'bank' AND pm.method_code = UPPER(upm.payment_method))
                                     )
-                                    WHERE upm.user_id = ? AND upm.verification_status = 'verified'
+                                    WHERE upm.user_id = ? AND upm.status = 'verified'
                                     ORDER BY upm.created_at DESC");
                                 $stmt->execute([$_SESSION['user_id']]);
                                 while ($userMethod = $stmt->fetch(PDO::FETCH_ASSOC)) {
