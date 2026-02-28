@@ -60,9 +60,9 @@ try {
                 w.processed_at,
                 w.updated_at
               FROM transactions t
-              LEFT JOIN withdrawals w ON t.reference = w.reference AND t.type = 'withdrawal'
-              LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id AND w.method_code = upm.payment_method AND t.type = 'withdrawal'
-              LEFT JOIN deposits d ON t.reference = d.reference AND t.type = 'deposit'
+              LEFT JOIN withdrawals w ON t.reference COLLATE utf8mb4_unicode_ci = w.reference COLLATE utf8mb4_unicode_ci AND t.type = 'withdrawal'
+              LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id AND w.method_code COLLATE utf8mb4_unicode_ci = upm.payment_method COLLATE utf8mb4_unicode_ci AND t.type = 'withdrawal'
+              LEFT JOIN deposits d ON t.reference COLLATE utf8mb4_unicode_ci = d.reference COLLATE utf8mb4_unicode_ci AND t.type = 'deposit'
               LEFT JOIN case_recovery_transactions crt ON t.case_id = crt.case_id AND t.type = 'refund'
               WHERE t.user_id = :user_id";
 
@@ -118,8 +118,8 @@ try {
     $filteredRecords = $totalRecords;
     if (!empty($search)) {
         $filteredQuery = "SELECT COUNT(*) FROM transactions t
-                         LEFT JOIN withdrawals w ON t.reference = w.reference AND t.type = 'withdrawal'
-                         LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id AND w.method_code = upm.payment_method
+                         LEFT JOIN withdrawals w ON t.reference COLLATE utf8mb4_unicode_ci = w.reference COLLATE utf8mb4_unicode_ci AND t.type = 'withdrawal'
+                         LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id AND w.method_code COLLATE utf8mb4_unicode_ci = upm.payment_method COLLATE utf8mb4_unicode_ci
                          WHERE t.user_id = :user_id
                          AND (t.type LIKE :search OR t.status LIKE :search OR t.reference LIKE :search OR w.method_code LIKE :search)";
         $filteredStmt = $pdo->prepare($filteredQuery);

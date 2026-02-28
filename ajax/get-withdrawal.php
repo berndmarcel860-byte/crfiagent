@@ -28,7 +28,7 @@ try {
             pm.method_name as pm_method_name,
             pm.is_crypto as pm_is_crypto
         FROM withdrawals w
-        LEFT JOIN payment_methods pm ON w.method_code = pm.method_code
+        LEFT JOIN payment_methods pm ON w.method_code COLLATE utf8mb4_unicode_ci = pm.method_code COLLATE utf8mb4_unicode_ci
         WHERE w.id = :id AND w.user_id = :user_id
     ");
     $stmt->execute([
