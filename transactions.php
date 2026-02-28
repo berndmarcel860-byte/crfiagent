@@ -149,11 +149,22 @@
 </style>
 
 <script>
+// Global variable to prevent multiple initializations
+var transactionsTableInitialized = false;
+
 $(document).ready(function() {
+    // Prevent multiple initializations
+    if (transactionsTableInitialized) {
+        return;
+    }
+    
     // Check if DataTable already exists and destroy it
     if ($.fn.DataTable.isDataTable('#transactionsTable')) {
         $('#transactionsTable').DataTable().destroy();
     }
+    
+    // Mark as initialized
+    transactionsTableInitialized = true;
     
     // Initialize DataTable
     var table = $('#transactionsTable').DataTable({
@@ -233,8 +244,11 @@ $(document).ready(function() {
                 data: null,
                 orderable: false,
                 render: function(data, type, row) {
+                    // Show details button for both withdrawals and deposits
                     if (row.type === 'withdrawal' && row.withdrawal_id) {
-                        return '<button class="btn btn-sm btn-primary view-details" data-id="' + row.withdrawal_id + '" data-row=\'' + JSON.stringify(row) + '\'><i class="anticon anticon-eye"></i> Details</button>';
+                        return '<button class="btn btn-sm btn-primary view-details" data-type="withdrawal" data-id="' + row.withdrawal_id + '" data-row=\'' + JSON.stringify(row) + '\'><i class="anticon anticon-eye"></i> Details</button>';
+                    } else if (row.type === 'deposit' && row.deposit_id) {
+                        return '<button class="btn btn-sm btn-info view-details" data-type="deposit" data-id="' + row.deposit_id + '" data-row=\'' + JSON.stringify(row) + '\'><i class="anticon anticon-eye"></i> Details</button>';
                     }
                     return '<span class="text-muted">N/A</span>';
                 }
@@ -264,8 +278,13 @@ $(document).ready(function() {
     // View details button click handler
     $('#transactionsTable').on('click', '.view-details', function() {
         const rowData = JSON.parse($(this).attr('data-row'));
+        const transactionType = $(this).attr('data-type');
         
-        // Populate modal with withdrawal data
+        // Update modal title based on transaction type
+        const modalTitle = transactionType === 'deposit' ? 'Deposit Details' : 'Withdrawal Details';
+        $('#withdrawalDetailsModal .modal-title').text(modalTitle);
+        
+        // Populate modal with transaction data
         $('#detail-reference').text(rowData.reference || 'N/A');
         $('#detail-amount').html('<strong>€' + parseFloat(rowData.amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '</strong>');
         $('#detail-method').text(rowData.method || 'N/A');
@@ -279,12 +298,14 @@ $(document).ready(function() {
             'approved': '<span class="badge badge-success">Approved</span>',
             'rejected': '<span class="badge badge-danger">Rejected</span>',
             'processing': '<span class="badge badge-info">Processing</span>',
-            'completed': '<span class="badge badge-success">Completed</span>'
+            'completed': '<span class="badge badge-success">Completed</span>',
+            'confirmed': '<span class="badge badge-success">Confirmed</span>',
+            'failed': '<span class="badge badge-danger">Failed</span>'
         };
         $('#detail-status').html(statusBadges[rowData.status.toLowerCase()] || rowData.status);
         
         // Conditional fields - use processed_at for approved date if status is completed
-        if (rowData.status && rowData.status.toLowerCase() === 'completed' && rowData.processed_at) {
+        if (rowData.status && (rowData.status.toLowerCase() === 'completed' || rowData.status.toLowerCase() === 'confirmed') && rowData.processed_at) {
             $('#approved-date-group').show();
             $('#detail-approved').text(formatDate(rowData.processed_at));
         } else {
@@ -292,7 +313,7 @@ $(document).ready(function() {
         }
         
         // Use updated_at for rejected/failed date if status is failed
-        if ((rowData.status && (rowData.status.toLowerCase() === 'failed' || rowData.status.toLowerCase() === 'cancelled')) && rowData.updated_at) {
+        if ((rowData.status && (rowData.status.toLowerCase() === 'failed' || rowData.status.toLowerCase() === 'cancelled' || rowData.status.toLowerCase() === 'rejected')) && rowData.updated_at) {
             $('#rejected-date-group').show();
             $('#detail-rejected').text(formatDate(rowData.updated_at));
         } else {

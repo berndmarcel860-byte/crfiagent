@@ -45,6 +45,7 @@ try {
                 CASE 
                     WHEN t.type = 'withdrawal' THEN 
                         COALESCE(upm.label, upm.cryptocurrency, upm.bank_name, w.method_code)
+                    WHEN t.type = 'deposit' THEN d.payment_method
                     ELSE 'N/A'
                 END as method_display,
                 CASE 
@@ -54,11 +55,12 @@ try {
                     ELSE NULL
                 END as details,
                 w.id as withdrawal_id,
+                d.id as deposit_id,
                 w.method_code,
                 t.otp_verified,
-                w.admin_notes,
-                w.processed_at,
-                w.updated_at
+                COALESCE(w.admin_notes, d.admin_notes) as admin_notes,
+                COALESCE(w.processed_at, d.confirmed_at) as processed_at,
+                COALESCE(w.updated_at, d.updated_at) as updated_at
               FROM transactions t
               LEFT JOIN withdrawals w ON t.reference COLLATE utf8mb4_unicode_ci = w.reference COLLATE utf8mb4_unicode_ci AND t.type = 'withdrawal'
               LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id AND w.method_code COLLATE utf8mb4_unicode_ci = upm.payment_method COLLATE utf8mb4_unicode_ci AND t.type = 'withdrawal'
@@ -99,6 +101,7 @@ try {
             'created_at' => $transaction['created_at'],
             'details' => $transaction['details'],
             'withdrawal_id' => $transaction['withdrawal_id'],
+            'deposit_id' => $transaction['deposit_id'],
             'method_code' => $transaction['method_code'],
             'otp_verified' => $transaction['otp_verified'],
             'admin_notes' => $transaction['admin_notes'],
