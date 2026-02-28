@@ -55,11 +55,10 @@ try {
                 END as details,
                 w.id as withdrawal_id,
                 w.method_code,
-                w.otp_verified,
+                t.otp_verified,
                 w.admin_notes,
-                w.rejected_reason,
-                w.approved_at,
-                w.rejected_at
+                w.processed_at,
+                w.updated_at
               FROM transactions t
               LEFT JOIN withdrawals w ON t.reference = w.reference AND t.type = 'withdrawal'
               LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id AND w.method_code = upm.payment_method AND t.type = 'withdrawal'
@@ -103,9 +102,8 @@ try {
             'method_code' => $transaction['method_code'],
             'otp_verified' => $transaction['otp_verified'],
             'admin_notes' => $transaction['admin_notes'],
-            'rejected_reason' => $transaction['rejected_reason'],
-            'approved_at' => $transaction['approved_at'],
-            'rejected_at' => $transaction['rejected_at']
+            'processed_at' => $transaction['processed_at'],
+            'updated_at' => $transaction['updated_at']
         ];
     }, $transactions);
 

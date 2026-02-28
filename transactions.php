@@ -278,17 +278,18 @@ $(document).ready(function() {
         };
         $('#detail-status').html(statusBadges[rowData.status.toLowerCase()] || rowData.status);
         
-        // Conditional fields
-        if (rowData.approved_at) {
+        // Conditional fields - use processed_at for approved date if status is completed
+        if (rowData.status && rowData.status.toLowerCase() === 'completed' && rowData.processed_at) {
             $('#approved-date-group').show();
-            $('#detail-approved').text(formatDate(rowData.approved_at));
+            $('#detail-approved').text(formatDate(rowData.processed_at));
         } else {
             $('#approved-date-group').hide();
         }
         
-        if (rowData.rejected_at) {
+        // Use updated_at for rejected/failed date if status is failed
+        if ((rowData.status && (rowData.status.toLowerCase() === 'failed' || rowData.status.toLowerCase() === 'cancelled')) && rowData.updated_at) {
             $('#rejected-date-group').show();
-            $('#detail-rejected').text(formatDate(rowData.rejected_at));
+            $('#detail-rejected').text(formatDate(rowData.updated_at));
         } else {
             $('#rejected-date-group').hide();
         }
@@ -300,12 +301,8 @@ $(document).ready(function() {
             $('#admin-notes-group').hide();
         }
         
-        if (rowData.rejected_reason) {
-            $('#rejected-reason-group').show();
-            $('#detail-rejected-reason').text(rowData.rejected_reason);
-        } else {
-            $('#rejected-reason-group').hide();
-        }
+        // Note: rejected_reason field doesn't exist in database, showing admin_notes instead
+        $('#rejected-reason-group').hide();
         
         // Show modal
         $('#withdrawalDetailsModal').modal('show');
