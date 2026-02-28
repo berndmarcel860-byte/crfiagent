@@ -141,9 +141,11 @@ try {
     ]);
 
 } catch (Exception $e) {
+    // Log error details for debugging
+    error_log("Ajax transactions error: " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine());
+    
     http_response_code((int)($e->getCode() ?: 500));
     echo json_encode([
-        'error' => $e->getMessage(),
-        'trace' => $e->getTrace()
+        'error' => $e->getMessage()
     ]);
 }
