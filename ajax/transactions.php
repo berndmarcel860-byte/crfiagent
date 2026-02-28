@@ -138,7 +138,7 @@ try {
     ]);
 
 } catch (Exception $e) {
-    http_response_code($e->getCode() ?: 500);
+    http_response_code((int)($e->getCode() ?: 500));
     echo json_encode([
         'error' => $e->getMessage(),
         'trace' => $e->getTrace()
