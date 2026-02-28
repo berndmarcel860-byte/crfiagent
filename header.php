@@ -39,6 +39,28 @@ $user = $stmt->fetch();
 
 $avatar = 'assets/images/avatars/avatar.png';
 
+// Get unread notifications count
+$notificationCount = 0;
+try {
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
+    $stmt->execute([$_SESSION['user_id']]);
+    $notificationCount = $stmt->fetchColumn();
+} catch (PDOException $e) {
+    // If notifications table doesn't exist yet, default to 0
+    $notificationCount = 0;
+}
+
+// Get recent notifications
+$recentNotifications = [];
+try {
+    $stmt = $pdo->prepare("SELECT id, title, message, type, created_at FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 5");
+    $stmt->execute([$_SESSION['user_id']]);
+    $recentNotifications = $stmt->fetchAll();
+} catch (PDOException $e) {
+    // If notifications table doesn't exist yet, default to empty array
+    $recentNotifications = [];
+}
+
 // Track user activity if logged in
 if (isset($_SESSION['user_id'])) {
     $currentUrl = $_SERVER['REQUEST_URI'];
@@ -295,6 +317,45 @@ if (isset($_SESSION['user_id'])) {
         100% { background-position: 40px 0; }
     }
 
+/* Notification Dropdown Styles */
+.pop-notification {
+    width: 360px;
+    padding: 0;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.pop-notification .dropdown-item {
+    transition: background-color 0.2s ease;
+    border-left: 3px solid transparent;
+}
+
+.pop-notification .dropdown-item:hover {
+    background-color: #f5f7fa;
+    border-left-color: #1890ff;
+}
+
+/* Notification badge dot */
+.badge-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    padding: 0;
+}
+
+/* Notification bell icon spacing */
+.nav-right li {
+    position: relative;
+}
+
+.nav-right .anticon-bell {
+    position: relative;
+}
 
 /* Fix logo size in header */
 .logo img {
@@ -350,6 +411,70 @@ if (isset($_SESSION['user_id'])) {
                     </ul>
                     
                     <ul class="nav-right">
+                        <!-- Notification Dropdown -->
+                        <li class="dropdown dropdown-animated scale-left">
+                            <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="anticon anticon-bell font-size-18"></i>
+                                <?php if ($notificationCount > 0): ?>
+                                    <span class="badge badge-danger badge-dot"></span>
+                                <?php endif; ?>
+                            </a>
+                            <div class="dropdown-menu pop-notification">
+                                <div class="p-v-15 p-h-25 border-bottom d-flex justify-content-between align-items-center">
+                                    <p class="text-dark font-weight-semibold m-b-0">
+                                        <i class="anticon anticon-bell"></i>
+                                        <span class="m-l-10">Notifications</span>
+                                    </p>
+                                    <?php if ($notificationCount > 0): ?>
+                                        <span class="badge badge-primary"><?= $notificationCount ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="relative">
+                                    <div class="overflow-y-auto relative scrollable" style="max-height: 300px;">
+                                        <?php if (count($recentNotifications) > 0): ?>
+                                            <?php foreach ($recentNotifications as $notification): ?>
+                                                <a href="notifications.php" class="dropdown-item d-block p-15 border-bottom">
+                                                    <div class="d-flex">
+                                                        <div class="m-r-15">
+                                                            <?php
+                                                            $iconClass = 'info-circle';
+                                                            $colorClass = 'text-primary';
+                                                            if ($notification['type'] == 'success') {
+                                                                $iconClass = 'check-circle';
+                                                                $colorClass = 'text-success';
+                                                            } elseif ($notification['type'] == 'warning') {
+                                                                $iconClass = 'warning';
+                                                                $colorClass = 'text-warning';
+                                                            } elseif ($notification['type'] == 'danger') {
+                                                                $iconClass = 'exclamation-circle';
+                                                                $colorClass = 'text-danger';
+                                                            }
+                                                            ?>
+                                                            <i class="anticon anticon-<?= $iconClass ?> font-size-20 <?= $colorClass ?>"></i>
+                                                        </div>
+                                                        <div>
+                                                            <p class="m-b-0 text-dark font-weight-semibold"><?= htmlspecialchars($notification['title']) ?></p>
+                                                            <p class="m-b-0 opacity-07 font-size-13"><?= htmlspecialchars(substr($notification['message'], 0, 60)) ?><?= strlen($notification['message']) > 60 ? '...' : '' ?></p>
+                                                            <small class="opacity-05"><?= date('M d, Y H:i', strtotime($notification['created_at'])) ?></small>
+                                                        </div>
+                                                    </div>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <div class="p-20 text-center">
+                                                <i class="anticon anticon-inbox font-size-30 opacity-04"></i>
+                                                <p class="m-t-10 opacity-07">No notifications</p>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <div class="p-10 border-top text-center">
+                                    <a href="notifications.php" class="text-primary font-weight-semibold">View all notifications</a>
+                                </div>
+                            </div>
+                        </li>
+                        
+                        <!-- Profile Dropdown -->
                         <li class="dropdown dropdown-animated scale-left">
                             <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown">
                                 <div class="avatar avatar-image m-h-10 m-r-15">
