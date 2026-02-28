@@ -34,6 +34,16 @@
                     </a>
                 </li>
 
+                <!-- Payment Methods -->
+                <li class="nav-item">
+                    <a href="payment-methods.php" title="Manage Payment Methods">
+                        <span class="icon-holder">
+                            <i class="anticon anticon-credit-card"></i>
+                        </span>
+                        <span class="title">Payment Methods</span>
+                    </a>
+                </li>
+
                 <!-- KYC Verification -->
                 <li class="nav-item">
                     <a href="kyc.php" title="Identity Verification">
@@ -73,12 +83,6 @@
                             <a href="settings.php" title="Account Settings">
                                 <i class="anticon anticon-setting m-r-10"></i>
                                 Settings
-                            </a>
-                        </li>
-                        <li>
-                            <a href="payment-methods.php" title="Manage Payment Methods">
-                                <i class="anticon anticon-credit-card m-r-10"></i>
-                                Payment Methods
                             </a>
                         </li>
                         <li>

@@ -388,15 +388,6 @@ if (isset($_SESSION['user_id'])) {
                                         <i class="anticon font-size-10 anticon-right"></i>
                                     </div>
                                 </a>
-                                <a href="payment-methods.php" class="dropdown-item d-block p-h-15 p-v-10">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <i class="anticon opacity-04 font-size-16 anticon-credit-card"></i>
-                                            <span class="m-l-10">Payment Methods</span>
-                                        </div>
-                                        <i class="anticon font-size-10 anticon-right"></i>
-                                    </div>
-                                </a>
                                 <a href="logout.php" class="dropdown-item d-block p-h-15 p-v-10">
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div>
