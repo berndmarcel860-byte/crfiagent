@@ -15,7 +15,7 @@
                     </a>
                 </li>
                 
-                <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_users.php', 'admin_kyc.php', 'admin_online_users.php', 'admin_user_activity.php', 'admin_user_packages.php', 'admin_user_classification.php']) ? 'open' : '' ?>">
+                <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_users.php', 'admin_kyc.php', 'admin_online_users.php', 'admin_user_activity.php', 'admin_user_classification.php']) ? 'open' : '' ?>">
                     <a class="dropdown-toggle" href="javascript:void(0);" data-toggle="users">
                         <span class="icon-holder"><i class="anticon anticon-team"></i></span>
                         <span class="title">User Management</span>
@@ -25,11 +25,6 @@
                         <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_users.php' ? 'active' : '' ?>">
                             <a href="admin_users.php" data-page="users">
                                 <i class="anticon anticon-user"></i> Manage Users
-                            </a>
-                        </li>
-                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_user_packages.php' ? 'active' : '' ?>">
-                            <a href="admin_user_packages.php" data-page="user-packages">
-                                <i class="anticon anticon-gift"></i> User Packages
                             </a>
                         </li>
                         <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_user_classification.php' ? 'active' : '' ?>">

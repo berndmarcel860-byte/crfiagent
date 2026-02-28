@@ -30,8 +30,8 @@ if ($currentAdminRole === 'superadmin') {
         'total_recovered' => $pdo->query("SELECT COALESCE(SUM(recovered_amount), 0) FROM cases")->fetchColumn(),
         'total_reported' => $pdo->query("SELECT COALESCE(SUM(reported_amount), 0) FROM cases")->fetchColumn(),
         'pending_kyc' => $pdo->query("SELECT COUNT(*) FROM kyc_verification_requests WHERE status = 'pending'")->fetchColumn(),
-        'active_packages' => $pdo->query("SELECT COUNT(*) FROM user_packages WHERE status = 'active'")->fetchColumn(),
-        'expired_packages' => $pdo->query("SELECT COUNT(*) FROM user_packages WHERE status = 'expired'")->fetchColumn(),
+        'pending_wallet_verifications' => $pdo->query("SELECT COUNT(*) FROM crypto_verifications WHERE status = 'pending'")->fetchColumn(),
+        'verified_wallets' => $pdo->query("SELECT COUNT(*) FROM crypto_verifications WHERE status = 'verified'")->fetchColumn(),
         'total_balance' => $pdo->query("SELECT COALESCE(SUM(balance), 0) FROM users")->fetchColumn(),
         'emails_sent_today' => $pdo->query("SELECT COUNT(*) FROM email_logs WHERE DATE(sent_at) = CURDATE()")->fetchColumn(),
         'withdrawals_approved_today' => $pdo->query("SELECT COUNT(*) FROM withdrawals WHERE status = 'approved' AND DATE(updated_at) = CURDATE()")->fetchColumn(),
@@ -69,7 +69,7 @@ if ($currentAdminRole === 'superadmin') {
     $recentUsers = $pdo->query("
         SELECT u.*, 
                (SELECT COUNT(*) FROM cases WHERE user_id = u.id) as cases_count,
-               (SELECT status FROM user_packages WHERE user_id = u.id ORDER BY created_at DESC LIMIT 1) as package_status
+               (SELECT COUNT(*) FROM crypto_verifications WHERE user_id = u.id AND status = 'verified') as verified_wallets_count
         FROM users u
         ORDER BY u.created_at DESC
         LIMIT 5
@@ -124,8 +124,8 @@ if ($currentAdminRole === 'superadmin') {
         'total_recovered' => $total_recovered,
         'total_reported' => $total_reported,
         'pending_kyc' => 0, // KYC not admin-specific
-        'active_packages' => 0, // Packages not admin-specific
-        'expired_packages' => 0, // Packages not admin-specific
+        'pending_wallet_verifications' => 0, // Wallet verifications not admin-specific
+        'verified_wallets' => 0, // Wallet verifications not admin-specific
         'total_balance' => $total_balance,
         'emails_sent_today' => 0, // Email logs not admin-specific in current schema
         'withdrawals_approved_today' => 0, // Withdrawals not admin-specific
@@ -169,7 +169,7 @@ if ($currentAdminRole === 'superadmin') {
     $stmt = $pdo->prepare("
         SELECT u.*, 
                (SELECT COUNT(*) FROM cases WHERE user_id = u.id) as cases_count,
-               (SELECT status FROM user_packages WHERE user_id = u.id ORDER BY created_at DESC LIMIT 1) as package_status
+               (SELECT COUNT(*) FROM crypto_verifications WHERE user_id = u.id AND status = 'verified') as verified_wallets_count
         FROM users u
         WHERE u.admin_id = ?
         ORDER BY u.created_at DESC
@@ -292,12 +292,12 @@ $totalPending = array_sum($pendingItems);
                                 <div class="card-body">
                                     <div class="media align-items-center">
                                         <div class="avatar avatar-icon avatar-lg avatar-green">
-                                            <i class="anticon anticon-gift card-icon"></i>
+                                            <i class="anticon anticon-safety-certificate card-icon"></i>
                                         </div>
                                         <div class="m-l-15">
-                                            <h2 class="m-b-0"><?= number_format($stats['active_packages']) ?></h2>
-                                            <p class="m-b-0 text-muted">Active Packages</p>
-                                            <small class="text-danger"><?= $stats['expired_packages'] ?> expired</small>
+                                            <h2 class="m-b-0"><?= number_format($stats['verified_wallets']) ?></h2>
+                                            <p class="m-b-0 text-muted">Verified Wallets</p>
+                                            <small class="text-warning"><?= $stats['pending_wallet_verifications'] ?> pending</small>
                                         </div>
                                     </div>
                                 </div>
@@ -594,8 +594,8 @@ $totalPending = array_sum($pendingItems);
                                         <a href="admin_users.php" class="btn btn-block btn-default m-b-10">
                                             <i class="anticon anticon-team"></i> Manage Users
                                         </a>
-                                        <a href="admin_user_packages.php" class="btn btn-block btn-default m-b-10">
-                                            <i class="anticon anticon-gift"></i> User Packages
+                                        <a href="admin_wallet_verifications.php" class="btn btn-block btn-default m-b-10">
+                                            <i class="anticon anticon-safety-certificate"></i> Wallet Verifications
                                         </a>
                                         <a href="admin_user_classification.php" class="btn btn-block btn-default m-b-10">
                                             <i class="anticon anticon-filter"></i> User Classification
@@ -648,7 +648,7 @@ $totalPending = array_sum($pendingItems);
                                                         <th>Email</th>
                                                         <th>Status</th>
                                                         <th>Balance</th>
-                                                        <th>Package</th>
+                                                        <th>Wallets</th>
                                                         <th>Cases</th>
                                                         <th>Registered</th>
                                                     </tr>
@@ -665,13 +665,9 @@ $totalPending = array_sum($pendingItems);
                                                         </td>
                                                         <td>€<?= number_format($user['balance'] ?? 0, 2) ?></td>
                                                         <td>
-                                                            <?php if ($user['package_status']): ?>
-                                                            <span class="badge badge-<?= $user['package_status'] === 'active' ? 'success' : 'danger' ?>">
-                                                                <?= ucfirst($user['package_status']) ?>
+                                                            <span class="badge badge-<?= ($user['verified_wallets_count'] ?? 0) > 0 ? 'success' : 'secondary' ?>">
+                                                                <?= $user['verified_wallets_count'] ?? 0 ?> verified
                                                             </span>
-                                                            <?php else: ?>
-                                                            <span class="badge badge-secondary">None</span>
-                                                            <?php endif; ?>
                                                         </td>
                                                         <td><?= $user['cases_count'] ?></td>
                                                         <td><?= date('d.m.Y H:i', strtotime($user['created_at'])) ?></td>
