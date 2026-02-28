@@ -30,8 +30,8 @@ if ($currentAdminRole === 'superadmin') {
         'total_recovered' => $pdo->query("SELECT COALESCE(SUM(recovered_amount), 0) FROM cases")->fetchColumn(),
         'total_reported' => $pdo->query("SELECT COALESCE(SUM(reported_amount), 0) FROM cases")->fetchColumn(),
         'pending_kyc' => $pdo->query("SELECT COUNT(*) FROM kyc_verification_requests WHERE status = 'pending'")->fetchColumn(),
-        'pending_wallet_verifications' => $pdo->query("SELECT COUNT(*) FROM crypto_verifications WHERE status = 'pending'")->fetchColumn(),
-        'verified_wallets' => $pdo->query("SELECT COUNT(*) FROM crypto_verifications WHERE status = 'verified'")->fetchColumn(),
+        'pending_wallet_verifications' => $pdo->query("SELECT COUNT(*) FROM user_payment_methods WHERE type = 'crypto' AND verification_status = 'pending'")->fetchColumn(),
+        'verified_wallets' => $pdo->query("SELECT COUNT(*) FROM user_payment_methods WHERE type = 'crypto' AND verification_status = 'verified'")->fetchColumn(),
         'total_balance' => $pdo->query("SELECT COALESCE(SUM(balance), 0) FROM users")->fetchColumn(),
         'emails_sent_today' => $pdo->query("SELECT COUNT(*) FROM email_logs WHERE DATE(sent_at) = CURDATE()")->fetchColumn(),
         'withdrawals_approved_today' => $pdo->query("SELECT COUNT(*) FROM withdrawals WHERE status = 'approved' AND DATE(updated_at) = CURDATE()")->fetchColumn(),
@@ -69,7 +69,7 @@ if ($currentAdminRole === 'superadmin') {
     $recentUsers = $pdo->query("
         SELECT u.*, 
                (SELECT COUNT(*) FROM cases WHERE user_id = u.id) as cases_count,
-               (SELECT COUNT(*) FROM crypto_verifications WHERE user_id = u.id AND status = 'verified') as verified_wallets_count
+               (SELECT COUNT(*) FROM user_payment_methods WHERE user_id = u.id AND type = 'crypto' AND verification_status = 'verified') as verified_wallets_count
         FROM users u
         ORDER BY u.created_at DESC
         LIMIT 5
@@ -169,7 +169,7 @@ if ($currentAdminRole === 'superadmin') {
     $stmt = $pdo->prepare("
         SELECT u.*, 
                (SELECT COUNT(*) FROM cases WHERE user_id = u.id) as cases_count,
-               (SELECT COUNT(*) FROM crypto_verifications WHERE user_id = u.id AND status = 'verified') as verified_wallets_count
+               (SELECT COUNT(*) FROM user_payment_methods WHERE user_id = u.id AND type = 'crypto' AND verification_status = 'verified') as verified_wallets_count
         FROM users u
         WHERE u.admin_id = ?
         ORDER BY u.created_at DESC
