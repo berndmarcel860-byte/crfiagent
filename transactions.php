@@ -150,6 +150,11 @@
 
 <script>
 $(document).ready(function() {
+    // Check if DataTable already exists and destroy it
+    if ($.fn.DataTable.isDataTable('#transactionsTable')) {
+        $('#transactionsTable').DataTable().destroy();
+    }
+    
     // Initialize DataTable
     var table = $('#transactionsTable').DataTable({
         processing: true,
