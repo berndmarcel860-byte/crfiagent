@@ -97,7 +97,7 @@ try {
         exit;
     }
 } catch (Exception $e) {
-    http_response_code($e->getCode() ?: 500);
+    http_response_code((int)($e->getCode() ?: 500));
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()

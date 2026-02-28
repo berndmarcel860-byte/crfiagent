@@ -39,7 +39,7 @@ try {
 
 } catch (Exception $e) {
     error_log('Error in get-case.php: ' . $e->getMessage());
-    http_response_code($e->getCode() ?: 400);
+    http_response_code((int)($e->getCode() ?: 400));
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage(),

@@ -80,7 +80,7 @@ try {
     }
 
 } catch (Exception $e) {
-    http_response_code($e->getCode() ?: 400);
+    http_response_code((int)($e->getCode() ?: 400));
     echo json_encode([
         'success' => false,
         'message' => $e->getMessage()
