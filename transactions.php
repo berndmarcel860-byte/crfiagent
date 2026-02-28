@@ -153,13 +153,29 @@
 var transactionsTableInitialized = false;
 
 $(document).ready(function() {
+    // Check if table element exists
+    if (!$('#transactionsTable').length) {
+        console.log('Transaction table not found');
+        return;
+    }
+
+    // Toastr initialization
+    toastr.options = {
+        positionClass: "toast-top-right",
+        timeOut: 5000,
+        closeButton: true,
+        progressBar: true
+    };
+
     // Prevent multiple initializations
     if (transactionsTableInitialized) {
+        console.log('Table already initialized, skipping');
         return;
     }
     
     // Check if DataTable already exists and destroy it
     if ($.fn.DataTable.isDataTable('#transactionsTable')) {
+        console.log('Destroying existing DataTable instance');
         $('#transactionsTable').DataTable().destroy();
     }
     
@@ -174,30 +190,64 @@ $(document).ready(function() {
             url: 'ajax/transactions.php',
             type: 'POST',
             data: function(d) {
+                // Add CSRF token to request
+                d.csrf_token = $('meta[name="csrf-token"]').attr('content');
                 return JSON.stringify(d);
             },
             contentType: 'application/json',
+            dataSrc: function(json) {
+                // Validate response data
+                if (!json || !json.data) {
+                    console.error('Invalid data format:', json);
+                    toastr.error('Invalid data received from server');
+                    return [];
+                }
+                console.log('Received data:', json.data.length, 'records');
+                return json.data;
+            },
             error: function(xhr, error, thrown) {
-                console.error('DataTable Ajax error:', error, thrown);
-                $('#transactionError').removeClass('d-none').text('Error loading transactions. Please refresh the page.');
+                console.error('AJAX Error:', xhr.responseText);
+                let errorMsg = 'Failed to load transactions';
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.error) errorMsg = response.error;
+                } catch (e) {
+                    console.error('Could not parse error response:', e);
+                }
+                
+                $('#transactionError').text(errorMsg).removeClass('d-none');
+                toastr.error(errorMsg);
             }
         },
         columns: [
             { 
                 data: 'type',
                 render: function(data, type, row) {
+                    // Add icons to transaction types
+                    const icon = {
+                        'deposit': '<i class="anticon anticon-arrow-down"></i> ',
+                        'withdrawal': '<i class="anticon anticon-arrow-up"></i> ',
+                        'refund': '<i class="anticon anticon-undo"></i> ',
+                        'fee': '<i class="anticon anticon-dollar"></i> ',
+                        'transfer': '<i class="anticon anticon-swap"></i> '
+                    }[data] || '<i class="anticon anticon-file"></i> ';
+                    
                     const typeLabels = {
-                        'deposit': '<span class="badge badge-info">Deposit</span>',
-                        'withdrawal': '<span class="badge badge-warning">Withdrawal</span>',
-                        'refund': '<span class="badge badge-success">Refund</span>'
+                        'deposit': '<span class="badge badge-info">' + icon + 'Deposit</span>',
+                        'withdrawal': '<span class="badge badge-warning">' + icon + 'Withdrawal</span>',
+                        'refund': '<span class="badge badge-success">' + icon + 'Refund</span>',
+                        'fee': '<span class="badge badge-secondary">' + icon + 'Fee</span>',
+                        'transfer': '<span class="badge badge-primary">' + icon + 'Transfer</span>'
                     };
-                    return typeLabels[data] || data;
+                    return typeLabels[data] || (icon + (data ? data.charAt(0).toUpperCase() + data.slice(1) : 'N/A'));
                 }
             },
             { 
                 data: 'amount',
                 render: function(data, type, row) {
-                    return '€' + parseFloat(data).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                    const amount = parseFloat(data || 0).toFixed(2);
+                    const colorClass = row.type === 'deposit' || row.type === 'refund' ? 'text-success' : 'text-danger';
+                    return '<span class="' + colorClass + '">€' + amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + '</span>';
                 }
             },
             { 
@@ -209,13 +259,16 @@ $(document).ready(function() {
             { 
                 data: 'status',
                 render: function(data, type, row) {
+                    if (!data) return '';
                     const statusBadges = {
                         'pending': '<span class="badge badge-warning">Pending</span>',
                         'completed': '<span class="badge badge-success">Completed</span>',
                         'approved': '<span class="badge badge-success">Approved</span>',
                         'rejected': '<span class="badge badge-danger">Rejected</span>',
                         'processing': '<span class="badge badge-info">Processing</span>',
-                        'failed': '<span class="badge badge-danger">Failed</span>'
+                        'failed': '<span class="badge badge-danger">Failed</span>',
+                        'cancelled': '<span class="badge badge-secondary">Cancelled</span>',
+                        'confirmed': '<span class="badge badge-success">Confirmed</span>'
                     };
                     return statusBadges[data.toLowerCase()] || '<span class="badge badge-secondary">' + data + '</span>';
                 }
@@ -223,7 +276,7 @@ $(document).ready(function() {
             { 
                 data: 'reference',
                 render: function(data, type, row) {
-                    return '<code style="font-size: 11px;">' + (data || 'N/A') + '</code>';
+                    return data ? '<small class="text-muted"><code style="font-size: 11px;">' + data + '</code></small>' : 'N/A';
                 }
             },
             { 
@@ -257,22 +310,41 @@ $(document).ready(function() {
         order: [[5, 'desc']], // Order by date descending
         pageLength: 10,
         lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+        responsive: true,
         language: {
+            processing: '<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>',
             emptyTable: "No transactions found",
             info: "Showing _START_ to _END_ of _TOTAL_ transactions",
             infoEmpty: "Showing 0 to 0 of 0 transactions",
             infoFiltered: "(filtered from _MAX_ total transactions)",
             lengthMenu: "Show _MENU_ transactions",
             loadingRecords: "Loading...",
-            processing: "Processing...",
             search: "Search:",
             zeroRecords: "No matching transactions found"
+        },
+        initComplete: function() {
+            console.log('Table initialization complete');
+        },
+        drawCallback: function() {
+            console.log('Table redraw complete');
         }
     });
 
-    // Refresh button
+    // Refresh button with proper callback handling
     $('#refreshTransactions').on('click', function() {
-        table.ajax.reload(null, false);
+        console.log('Starting refresh...');
+        $('#transactionError').addClass('d-none');
+        
+        // Use the callback parameter of ajax.reload()
+        table.ajax.reload(function(json) {
+            console.log('Refresh successful', json);
+            toastr.success('Transactions updated successfully');
+        }, false);
+    });
+
+    // Debug processing events
+    $('#transactionsTable').on('processing.dt', function(e, settings, processing) {
+        console.log('Processing state:', processing);
     });
 
     // View details button click handler
