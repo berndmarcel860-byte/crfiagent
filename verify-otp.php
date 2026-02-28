@@ -38,6 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unset($_SESSION['login_otp']);
                 unset($_SESSION['otp_expire']);
                 
+                // Track successful OTP verification for 1-hour window
+                $_SESSION['last_otp_verified_at'] = time();
+                
                 // Set user session
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_email'] = $user['email'];

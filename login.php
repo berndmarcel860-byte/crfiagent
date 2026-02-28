@@ -25,9 +25,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($user['status'] !== 'active') {
                 $error = "Your account is currently " . ucfirst($user['status']);
             } else {
-                // Password verified - Now send OTP for two-factor authentication
+                // Password verified - Check if OTP verification is still valid
                 session_start();
                 
+                // Check if user verified OTP within last hour (3600 seconds)
+                if (isset($_SESSION['last_otp_verified_at']) && (time() - $_SESSION['last_otp_verified_at']) < 3600) {
+                    // OTP still valid - skip verification and complete login immediately
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_email'] = $user['email'];
+                    $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
+                    $_SESSION['last_activity'] = time();
+                    
+                    // Update last login
+                    $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?")->execute([$user['id']]);
+                    
+                    // Redirect to dashboard
+                    header("Location: index.php");
+                    exit();
+                }
+                
+                // OTP expired or not verified - send OTP for two-factor authentication
                 // Check rate limiting for OTP requests (max 3 per hour)
                 $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM otp_logs WHERE user_id = ? AND purpose = 'login' AND created_at > DATE_SUB(NOW(), INTERVAL 1 HOUR)");
                 $stmt->execute([$user['id']]);
