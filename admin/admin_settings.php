@@ -7,10 +7,8 @@ if (!isset($_SESSION['admin_id'])) {
     exit();
 }
 
-// Generate CSRF token if not exists
-if (!isset($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
+// CSRF token is already generated in admin_session.php as admin_csrf_token
+// No need to generate it again here
 
 // Get current system settings
 $stmt = $pdo->query("SELECT * FROM system_settings WHERE id = 1");
@@ -86,7 +84,7 @@ if (!$smtpSettings) {
                                 </div>
                                 <div class="card-body">
                                     <form id="systemSettingsForm">
-                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['admin_csrf_token']); ?>">
                                         
                                         <div class="row">
                                             <div class="col-md-6">
@@ -164,7 +162,7 @@ if (!$smtpSettings) {
                                     </div>
 
                                     <form id="smtpSettingsForm">
-                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
+                                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['admin_csrf_token']); ?>">
                                         
                                         <div class="row">
                                             <div class="col-md-8">

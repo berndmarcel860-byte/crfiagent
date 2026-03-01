@@ -10,7 +10,7 @@ if (!is_admin_logged_in()) {
 }
 
 // Verify CSRF token
-if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['admin_csrf_token']) {
     echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
     exit();
 }
