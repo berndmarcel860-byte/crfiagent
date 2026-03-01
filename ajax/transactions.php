@@ -44,18 +44,18 @@ try {
             d.status,
             d.reference,
             d.created_at,
-            d.payment_method as method_display,
+            d.method_code as method_display,
             d.proof_path as details,
             NULL as withdrawal_id,
             d.id as deposit_id,
-            d.payment_method as method_code,
+            d.method_code,
             NULL as otp_verified,
             d.admin_notes,
-            d.confirmed_at as processed_at,
+            d.processed_at,
             d.updated_at,
-            d.transaction_id,
-            d.confirmed_by,
-            d.ip_address
+            NULL as transaction_id,
+            d.processed_by,
+            NULL as ip_address
         FROM deposits d
         WHERE d.user_id = :user_id1
         
