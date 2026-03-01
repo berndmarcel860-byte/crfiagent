@@ -158,61 +158,32 @@ try {
     ]);
     $logStmt->execute([$currentAdminId, $logDetails]);
     
-    // Send email notification to user using AdminEmailHelper
+    // Send email notification to user using AdminEmailHelper with templates
     try {
         require_once '../AdminEmailHelper.php';
         $emailHelper = new AdminEmailHelper($pdo);
-        
-        $statusText = ucfirst($status);
         
         // Prepare custom variables specific to this deposit
         $customVars = [
             'deposit_amount' => number_format($amount, 2),
             'deposit_reference' => $reference,
-            'deposit_status' => $statusText,
+            'deposit_status' => ucfirst($status),
             'payment_method' => $methodCode,
             'date' => date('d.m.Y H:i')
         ];
         
-        // Email subject
-        $subject = "Deposit {$statusText}";
+        // Determine which template to use based on deposit status
+        $templateKey = ($status === 'completed') ? 'deposit_completed' : 'deposit_pending';
         
-        // Email content with variable placeholders that AdminEmailHelper will replace
-        $emailContent = "
-            <h2>Deposit {$statusText}</h2>
-            <p>Dear {first_name} {last_name},</p>
-            <p>A deposit has been recorded for your account:</p>
-            <ul>
-                <li><strong>Amount:</strong> €{deposit_amount}</li>
-                <li><strong>Reference:</strong> {deposit_reference}</li>
-                <li><strong>Payment Method:</strong> {payment_method}</li>
-                <li><strong>Status:</strong> {deposit_status}</li>
-                <li><strong>Date:</strong> {date}</li>
-            </ul>
-        ";
-        
-        if ($status === 'completed') {
-            $emailContent .= "
-                <p style='color: #28a745; font-weight: bold;'>✓ Your account balance has been updated.</p>
-                <p>You can view your updated balance in your <a href='{dashboard_url}' style='color: #007bff;'>dashboard</a>.</p>
-            ";
-        } else if ($status === 'pending') {
-            $emailContent .= "
-                <p>Your deposit is being processed. You will receive another notification once it's completed.</p>
-            ";
-        }
-        
-        $emailContent .= "
-            <p>If you have any questions, please contact our support team at {contact_email}.</p>
-        ";
-        
-        // Send email using AdminEmailHelper (all 41+ variables automatically available)
-        $success = $emailHelper->sendDirectEmail($userId, $subject, $emailContent, $customVars);
+        // Send email using template from email_templates table
+        // This uses sendTemplateEmail() which fetches the template from database
+        // and automatically replaces all variables (41+ standard + 5 custom)
+        $success = $emailHelper->sendTemplateEmail($templateKey, $userId, $customVars);
         
         if ($success) {
-            error_log("Deposit email sent successfully to user ID: {$userId} for reference: {$reference}");
+            error_log("Deposit email sent successfully to user ID: {$userId} for reference: {$reference} using template: {$templateKey}");
         } else {
-            error_log("Failed to send deposit email to user ID: {$userId} for reference: {$reference}");
+            error_log("Failed to send deposit email to user ID: {$userId} for reference: {$reference} using template: {$templateKey}");
         }
     } catch (Exception $e) {
         // Log email error but don't fail the deposit creation
