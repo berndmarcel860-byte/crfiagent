@@ -69,6 +69,18 @@ try {
     ");
     $stmt->execute([$reason, $_SESSION['admin_id'], $kycId]);
     
+    // Create in-app notification for user
+    try {
+        $notificationMessage = "Your KYC verification has been rejected. Reason: {$reason}. Please check the details and resubmit if necessary.";
+        $notifStmt = $pdo->prepare("
+            INSERT INTO notifications (user_id, type, title, message, is_read, created_at)
+            VALUES (?, 'warning', 'KYC Documents Rejected', ?, 0, NOW())
+        ");
+        $notifStmt->execute([$kyc['user_id'], $notificationMessage]);
+    } catch (Exception $e) {
+        error_log('In-app notification failed: ' . $e->getMessage());
+    }
+    
     // Send rejection email
     sendKYCEmail($pdo, $user, 'kyc_rejected', $kycId, $reason);
     

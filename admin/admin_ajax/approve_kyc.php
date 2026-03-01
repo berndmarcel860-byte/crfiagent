@@ -66,6 +66,17 @@ try {
     $stmt = $pdo->prepare("UPDATE users SET is_verified = 1 WHERE id = ?");
     $stmt->execute([$kyc['user_id']]);
     
+    // Create in-app notification for user
+    try {
+        $notifStmt = $pdo->prepare("
+            INSERT INTO notifications (user_id, type, title, message, is_read, created_at)
+            VALUES (?, 'success', 'KYC Documents Approved', 'Your KYC verification has been approved! Your account is now verified.', 0, NOW())
+        ");
+        $notifStmt->execute([$kyc['user_id']]);
+    } catch (Exception $e) {
+        error_log('In-app notification failed: ' . $e->getMessage());
+    }
+    
     // Send approval email
     sendKYCEmail($pdo, $user, 'kyc_approved', $kycId, null);
     
