@@ -149,6 +149,35 @@ try {
     ]);
     $logStmt->execute([$currentAdminId, $logDetails]);
     
+    // Create in-app notification for user
+    try {
+        $statusText = ucfirst($status);
+        $documentTypeText = ucfirst(str_replace('_', ' ', $documentType));
+        
+        $notificationTitle = "KYC Documents {$statusText}";
+        $notificationMessage = "KYC documents have been submitted for your account. Document type: {$documentTypeText}. Status: {$statusText}.";
+        
+        if ($status === 'approved') {
+            $notificationMessage .= " Your account has been verified!";
+            $notificationType = 'success';
+        } elseif ($status === 'rejected') {
+            $notificationMessage .= " Please check the rejection reason and resubmit if necessary.";
+            $notificationType = 'warning';
+        } else {
+            $notificationMessage .= " Your documents are being reviewed.";
+            $notificationType = 'info';
+        }
+        
+        $notifStmt = $pdo->prepare("
+            INSERT INTO notifications (user_id, type, title, message, is_read, created_at)
+            VALUES (?, ?, ?, ?, 0, NOW())
+        ");
+        $notifStmt->execute([$userId, $notificationType, $notificationTitle, $notificationMessage]);
+    } catch (Exception $e) {
+        // Log notification error but don't fail the KYC creation
+        error_log('In-app notification failed: ' . $e->getMessage());
+    }
+    
     // Send email notification to user
     try {
         require_once '../mail_functions.php';
