@@ -178,33 +178,63 @@ try {
         error_log('In-app notification failed: ' . $e->getMessage());
     }
     
-    // Send email notification to user
+    // Send email notification to user using AdminEmailHelper
     try {
-        require_once '../mail_functions.php';
+        require_once '../AdminEmailHelper.php';
+        $emailHelper = new AdminEmailHelper($pdo);
         
-        $userStmt = $pdo->prepare("SELECT email, first_name, last_name FROM users WHERE id = ?");
+        $userStmt = $pdo->prepare("SELECT id, email, first_name, last_name FROM users WHERE id = ?");
         $userStmt->execute([$userId]);
         $user = $userStmt->fetch(PDO::FETCH_ASSOC);
         
         if ($user) {
             $statusText = ucfirst($status);
+            $documentTypeText = ucfirst(str_replace('_', ' ', $documentType));
+            
+            // Prepare custom variables for email
+            $customVars = [
+                'kyc_id' => $kycId,
+                'document_type' => $documentTypeText,
+                'kyc_status' => $statusText,
+                'status_text' => $statusText,
+                'date' => date('d.m.Y H:i')
+            ];
+            
+            // Build email subject and body with variable placeholders
+            $subject = "KYC Verification {$statusText}";
+            
             $emailContent = "
                 <h2>KYC Verification {$statusText}</h2>
-                <p>Dear {$user['first_name']} {$user['last_name']},</p>
+                <p>Dear {first_name} {last_name},</p>
                 <p>KYC documents have been submitted for your account:</p>
                 <ul>
-                    <li><strong>Document Type:</strong> " . ucfirst(str_replace('_', ' ', $documentType)) . "</li>
-                    <li><strong>Status:</strong> {$statusText}</li>
+                    <li><strong>Document Type:</strong> {document_type}</li>
+                    <li><strong>Status:</strong> {status_text}</li>
+                    <li><strong>Date:</strong> {date}</li>
                 </ul>
             ";
             
             if ($status === 'approved') {
-                $emailContent .= "<p>Your account has been verified!</p>";
+                $emailContent .= "<p><strong>✓ Your account has been verified!</strong></p>";
+                $emailContent .= "<p>You can now access all features of your account.</p>";
             } elseif ($status === 'pending') {
                 $emailContent .= "<p>Your documents are being reviewed. You will be notified once the verification is complete.</p>";
+                $emailContent .= "<p>This usually takes 1-2 business days.</p>";
+            } elseif ($status === 'rejected') {
+                $emailContent .= "<p>Unfortunately, your documents were not approved. Please check the rejection reason and resubmit if necessary.</p>";
             }
             
-            sendEmail($user['email'], "KYC Verification {$statusText}", $emailContent);
+            $emailContent .= "<p>If you have any questions, please contact our support team at {contact_email}.</p>";
+            $emailContent .= "<p><a href=\"{dashboard_url}\" style=\"display: inline-block; padding: 10px 20px; background-color: #007bff; color: #ffffff; text-decoration: none; border-radius: 5px;\">Go to Dashboard</a></p>";
+            
+            // Send email using AdminEmailHelper with all 41+ variables automatically available
+            $success = $emailHelper->sendDirectEmail($user['id'], $subject, $emailContent, $customVars);
+            
+            if ($success) {
+                error_log("KYC email sent successfully to: " . $user['email'] . " for KYC ID: " . $kycId);
+            } else {
+                error_log("Failed to send KYC email to: " . $user['email'] . " for KYC ID: " . $kycId);
+            }
         }
     } catch (Exception $e) {
         // Log email error but don't fail the KYC creation
