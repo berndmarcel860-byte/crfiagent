@@ -73,13 +73,13 @@ try {
             w.id as withdrawal_id,
             NULL as deposit_id,
             w.method_code,
-            w.otp_verified,
+            NULL as otp_verified,
             w.admin_notes,
             w.processed_at,
             w.updated_at,
-            w.transaction_id,
+            NULL as transaction_id,
             w.processed_by as confirmed_by,
-            w.ip_address
+            NULL as ip_address
         FROM withdrawals w
         LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id 
             AND w.method_code COLLATE utf8mb4_unicode_ci = upm.payment_method COLLATE utf8mb4_unicode_ci
