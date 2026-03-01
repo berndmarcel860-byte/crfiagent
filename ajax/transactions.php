@@ -55,7 +55,7 @@ try {
             d.processed_at,
             d.updated_at,
             NULL as transaction_id,
-            d.processed_by,
+            d.processed_by as confirmed_by,
             NULL as ip_address
         FROM deposits d
         WHERE d.user_id = :user_id1
