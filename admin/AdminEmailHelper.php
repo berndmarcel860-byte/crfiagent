@@ -4,15 +4,17 @@
  * Centralized email handling for admin backend with comprehensive variable support
  * 
  * This class provides a unified interface for sending emails from admin panels,
- * automatically fetching and replacing 41+ variables from multiple database tables.
+ * automatically fetching and replacing 42+ variables from multiple database tables.
  * 
  * FEATURES:
  * - Template-based emails (uses email_templates table)
  * - Direct HTML emails (for admin-customized content)
  * - Automatic variable fetching from 6 database tables
  * - Email tracking support
- * - Professional HTML wrapping
+ * - Professional HTML wrapping (matching email_template_helper.php)
  * - Error handling and logging
+ * - Logo support in email headers
+ * - Responsive email design
  * 
  * USAGE:
  * require_once 'AdminEmailHelper.php';
@@ -26,9 +28,9 @@
  * $body = "<p>Hello {first_name} {last_name}, your balance is {balance}.</p>";
  * $emailHelper->sendDirectEmail($userId, $subject, $body);
  * 
- * AVAILABLE VARIABLES (41+):
+ * AVAILABLE VARIABLES (42+):
  * User Data: {user_id}, {first_name}, {last_name}, {full_name}, {email}, {balance}, {status}, etc.
- * Company: {brand_name}, {company_address}, {contact_email}, {contact_phone}, {fca_reference_number}, etc.
+ * Company: {brand_name}, {company_address}, {contact_email}, {contact_phone}, {fca_reference_number}, {logo_url}, etc.
  * Bank Account: {has_bank_account}, {bank_name}, {account_holder}, {iban}, {bic}, {bank_country}
  * Crypto Wallet: {has_crypto_wallet}, {cryptocurrency}, {network}, {wallet_address}
  * Onboarding: {onboarding_completed}, {onboarding_step}
@@ -200,15 +202,16 @@ class AdminEmailHelper {
                 'is_verified' => ($user['is_verified'] ?? 0) ? 'Ja' : 'Nein',
                 'kyc_status' => htmlspecialchars($user['kyc_status'] ?? 'pending'),
                 
-                // Company/System settings (8 variables)
+                // Company/System settings (9 variables)
                 'site_name' => htmlspecialchars($settings['brand_name'] ?? $this->brandName),
                 'brand_name' => htmlspecialchars($settings['brand_name'] ?? $this->brandName),
                 'site_url' => htmlspecialchars($settings['site_url'] ?? $this->siteUrl),
                 'contact_email' => htmlspecialchars($settings['contact_email'] ?? 'info@cryptofinanze.de'),
                 'contact_phone' => htmlspecialchars($settings['contact_phone'] ?? ''),
-                'company_address' => htmlspecialchars($settings['company_address'] ?? ''),
-                'fca_reference_number' => htmlspecialchars($settings['fca_reference_number'] ?? ''),
-                'fca_reference' => htmlspecialchars($settings['fca_reference_number'] ?? ''),
+                'company_address' => htmlspecialchars($settings['company_address'] ?? 'Davidson House Forbury Square, Reading, RG1 3EU, UNITED KINGDOM'),
+                'fca_reference_number' => htmlspecialchars($settings['fca_reference_number'] ?? '910584'),
+                'fca_reference' => htmlspecialchars($settings['fca_reference_number'] ?? '910584'),
+                'logo_url' => htmlspecialchars($settings['logo_url'] ?? 'https://kryptox.co.uk/assets/img/logo.png'),
                 
                 // Bank account (6 variables)
                 'has_bank_account' => $bankAccount ? 'yes' : 'no',
@@ -275,6 +278,7 @@ class AdminEmailHelper {
     
     /**
      * Wrap HTML content in professional email template
+     * Updated to match email_template_helper.php structure
      * 
      * @param string $subject Email subject
      * @param string $body Email body content
@@ -282,75 +286,177 @@ class AdminEmailHelper {
      * @return string Complete HTML email
      */
     private function wrapInTemplate($subject, $body, $variables) {
-        // Convert newlines to paragraphs if needed
-        if (strpos($body, '<p>') === false && strpos($body, '<div>') === false) {
-            $body = str_replace("\r\n", "\n", $body);
-            $paragraphs = '';
-            $lines = explode("\n", $body);
-            foreach ($lines as $line) {
-                $line = trim($line);
-                if (!empty($line)) {
-                    $paragraphs .= '<p>' . $line . '</p>';
-                } else {
-                    $paragraphs .= '<br>';
-                }
-            }
-            $body = $paragraphs;
-        }
-        
         $firstName = $variables['first_name'] ?? '';
         $lastName = $variables['last_name'] ?? '';
         $brandName = $variables['brand_name'] ?? $this->brandName;
         $siteUrl = $variables['site_url'] ?? $this->siteUrl;
         $contactEmail = $variables['contact_email'] ?? 'info@cryptofinanze.de';
-        $companyAddress = $variables['company_address'] ?? '';
-        $fcaReference = $variables['fca_reference_number'] ?? '';
+        $companyAddress = $variables['company_address'] ?? 'Davidson House Forbury Square, Reading, RG1 3EU, UNITED KINGDOM';
+        $fcaReference = $variables['fca_reference_number'] ?? '910584';
+        $logoUrl = $variables['logo_url'] ?? 'https://kryptox.co.uk/assets/img/logo.png';
         
         return '<!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>' . htmlspecialchars($subject) . '</title>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f4f6f8; margin: 0; padding: 0; }
-        .container { max-width: 640px; margin: 30px auto; background: #fff; border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); overflow: hidden; }
-        .header { background: linear-gradient(90deg, #2950a8 0%, #2da9e3 100%); color: #fff; text-align: center; padding: 30px 20px; }
-        .header h1 { margin: 0; font-size: 26px; font-weight: 600; }
-        .content { padding: 25px; background: #f9f9f9; }
-        .highlight-box { background: linear-gradient(90deg, #007bff10 0%, #007bff05 100%); border-left: 5px solid #007bff; padding: 20px; border-radius: 6px; margin: 20px 0; }
-        .btn { display: inline-block; background: #007bff; color: white; padding: 10px 18px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-top: 15px; }
-        .signature { margin-top: 40px; border-top: 1px solid #e0e0e0; padding-top: 25px; font-size: 14px; color: #555; text-align: center; }
-        .footer { text-align: center; font-size: 12px; color: #777; padding: 15px; background: #f1f3f5; }
-        @media only screen and (max-width: 600px) { .container { width: 94%; } .header h1 { font-size: 22px; } }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+        }
+        .email-header {
+            background: linear-gradient(135deg, #2950a8, #2da9e3);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .email-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .email-header p {
+            margin: 5px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .email-body {
+            padding: 30px;
+            background-color: #ffffff;
+        }
+        .email-footer {
+            background-color: #f9f9f9;
+            color: #333;
+            padding: 25px;
+            text-align: left;
+            font-size: 14px;
+        }
+        .email-footer p {
+            margin: 5px 0;
+        }
+        .email-footer a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .signature {
+            margin-top: 40px;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 25px;
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+        }
+        .signature img {
+            height: 50px;
+            margin: 0 auto 12px;
+            display: block;
+        }
+        .signature strong {
+            color: #111;
+            font-size: 15px;
+        }
+        .signature a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .signature p {
+            font-size: 12px;
+            color: #777;
+            line-height: 1.5;
+            margin-top: 8px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            padding: 15px;
+            background: #f1f3f5;
+        }
+        a {
+            color: #2950a8;
+            text-decoration: none;
+        }
+        h2 {
+            color: #2950a8;
+            margin-top: 0;
+        }
+        h3 {
+            color: #2950a8;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2950a8, #2da9e3);
+            color: white !important;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .button:hover {
+            opacity: 0.9;
+        }
+        @media only screen and (max-width: 600px) {
+            .email-body {
+                padding: 20px;
+            }
+            .email-header {
+                padding: 20px;
+            }
+            .signature img {
+                height: 45px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>' . htmlspecialchars($subject) . '</h1>
+    <div class="email-container">
+        <div class="email-header">
+            <h1>🛡️ ' . htmlspecialchars($brandName) . '</h1>
+            <p>AI-Powered Fund Recovery Platform</p>
         </div>
-        <div class="content">
-            <p>Sehr geehrte/r ' . htmlspecialchars($firstName) . ' ' . htmlspecialchars($lastName) . ',</p>
-            <div class="highlight-box">
-                ' . $body . '
-            </div>
-            <p><a href="' . htmlspecialchars($siteUrl) . '/login.php" class="btn">Zum Kundenportal</a></p>
+        <div class="email-body">
+            ' . $body . '
+        </div>
+        <div class="email-footer">
             <p>Mit freundlichen Grüßen,</p>
+            
             <div class="signature">
+                <img src="' . htmlspecialchars($logoUrl) . '" alt="' . htmlspecialchars($brandName) . ' Logo"><br>
                 <strong>' . htmlspecialchars($brandName) . ' Team</strong><br>
                 ' . htmlspecialchars($companyAddress) . '<br>
                 E: <a href="mailto:' . htmlspecialchars($contactEmail) . '">' . htmlspecialchars($contactEmail) . '</a> | 
                 W: <a href="' . htmlspecialchars($siteUrl) . '">' . htmlspecialchars($siteUrl) . '</a>
-                <p style="font-size: 12px; color: #777; margin-top: 10px;">
+                <p>
                     FCA Reference Nr: ' . htmlspecialchars($fcaReference) . '<br>
-                    <em>Hinweis:</em> Diese E-Mail kann vertrauliche Informationen enthalten.
+                    <br>
+                    <em>Hinweis:</em> Diese E-Mail kann vertrauliche oder rechtlich geschützte Informationen enthalten. 
+                    Wenn Sie nicht der richtige Adressat sind, informieren Sie uns bitte und löschen Sie diese Nachricht.
                 </p>
             </div>
         </div>
-        <div class="footer">
-            © ' . date('Y') . ' ' . htmlspecialchars($brandName) . '. Alle Rechte vorbehalten.
-        </div>
+    </div>
+    
+    <div class="footer">
+        &copy; ' . date('Y') . ' ' . htmlspecialchars($brandName) . '. Alle Rechte vorbehalten.
     </div>
 </body>
 </html>';
