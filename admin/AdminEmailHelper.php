@@ -101,6 +101,12 @@ class AdminEmailHelper {
             $subject = $this->replaceVariables($template['subject'], $variables);
             $htmlBody = $this->replaceVariables($template['content'], $variables);
             
+            // Wrap in professional template if not already a complete HTML document
+            // Templates from database contain only content HTML, so they need wrapping
+            if (strpos($htmlBody, '<!DOCTYPE') === false && strpos($htmlBody, '<html') === false) {
+                $htmlBody = $this->wrapInTemplate($subject, $htmlBody, $variables);
+            }
+            
             // Send email
             return $this->sendEmail($userId, $subject, $htmlBody, $variables);
             
