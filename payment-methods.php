@@ -2,137 +2,242 @@
 /**
  * Payment Methods Management Page
  * Allows users to manage their fiat and crypto payment methods
+ * Updated: 2026-03-01 - Modern Professional Design
  */
 include 'header.php'; 
 ?>
 
 <style>
+/* Modern Card Design */
 .payment-card {
-    border: 1px solid #e3e6f0;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 15px;
-    transition: all 0.3s;
+    border: none;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
+
+.payment-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4e73df, #224abe);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
 .payment-card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
 }
+
+.payment-card:hover::before {
+    opacity: 1;
+}
+
 .payment-card.default {
-    border-color: #4e73df;
-    background: #f8f9fc;
+    background: linear-gradient(135deg, #f8f9fc 0%, #e7f0ff 100%);
+    border: 2px solid #4e73df;
 }
+
+.payment-card.default::before {
+    opacity: 1;
+    height: 4px;
+}
+
+/* Enhanced Badges */
 .payment-badge {
     font-size: 11px;
-    padding: 3px 8px;
-    border-radius: 3px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
 }
+
+.badge-default {
+    background: linear-gradient(135deg, #4e73df, #224abe);
+    color: white;
+    box-shadow: 0 2px 8px rgba(78, 115, 223, 0.3);
+}
+
+/* Method Actions */
 .method-actions {
     float: right;
+    display: flex;
+    gap: 8px;
 }
+
 .method-actions button {
-    margin-left: 5px;
-    padding: 3px 8px;
-    font-size: 12px;
+    margin-left: 0;
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    border: none;
 }
+
+.method-actions button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Modern Add Button */
 .add-method-btn {
     width: 100%;
-    padding: 15px;
+    padding: 20px;
     border: 2px dashed #cbd5e0;
-    background: #f7fafc;
+    background: linear-gradient(135deg, #f7fafc 0%, #ffffff 100%);
     color: #4a5568;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 15px;
 }
+
 .add-method-btn:hover {
     border-color: #4e73df;
-    background: #e7f1ff;
+    border-style: solid;
+    background: linear-gradient(135deg, #e7f1ff 0%, #f0f7ff 100%);
     color: #4e73df;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(78, 115, 223, 0.15);
 }
+
+.add-method-btn i {
+    font-size: 18px;
+    margin-right: 8px;
+}
+
+/* Typography */
 .masked-text {
-    font-family: monospace;
-    letter-spacing: 2px;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 3px;
+    font-weight: 600;
+    color: #2d3748;
 }
+
+/* Status Icons */
 .verification-status {
-    display: inline-block;
-    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 10px;
+    gap: 6px;
 }
+
 .status-icon {
     cursor: pointer;
-    margin-left: 8px;
-    transition: all 0.3s;
+    margin-left: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 1.4em;
 }
+
 .status-icon:hover {
-    transform: scale(1.2);
+    transform: scale(1.3) rotate(5deg);
 }
+
+/* QR Code Container */
 .qr-code-container {
     text-align: center;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    margin: 15px 0;
+    padding: 30px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+    border-radius: 12px;
+    margin: 20px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
+
+/* Copy Button */
 .copy-btn {
     cursor: pointer;
-    margin-left: 5px;
+    margin-left: 8px;
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 6px;
 }
+
+.copy-btn:hover {
+    background: #e7f1ff;
+    color: #4e73df;
+    transform: scale(1.1);
+}
+
+/* Info Boxes */
 .verification-info {
-    background: #e7f3ff;
-    border-left: 4px solid #4e73df;
-    padding: 15px;
-    margin: 15px 0;
-    border-radius: 4px;
-}
-.security-box {
-    background: #fff3cd;
-    border: 1px solid #ffc107;
+    background: linear-gradient(135deg, #e7f3ff 0%, #f0f7ff 100%);
+    border-left: 5px solid #4e73df;
     padding: 20px;
-    border-radius: 8px;
     margin: 20px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(78, 115, 223, 0.1);
 }
+
+.security-box {
+    background: linear-gradient(135deg, #fff3cd 0%, #fffaf0 100%);
+    border: 2px solid #ffc107;
+    padding: 24px;
+    border-radius: 12px;
+    margin: 24px 0;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
+}
+
 .security-box h6 {
     color: #856404;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
+    font-weight: 700;
+    font-size: 16px;
 }
+
 .security-box ul {
     margin-bottom: 0;
+    padding-left: 20px;
 }
+
 .security-box li {
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     color: #856404;
+    line-height: 1.6;
 }
 
 /* Prominent Alert Boxes for Verification Status */
 .verification-alert {
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 15px;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 20px;
     border-left: 5px solid;
     font-size: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     animation: slideIn 0.5s ease-out;
+    backdrop-filter: blur(10px);
 }
 
 .alert-pending {
-    background-color: #fff3cd;
+    background: linear-gradient(135deg, #fff3cd 0%, #fffaf0 100%);
     border-color: #ffc107;
     color: #856404;
 }
 
 .alert-verifying {
-    background-color: #d1ecf1;
+    background: linear-gradient(135deg, #d1ecf1 0%, #e7f9fc 100%);
     border-color: #17a2b8;
     color: #0c5460;
 }
 
 .alert-verified {
-    background-color: #d4edda;
+    background: linear-gradient(135deg, #d4edda 0%, #e7f5ea 100%);
     border-color: #28a745;
     color: #155724;
 }
 
 .alert-failed {
-    background-color: #f8d7da;
+    background: linear-gradient(135deg, #f8d7da 0%, #fde7ea 100%);
     border-color: #dc3545;
     color: #721c24;
 }
@@ -141,9 +246,11 @@ include 'header.php';
 @keyframes pulse {
     0%, 100% {
         opacity: 1;
+        transform: scale(1);
     }
     50% {
-        opacity: 0.5;
+        opacity: 0.7;
+        transform: scale(0.95);
     }
 }
 
@@ -159,11 +266,20 @@ include 'header.php';
 @keyframes slideIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-20px);
     }
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
     }
 }
 
@@ -175,56 +291,229 @@ include 'header.php';
     animation: rotate 2s linear infinite;
 }
 
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
 /* Enhanced visibility */
 .verification-status {
-    font-size: 1.2em;
-    font-weight: bold;
-    padding: 6px 12px;
+    font-size: 1.3em;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 20px;
 }
 
 .status-icon {
-    font-size: 1.5em;
+    font-size: 1.6em;
     cursor: pointer;
-    margin-left: 10px;
-    transition: all 0.3s;
+    margin-left: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .status-icon:hover {
-    transform: scale(1.3);
+    transform: scale(1.4) rotate(-5deg);
 }
 
 /* Large action buttons in alerts */
 .verification-alert .btn {
     white-space: nowrap;
-    font-size: 1em;
-    padding: 10px 20px;
+    font-size: 1.05em;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.verification-alert .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .verification-alert h6 {
-    margin: 0;
+    margin: 0 0 10px 0;
+    font-size: 1.3em;
+    font-weight: 700;
+}
+
+/* Card Enhancements */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    color: white;
+    border-bottom: none;
+    padding: 20px;
+    font-weight: 600;
+}
+
+.card-header .card-title {
+    color: white;
+    font-size: 1.3em;
+    font-weight: 700;
+}
+
+.card-header .badge {
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+}
+
+.card-body {
+    padding: 24px;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    color: white;
+    padding: 32px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 16px rgba(78, 115, 223, 0.3);
+}
+
+.page-header h2 {
+    font-size: 2em;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: rgba(255,255,255,0.9);
+    font-size: 1.1em;
+    margin-bottom: 0;
+}
+
+/* Alert Improvements */
+.alert {
+    border-radius: 12px;
+    border: none;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1 0%, #e7f9fc 100%);
+    color: #0c5460;
+    border-left: 5px solid #17a2b8;
+}
+
+.alert-heading {
+    font-weight: 700;
     font-size: 1.2em;
 }
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
+}
+
+.empty-state i {
+    font-size: 64px;
+    margin-bottom: 20px;
+    color: #cbd5e0;
+}
+
+.empty-state h5 {
+    font-size: 1.3em;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: #4a5568;
+}
+
+.empty-state p {
+    font-size: 1em;
+    color: #718096;
+}
+
+/* Loading State */
+.loading-state {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.loading-state i {
+    font-size: 48px;
+    color: #4e73df;
+}
+
+.loading-state p {
+    margin-top: 16px;
+    color: #718096;
+    font-size: 1.1em;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .payment-card {
+        padding: 20px;
+    }
+    
+    .method-actions {
+        float: none;
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 12px;
+    }
+    
+    .page-header {
+        padding: 24px;
+    }
+    
+    .page-header h2 {
+        font-size: 1.6em;
+    }
+    
+    .add-method-btn {
+        padding: 16px;
+        font-size: 14px;
+    }
+    
+    .card-header {
+        padding: 16px;
+    }
+    
+    .card-body {
+        padding: 20px;
+    }
+}
+
 </style>
 
 <!-- Content Wrapper START -->
 <div class="main-content">
     <div class="container-fluid">
         <div class="page-header">
-            <h2 class="header-title">Payment Methods</h2>
-            <p class="text-muted">Manage your fiat and cryptocurrency payment methods</p>
+            <h2 class="header-title"><i class="fas fa-wallet"></i> Payment Methods</h2>
+            <p class="text-white-50">Manage your fiat and cryptocurrency payment methods securely</p>
         </div>
 
         <!-- Info Alert -->
         <div class="alert alert-info alert-dismissible fade show" role="alert">
             <h5 class="alert-heading">
-                <i class="fas fa-info-circle"></i> About Cryptocurrency Wallet Verification
+                <i class="fas fa-shield-alt"></i> About Cryptocurrency Wallet Verification
             </h5>
-            <p>
+            <p class="mb-2">
                 Cryptocurrency wallets require verification through a <strong>Satoshi Test</strong> before they can be used for withdrawals. 
-                This is a security measure to prove wallet ownership.
+                This is a security measure to prove wallet ownership and protect your funds.
             </p>
             <p class="mb-0">
-                <a href="satoshi-test-guide.php" class="btn btn-sm btn-outline-primary">
+                <a href="satoshi-test-guide.php" class="btn btn-sm btn-outline-info">
                     <i class="fas fa-book-open"></i> Learn About Satoshi Test
                 </a>
             </p>
@@ -235,19 +524,19 @@ include 'header.php';
 
         <div class="row">
             <!-- Fiat Payment Methods -->
-            <div class="col-lg-6">
-                <div class="card">
+            <div class="col-lg-6 mb-4">
+                <div class="card fade-in">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title mb-0">
                             <i class="fas fa-university"></i> Bank Accounts
                         </h4>
-                        <span class="badge badge-primary" id="fiatCount">0</span>
+                        <span class="badge badge-light" id="fiatCount">0</span>
                     </div>
                     <div class="card-body">
                         <div id="fiatMethods">
-                            <div class="text-center py-4">
-                                <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
-                                <p class="mt-2 text-muted">Loading...</p>
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading bank accounts...</p>
                             </div>
                         </div>
                         <button class="add-method-btn mt-3" onclick="showAddFiatModal()">
@@ -258,19 +547,19 @@ include 'header.php';
             </div>
 
             <!-- Crypto Wallets -->
-            <div class="col-lg-6">
-                <div class="card">
+            <div class="col-lg-6 mb-4">
+                <div class="card fade-in">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <h4 class="card-title mb-0">
                             <i class="fab fa-bitcoin"></i> Crypto Wallets
                         </h4>
-                        <span class="badge badge-primary" id="cryptoCount">0</span>
+                        <span class="badge badge-light" id="cryptoCount">0</span>
                     </div>
                     <div class="card-body">
                         <div id="cryptoMethods">
-                            <div class="text-center py-4">
-                                <i class="fas fa-spinner fa-spin fa-2x text-muted"></i>
-                                <p class="mt-2 text-muted">Loading...</p>
+                            <div class="loading-state">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading crypto wallets...</p>
                             </div>
                         </div>
                         <button class="add-method-btn mt-3" onclick="showAddCryptoModal()">
