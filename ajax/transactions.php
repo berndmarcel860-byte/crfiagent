@@ -25,59 +25,79 @@ try {
 
     // Column mapping for ordering
     $columns = [
-        0 => 't.type',
-        1 => 't.amount',
+        0 => 'type',
+        1 => 'amount',
         2 => 'method_display',
-        3 => 't.status',
-        4 => 't.created_at',
-        5 => 't.reference'
+        3 => 'status',
+        4 => 'reference',
+        5 => 'created_at'
     ];
-    $orderBy = $columns[$orderColumn] ?? 't.created_at';
+    $orderBy = $columns[$orderColumn] ?? 'created_at';
 
-    // Prepare base query - use withdrawals table for withdrawal transactions
-    $query = "SELECT 
-                t.id,
-                t.type,
-                t.amount,
-                t.status,
-                t.reference,
-                t.created_at,
-                CASE 
-                    WHEN t.type = 'withdrawal' THEN 
-                        COALESCE(upm.label, upm.cryptocurrency, upm.bank_name, w.method_code)
-                    WHEN t.type = 'deposit' THEN d.payment_method
-                    ELSE 'N/A'
-                END as method_display,
-                CASE 
-                    WHEN t.type = 'withdrawal' THEN w.payment_details
-                    WHEN t.type = 'deposit' THEN d.proof_path
-                    WHEN t.type = 'refund' THEN crt.notes
-                    ELSE NULL
-                END as details,
-                w.id as withdrawal_id,
-                d.id as deposit_id,
-                w.method_code,
-                t.otp_verified,
-                COALESCE(w.admin_notes, d.admin_notes) as admin_notes,
-                COALESCE(w.processed_at, d.confirmed_at) as processed_at,
-                COALESCE(w.updated_at, d.updated_at) as updated_at
-              FROM transactions t
-              LEFT JOIN withdrawals w ON t.reference COLLATE utf8mb4_unicode_ci = w.reference COLLATE utf8mb4_unicode_ci AND t.type = 'withdrawal'
-              LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id AND w.method_code COLLATE utf8mb4_unicode_ci = upm.payment_method COLLATE utf8mb4_unicode_ci AND t.type = 'withdrawal'
-              LEFT JOIN deposits d ON t.reference COLLATE utf8mb4_unicode_ci = d.reference COLLATE utf8mb4_unicode_ci AND t.type = 'deposit'
-              LEFT JOIN case_recovery_transactions crt ON t.case_id = crt.case_id AND t.type = 'refund'
-              WHERE t.user_id = :user_id";
+    // Query directly from deposits and withdrawals tables using UNION
+    // This gives us complete data from source tables
+    $query = "
+        SELECT 
+            d.id,
+            'deposit' as type,
+            d.amount,
+            d.status,
+            d.reference,
+            d.created_at,
+            d.payment_method as method_display,
+            d.proof_path as details,
+            NULL as withdrawal_id,
+            d.id as deposit_id,
+            d.payment_method as method_code,
+            NULL as otp_verified,
+            d.admin_notes,
+            d.confirmed_at as processed_at,
+            d.updated_at,
+            d.transaction_id,
+            d.confirmed_by,
+            d.ip_address
+        FROM deposits d
+        WHERE d.user_id = :user_id1
+        
+        UNION ALL
+        
+        SELECT 
+            w.id,
+            'withdrawal' as type,
+            w.amount,
+            w.status,
+            w.reference,
+            w.created_at,
+            COALESCE(upm.label, upm.cryptocurrency, upm.bank_name, w.method_code) as method_display,
+            w.payment_details as details,
+            w.id as withdrawal_id,
+            NULL as deposit_id,
+            w.method_code,
+            w.otp_verified,
+            w.admin_notes,
+            w.processed_at,
+            w.updated_at,
+            w.transaction_id,
+            w.processed_by as confirmed_by,
+            w.ip_address
+        FROM withdrawals w
+        LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id 
+            AND w.method_code COLLATE utf8mb4_unicode_ci = upm.payment_method COLLATE utf8mb4_unicode_ci
+        WHERE w.user_id = :user_id2
+    ";
 
     // Add search filter if provided
+    $searchWhere = "";
     if (!empty($search)) {
-        $query .= " AND (t.type LIKE :search OR t.status LIKE :search OR t.reference LIKE :search OR w.method_code LIKE :search)";
+        $searchWhere = " AND (type LIKE :search OR status LIKE :search OR reference LIKE :search OR method_display LIKE :search)";
     }
 
-    // Add ordering and pagination
-    $query .= " ORDER BY $orderBy $orderDir LIMIT :start, :length";
+    // Wrap in subquery for filtering and ordering
+    $finalQuery = "SELECT * FROM ($query) AS combined WHERE 1=1 $searchWhere ORDER BY $orderBy $orderDir LIMIT :start, :length";
 
-    $stmt = $pdo->prepare($query);
-    $stmt->bindValue(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
+    $stmt = $pdo->prepare($finalQuery);
+    $stmt->bindValue(':user_id1', $_SESSION['user_id'], PDO::PARAM_INT);
+    $stmt->bindValue(':user_id2', $_SESSION['user_id'], PDO::PARAM_INT);
     $stmt->bindValue(':start', (int)$start, PDO::PARAM_INT);
     $stmt->bindValue(':length', (int)$length, PDO::PARAM_INT);
 
@@ -106,27 +126,30 @@ try {
             'otp_verified' => $transaction['otp_verified'],
             'admin_notes' => $transaction['admin_notes'],
             'processed_at' => $transaction['processed_at'],
-            'updated_at' => $transaction['updated_at']
+            'updated_at' => $transaction['updated_at'],
+            'transaction_id' => $transaction['transaction_id'],
+            'confirmed_by' => $transaction['confirmed_by'],
+            'ip_address' => $transaction['ip_address']
         ];
     }, $transactions);
 
-    // Get total records count
-    $totalQuery = "SELECT COUNT(*) FROM transactions WHERE user_id = :user_id";
+    // Get total records count from both tables
+    $totalQuery = "SELECT 
+                    (SELECT COUNT(*) FROM deposits WHERE user_id = :user_id1) + 
+                    (SELECT COUNT(*) FROM withdrawals WHERE user_id = :user_id2) as total";
     $totalStmt = $pdo->prepare($totalQuery);
-    $totalStmt->bindValue(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
+    $totalStmt->bindValue(':user_id1', $_SESSION['user_id'], PDO::PARAM_INT);
+    $totalStmt->bindValue(':user_id2', $_SESSION['user_id'], PDO::PARAM_INT);
     $totalStmt->execute();
     $totalRecords = $totalStmt->fetchColumn();
 
     // Get filtered count if searching
     $filteredRecords = $totalRecords;
     if (!empty($search)) {
-        $filteredQuery = "SELECT COUNT(*) FROM transactions t
-                         LEFT JOIN withdrawals w ON t.reference COLLATE utf8mb4_unicode_ci = w.reference COLLATE utf8mb4_unicode_ci AND t.type = 'withdrawal'
-                         LEFT JOIN user_payment_methods upm ON w.user_id = upm.user_id AND w.method_code COLLATE utf8mb4_unicode_ci = upm.payment_method COLLATE utf8mb4_unicode_ci
-                         WHERE t.user_id = :user_id
-                         AND (t.type LIKE :search OR t.status LIKE :search OR t.reference LIKE :search OR w.method_code LIKE :search)";
+        $filteredQuery = "SELECT COUNT(*) FROM ($query) AS combined WHERE 1=1 $searchWhere";
         $filteredStmt = $pdo->prepare($filteredQuery);
-        $filteredStmt->bindValue(':user_id', $_SESSION['user_id'], PDO::PARAM_INT);
+        $filteredStmt->bindValue(':user_id1', $_SESSION['user_id'], PDO::PARAM_INT);
+        $filteredStmt->bindValue(':user_id2', $_SESSION['user_id'], PDO::PARAM_INT);
         $filteredStmt->bindValue(':search', "%$search%");
         $filteredStmt->execute();
         $filteredRecords = $filteredStmt->fetchColumn();
