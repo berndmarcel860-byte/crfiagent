@@ -52,11 +52,11 @@ try {
     
     // Insert deposit
     $stmt = $pdo->prepare("
-        INSERT INTO deposits (user_id, amount, method_code, transaction_id, reference, status, admin_notes, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+        INSERT INTO deposits (user_id, amount, method_code, reference, status, admin_notes, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, NOW())
     ");
     
-    $stmt->execute([$userId, $amount, $methodCode, $transactionId, $reference, $status, $adminNotes]);
+    $stmt->execute([$userId, $amount, $methodCode, $reference, $status, $adminNotes]);
     
     // If status is completed, update user balance
     if ($status === 'completed') {
