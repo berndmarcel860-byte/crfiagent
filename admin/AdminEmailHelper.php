@@ -285,6 +285,7 @@ class AdminEmailHelper {
     /**
      * Wrap HTML content in professional email template
      * Updated to match email_template_helper.php structure
+     * Supports custom headers from templates using <!-- CUSTOM_HEADER --> marker
      * 
      * @param string $subject Email subject
      * @param string $body Email body content
@@ -300,6 +301,12 @@ class AdminEmailHelper {
         $companyAddress = $variables['company_address'] ?? 'Davidson House Forbury Square, Reading, RG1 3EU, UNITED KINGDOM';
         $fcaReference = $variables['fca_reference_number'] ?? '910584';
         $logoUrl = $variables['logo_url'] ?? 'https://kryptox.co.uk/assets/img/logo.png';
+        
+        // Check if template has custom header (marked with <!-- CUSTOM_HEADER -->)
+        $hasCustomHeader = (strpos($body, '<!-- CUSTOM_HEADER -->') !== false);
+        
+        // Remove the marker if present
+        $body = str_replace('<!-- CUSTOM_HEADER -->', '', $body);
         
         return '<!DOCTYPE html>
 <html>
@@ -434,11 +441,13 @@ class AdminEmailHelper {
     </style>
 </head>
 <body>
-    <div class="email-container">
+    <div class="email-container">' . 
+        // Only add default header if template doesn't have custom header
+        (!$hasCustomHeader ? '
         <div class="email-header">
             <h1>🛡️ ' . htmlspecialchars($brandName) . '</h1>
             <p>AI-Powered Fund Recovery Platform</p>
-        </div>
+        </div>' : '') . '
         <div class="email-body">
             ' . $body . '
         </div>
