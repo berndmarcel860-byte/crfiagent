@@ -48,23 +48,19 @@ try {
     $selfieWithIdPath = null;
     $addressProofPath = null;
     
-    // Allowed file types and max file size
+    // Allowed file types - no file size limit
     $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
     $allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
-    $maxFileSize = 5 * 1024 * 1024; // 5MB
     
     // Function to handle file upload with security validation
-    function handleFileUpload($fileKey, $uploadsDir, $userId, $allowedMimeTypes, $allowedExtensions, $maxFileSize) {
+    function handleFileUpload($fileKey, $uploadsDir, $userId, $allowedMimeTypes, $allowedExtensions) {
         if (!isset($_FILES[$fileKey]) || $_FILES[$fileKey]['error'] !== UPLOAD_ERR_OK) {
             return null;
         }
         
         $file = $_FILES[$fileKey];
         
-        // Check file size
-        if ($file['size'] > $maxFileSize) {
-            throw new Exception("File {$fileKey} is too large. Maximum size is 5MB.");
-        }
+        // File size validation removed - allow any size up to server limit
         
         // Validate file extension
         $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
@@ -100,10 +96,10 @@ try {
         throw new Exception("Failed to upload file {$fileKey}.");
     }
     
-    $documentFrontPath = handleFileUpload('document_front', $uploadsDir, $userId, $allowedMimeTypes, $allowedExtensions, $maxFileSize);
-    $documentBackPath = handleFileUpload('document_back', $uploadsDir, $userId, $allowedMimeTypes, $allowedExtensions, $maxFileSize);
-    $selfieWithIdPath = handleFileUpload('selfie_with_id', $uploadsDir, $userId, $allowedMimeTypes, $allowedExtensions, $maxFileSize);
-    $addressProofPath = handleFileUpload('address_proof', $uploadsDir, $userId, $allowedMimeTypes, $allowedExtensions, $maxFileSize);
+    $documentFrontPath = handleFileUpload('document_front', $uploadsDir, $userId, $allowedMimeTypes, $allowedExtensions);
+    $documentBackPath = handleFileUpload('document_back', $uploadsDir, $userId, $allowedMimeTypes, $allowedExtensions);
+    $selfieWithIdPath = handleFileUpload('selfie_with_id', $uploadsDir, $userId, $allowedMimeTypes, $allowedExtensions);
+    $addressProofPath = handleFileUpload('address_proof', $uploadsDir, $userId, $allowedMimeTypes, $allowedExtensions);
     
     // At least document front is required
     if (!$documentFrontPath) {

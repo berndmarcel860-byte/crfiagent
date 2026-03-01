@@ -407,7 +407,7 @@ try {
                         <h6><i class="anticon anticon-exclamation-circle m-r-10"></i>Important Notes:</h6>
                         <ul class="m-b-0">
                             <li>⚡ Processing time: 1-3 business days</li>
-                            <li>📏 Maximum file size: 10MB per document</li>
+                            <li>📏 File size limited only by server configuration</li>
                             <li>🔒 All documents are encrypted and secure</li>
                             <li>✅ Ensure all text and details are clearly readable</li>
                         </ul>
@@ -540,12 +540,7 @@ $(document).ready(function() {
         const preview = $(previewContainer);
         
         if (file) {
-            // Validate file size
-            if (file.size > 10 * 1024 * 1024) {
-                alert('File size must be less than 10MB');
-                input.value = '';
-                return;
-            }
+            // File size validation removed - allow any size up to server limit
             
             const reader = new FileReader();
             reader.onload = function(e) {

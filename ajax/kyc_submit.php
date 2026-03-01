@@ -101,11 +101,7 @@ try {
             'application/pdf' => 'pdf'
         ];
         
-        // Validate file size
-        if ($fileInput['size'] > $maxSize) {
-            throw new Exception("File size exceeds 10MB limit for " . $prefix);
-        }
-
+        // Validate file size (minimum only - no maximum limit)
         if ($fileInput['size'] < 1024) {
             throw new Exception("File is too small to be valid for " . $prefix);
         }
