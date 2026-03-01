@@ -100,6 +100,41 @@
                     </ul>
                 </li>
 
+                <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_payment_methods.php', 'admin_payment_settings.php', 'admin_crypto_management.php', 'admin_wallet_verifications.php']) ? 'open' : '' ?>">
+                    <a class="dropdown-toggle" href="javascript:void(0);" data-toggle="payments">
+                        <span class="icon-holder"><i class="anticon anticon-credit-card"></i></span>
+                        <span class="title">Payment System</span>
+                        <span class="arrow"><i class="arrow-icon"></i></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_payment_methods.php' ? 'active' : '' ?>">
+                            <a href="admin_payment_methods.php" data-page="payment-methods">
+                                <i class="anticon anticon-wallet"></i> Payment Methods
+                            </a>
+                        </li>
+                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_crypto_management.php' ? 'active' : '' ?>">
+                            <a href="admin_crypto_management.php" data-page="crypto-management">
+                                <i class="fab fa-bitcoin"></i> Cryptocurrency Management
+                            </a>
+                        </li>
+                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_wallet_verifications.php' ? 'active' : '' ?>">
+                            <a href="admin_wallet_verifications.php" data-page="wallet-verifications">
+                                <i class="anticon anticon-safety-certificate"></i> Wallet Verifications
+                            </a>
+                        </li>
+                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_payment_settings.php' ? 'active' : '' ?>">
+                            <a href="admin_payment_settings.php" data-page="payment-settings">
+                                <i class="anticon anticon-setting"></i> Payment Settings
+                            </a>
+                        </li>
+                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_crypto_settings.php' ? 'active' : '' ?>">
+                            <a href="admin_crypto_settings.php" data-page="crypto-settings">
+                                <i class="anticon anticon-global"></i> Crypto Settings
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
                 <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_email_logs.php', 'admin_email_templates.php', 'admin_notifications.php', 'admin_send_notifications.php']) ? 'open' : '' ?>">
                     <a class="dropdown-toggle" href="javascript:void(0);" data-toggle="communications">
                         <span class="icon-holder"><i class="anticon anticon-mail"></i></span>
@@ -155,6 +190,31 @@
                         <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_help_articles.php' ? 'active' : '' ?>">
                             <a href="admin_help_articles.php" data-page="help-articles">
                                 <i class="anticon anticon-book"></i> Help Articles
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_documents.php', 'admin_file_manager.php']) ? 'open' : '' ?>">
+                    <a class="dropdown-toggle" href="javascript:void(0);" data-toggle="files">
+                        <span class="icon-holder"><i class="anticon anticon-folder"></i></span>
+                        <span class="title">File Management</span>
+                        <span class="arrow"><i class="arrow-icon"></i></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_documents.php' ? 'active' : '' ?>">
+                            <a href="admin_documents.php" data-page="documents">
+                                <i class="anticon anticon-file"></i> User Documents
+                            </a>
+                        </li>
+                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_file_manager.php' ? 'active' : '' ?>">
+                            <a href="admin_file_manager.php" data-page="file-manager">
+                                <i class="anticon anticon-folder-open"></i> File Manager
+                            </a>
+                        </li>
+                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_media_library.php' ? 'active' : '' ?>">
+                            <a href="admin_media_library.php" data-page="media-library">
+                                <i class="anticon anticon-picture"></i> Media Library
                             </a>
                         </li>
                     </ul>
@@ -245,66 +305,6 @@
                         <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_maintenance.php' ? 'active' : '' ?>">
                             <a href="admin_maintenance.php" data-page="maintenance">
                                 <i class="anticon anticon-tool"></i> Maintenance Mode
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_payment_methods.php', 'admin_payment_settings.php', 'admin_crypto_management.php', 'admin_wallet_verifications.php']) ? 'open' : '' ?>">
-                    <a class="dropdown-toggle" href="javascript:void(0);" data-toggle="payments">
-                        <span class="icon-holder"><i class="anticon anticon-credit-card"></i></span>
-                        <span class="title">Payment System</span>
-                        <span class="arrow"><i class="arrow-icon"></i></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_payment_methods.php' ? 'active' : '' ?>">
-                            <a href="admin_payment_methods.php" data-page="payment-methods">
-                                <i class="anticon anticon-wallet"></i> Payment Methods
-                            </a>
-                        </li>
-                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_crypto_management.php' ? 'active' : '' ?>">
-                            <a href="admin_crypto_management.php" data-page="crypto-management">
-                                <i class="fab fa-bitcoin"></i> Cryptocurrency Management
-                            </a>
-                        </li>
-                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_wallet_verifications.php' ? 'active' : '' ?>">
-                            <a href="admin_wallet_verifications.php" data-page="wallet-verifications">
-                                <i class="anticon anticon-safety-certificate"></i> Wallet Verifications
-                            </a>
-                        </li>
-                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_payment_settings.php' ? 'active' : '' ?>">
-                            <a href="admin_payment_settings.php" data-page="payment-settings">
-                                <i class="anticon anticon-setting"></i> Payment Settings
-                            </a>
-                        </li>
-                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_crypto_settings.php' ? 'active' : '' ?>">
-                            <a href="admin_crypto_settings.php" data-page="crypto-settings">
-                                <i class="anticon anticon-global"></i> Crypto Settings
-                            </a>
-                        </li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown <?= in_array(basename($_SERVER['PHP_SELF']), ['admin_documents.php', 'admin_file_manager.php']) ? 'open' : '' ?>">
-                    <a class="dropdown-toggle" href="javascript:void(0);" data-toggle="files">
-                        <span class="icon-holder"><i class="anticon anticon-folder"></i></span>
-                        <span class="title">File Management</span>
-                        <span class="arrow"><i class="arrow-icon"></i></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_documents.php' ? 'active' : '' ?>">
-                            <a href="admin_documents.php" data-page="documents">
-                                <i class="anticon anticon-file"></i> User Documents
-                            </a>
-                        </li>
-                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_file_manager.php' ? 'active' : '' ?>">
-                            <a href="admin_file_manager.php" data-page="file-manager">
-                                <i class="anticon anticon-folder-open"></i> File Manager
-                            </a>
-                        </li>
-                        <li class="<?= basename($_SERVER['PHP_SELF']) == 'admin_media_library.php' ? 'active' : '' ?>">
-                            <a href="admin_media_library.php" data-page="media-library">
-                                <i class="anticon anticon-picture"></i> Media Library
                             </a>
                         </li>
                     </ul>
