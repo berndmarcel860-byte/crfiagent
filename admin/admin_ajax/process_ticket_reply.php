@@ -122,34 +122,69 @@ try {
 
     $pdo->commit();
 
-    // Send email notification to user
+    // Send email notification to user using AdminEmailHelper
     if ($ticket_info) {
-        $to = $ticket_info['email'];
-        $subject = "Re: Your Support Ticket #{$ticket_info['ticket_number']} - {$ticket_info['subject']}";
-        
-        $body = "
-            <p>Dear {$ticket_info['first_name']},</p>
+        try {
+            require_once '../AdminEmailHelper.php';
+            $emailHelper = new AdminEmailHelper($pdo);
             
-            <p>We have received your reply regarding ticket <strong>#{$ticket_info['ticket_number']}</strong> with subject <strong>{$ticket_info['subject']}</strong>.</p>
+            // Get user ID from ticket
+            $stmt = $pdo->prepare("SELECT user_id FROM support_tickets WHERE id = ?");
+            $stmt->execute([$ticket_id]);
+            $ticket = $stmt->fetch();
             
-            <div style='background:#f5f5f5; padding:15px; border-left:4px solid #1890ff; margin:15px 0;'>
-                " . nl2br(htmlspecialchars($message)) . "
-            </div>
-            
-            <p>You can view the full conversation and reply by visiting your support ticket:</p>
-            
-            <p><a href='".SITE_URL."/support_ticket.php?id={$ticket_id}' style='background:#1890ff; color:#fff; padding:10px 15px; text-decoration:none; border-radius:4px; display:inline-block;'>View Ticket</a></p>
-            
-            <p>If you have any further questions, please don't hesitate to reply to this email or through the ticket system.</p>
-            
-            <p>Best regards,<br>
-            {$_SESSION['admin_name']}<br>
-            Support Team<br>
-            ".SITE_NAME."</p>
-        ";
-        
-        // In a real implementation, you would use your email sending function here
-        // sendEmail($to, $subject, $body);
+            if ($ticket) {
+                $userId = $ticket['user_id'];
+                
+                // Prepare custom variables specific to this ticket reply
+                $customVars = [
+                    'ticket_number' => $ticket_info['ticket_number'],
+                    'ticket_subject' => $ticket_info['subject'],
+                    'admin_reply' => nl2br(htmlspecialchars($message)),
+                    'admin_name' => $_SESSION['admin_name'] ?? 'Support Team',
+                    'ticket_url' => SITE_URL . "/support_ticket.php?id={$ticket_id}",
+                    'date' => date('d.m.Y H:i')
+                ];
+                
+                // Email subject
+                $subject = "Re: Your Support Ticket #{$ticket_info['ticket_number']} - {$ticket_info['subject']}";
+                
+                // Email content with variable placeholders
+                $emailContent = "
+                    <h2>Support Ticket Update</h2>
+                    <p>Dear {first_name} {last_name},</p>
+                    
+                    <p>We have replied to your support ticket <strong>#{ticket_number}</strong> regarding <strong>{ticket_subject}</strong>.</p>
+                    
+                    <div style='background:#f5f5f5; padding:15px; border-left:4px solid #1890ff; margin:15px 0;'>
+                        <strong>Admin Reply:</strong><br>
+                        {admin_reply}
+                    </div>
+                    
+                    <p>You can view the full conversation and reply by visiting your support ticket:</p>
+                    
+                    <p><a href='{ticket_url}' style='background:#1890ff; color:#fff; padding:10px 15px; text-decoration:none; border-radius:4px; display:inline-block;'>View Ticket</a></p>
+                    
+                    <p>If you have any further questions, please don't hesitate to reply through the ticket system.</p>
+                    
+                    <p>Best regards,<br>
+                    {admin_name}<br>
+                    Support Team<br>
+                    {brand_name}</p>
+                ";
+                
+                // Send email using AdminEmailHelper
+                $success = $emailHelper->sendDirectEmail($userId, $subject, $emailContent, $customVars);
+                
+                if ($success) {
+                    error_log("Ticket reply email sent successfully to user ID: {$userId} for ticket: {$ticket_id}");
+                } else {
+                    error_log("Failed to send ticket reply email to user ID: {$userId} for ticket: {$ticket_id}");
+                }
+            }
+        } catch (Exception $e) {
+            error_log('Email notification failed: ' . $e->getMessage());
+        }
     }
 
     echo json_encode(['success' => true, 'message' => 'Reply sent successfully!']);

@@ -73,28 +73,47 @@ try {
     ]);
     $logStmt->execute([$currentAdminId, $logDetails, $ipAddress, $userAgent]);
     
-    // Send email notification to user
+    // Send email notification to user using AdminEmailHelper
     try {
-        require_once '../mail_functions.php';
+        require_once '../AdminEmailHelper.php';
+        $emailHelper = new AdminEmailHelper($pdo);
         
-        $userStmt = $pdo->prepare("SELECT email, first_name, last_name FROM users WHERE id = ?");
-        $userStmt->execute([$userId]);
-        $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+        // Prepare custom variables specific to this withdrawal
+        $customVars = [
+            'withdrawal_amount' => number_format($amount, 2),
+            'withdrawal_reference' => $reference,
+            'withdrawal_status' => 'Pending',
+            'payment_method' => $methodCode,
+            'date' => date('d.m.Y H:i')
+        ];
         
-        if ($user) {
-            $emailContent = "
-                <h2>Withdrawal Request Created</h2>
-                <p>Dear {$user['first_name']} {$user['last_name']},</p>
-                <p>A withdrawal request has been created for your account:</p>
-                <ul>
-                    <li><strong>Amount:</strong> €" . number_format($amount, 2) . "</li>
-                    <li><strong>Reference:</strong> {$reference}</li>
-                    <li><strong>Status:</strong> Pending</li>
-                </ul>
-                <p>You will receive another notification when your withdrawal is processed.</p>
-            ";
-            
-            sendEmail($user['email'], 'Withdrawal Request Created', $emailContent);
+        // Email subject
+        $subject = 'Withdrawal Request Created';
+        
+        // Email content with variable placeholders that AdminEmailHelper will replace
+        $emailContent = "
+            <h2>Withdrawal Request Created</h2>
+            <p>Dear {first_name} {last_name},</p>
+            <p>A withdrawal request has been created for your account:</p>
+            <ul>
+                <li><strong>Amount:</strong> €{withdrawal_amount}</li>
+                <li><strong>Reference:</strong> {withdrawal_reference}</li>
+                <li><strong>Payment Method:</strong> {payment_method}</li>
+                <li><strong>Status:</strong> {withdrawal_status}</li>
+                <li><strong>Date:</strong> {date}</li>
+            </ul>
+            <p>Your withdrawal request is being processed. You will receive another notification when it's completed.</p>
+            <p>You can track the status in your <a href='{dashboard_url}' style='color: #007bff;'>dashboard</a>.</p>
+            <p>If you have any questions, please contact our support team at {contact_email}.</p>
+        ";
+        
+        // Send email using AdminEmailHelper (all 41+ variables automatically available)
+        $success = $emailHelper->sendDirectEmail($userId, $subject, $emailContent, $customVars);
+        
+        if ($success) {
+            error_log("Withdrawal email sent successfully to user ID: {$userId} for reference: {$reference}");
+        } else {
+            error_log("Failed to send withdrawal email to user ID: {$userId} for reference: {$reference}");
         }
     } catch (Exception $e) {
         // Log email error but don't fail the withdrawal creation
