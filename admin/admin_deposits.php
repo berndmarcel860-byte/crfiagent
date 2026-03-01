@@ -56,7 +56,7 @@ require_once 'admin_header.php';
                 <h5 class="modal-title">Add Deposit for User</h5>
                 <button type="button" class="close" data-dismiss="modal"><i class="anticon anticon-close"></i></button>
             </div>
-            <form id="addDepositForm">
+            <form id="addDepositForm" enctype="multipart/form-data">
                 <div class="modal-body">
                     <div class="form-group">
                         <label>Select User <span class="text-danger">*</span></label>
@@ -80,6 +80,11 @@ require_once 'admin_header.php';
                             <option value="ethereum">Ethereum</option>
                             <option value="credit_card">Credit Card</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Proof of Payment <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" name="proof_file" accept=".jpg,.jpeg,.png,.pdf" required>
+                        <small class="form-text text-muted">Upload proof of payment (JPG, PNG, or PDF - max 10MB)</small>
                     </div>
                     <div class="form-group">
                         <label>Transaction ID / Reference</label>
@@ -316,12 +321,14 @@ $(document).ready(function() {
     // Add Deposit Form Submit
     $('#addDepositForm').submit(function(e) {
         e.preventDefault();
-        const formData = $(this).serialize();
+        const formData = new FormData(this);
         
         $.ajax({
             url: 'admin_ajax/add_deposit.php',
             type: 'POST',
             data: formData,
+            processData: false,
+            contentType: false,
             dataType: 'json',
             success: function(resp) {
                 if (resp && resp.success) {

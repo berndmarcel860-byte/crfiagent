@@ -17,6 +17,15 @@ try {
         exit;
     }
     
+    // Validate proof file
+    if (!isset($_FILES['proof_file']) || $_FILES['proof_file']['error'] !== UPLOAD_ERR_OK) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Proof of payment file is required'
+        ]);
+        exit;
+    }
+    
     $userId = intval($_POST['user_id']);
     $amount = floatval($_POST['amount']);
     $methodCode = $_POST['method_code'];
@@ -47,16 +56,86 @@ try {
         }
     }
     
+    // Create uploads directory if it doesn't exist
+    $uploadsDir = '../uploads/deposits';
+    if (!is_dir($uploadsDir)) {
+        mkdir($uploadsDir, 0755, true);
+    }
+    
+    // Handle file upload
+    $file = $_FILES['proof_file'];
+    $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf'];
+    $maxFileSize = 10 * 1024 * 1024; // 10MB
+    
+    // Validate file size
+    if ($file['size'] > $maxFileSize) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'File size exceeds 10MB limit'
+        ]);
+        exit;
+    }
+    
+    // Validate file extension
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($extension, $allowedExtensions)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid file type. Only JPG, PNG, and PDF files are allowed.'
+        ]);
+        exit;
+    }
+    
+    // Validate MIME type using finfo
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mimeType = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    
+    if (!in_array($mimeType, $allowedMimeTypes)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Invalid file content. File does not match its extension.'
+        ]);
+        exit;
+    }
+    
+    // Additional validation for images
+    if (in_array($extension, ['jpg', 'jpeg', 'png'])) {
+        $imageInfo = @getimagesize($file['tmp_name']);
+        if ($imageInfo === false) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Invalid image file.'
+            ]);
+            exit;
+        }
+    }
+    
+    // Generate secure filename
+    $filename = 'deposit_proof_' . $userId . '_' . time() . '_' . bin2hex(random_bytes(8)) . '.' . $extension;
+    $targetPath = $uploadsDir . '/' . $filename;
+    
+    if (!move_uploaded_file($file['tmp_name'], $targetPath)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Failed to upload proof file'
+        ]);
+        exit;
+    }
+    
+    $proofPath = 'uploads/deposits/' . $filename;
+    
     // Generate unique reference
     $reference = 'DEP' . time() . rand(1000, 9999);
     
     // Insert deposit
     $stmt = $pdo->prepare("
-        INSERT INTO deposits (user_id, amount, method_code, reference, status, admin_notes, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, NOW())
+        INSERT INTO deposits (user_id, amount, method_code, reference, proof_path, status, admin_notes, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
     ");
     
-    $stmt->execute([$userId, $amount, $methodCode, $reference, $status, $adminNotes]);
+    $stmt->execute([$userId, $amount, $methodCode, $reference, $proofPath, $status, $adminNotes]);
     
     // If status is completed, update user balance
     if ($status === 'completed') {
@@ -74,7 +153,8 @@ try {
         'amount' => $amount,
         'reference' => $reference,
         'method_code' => $methodCode,
-        'status' => $status
+        'status' => $status,
+        'proof_path' => $proofPath
     ]);
     $logStmt->execute([$currentAdminId, $logDetails]);
     
