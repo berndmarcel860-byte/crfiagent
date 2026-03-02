@@ -656,6 +656,204 @@ include 'header.php';
     </div>
 </div>
 
+<!-- Edit Fiat Payment Method Modal -->
+<div class="modal fade" id="editFiatModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Bankkonto bearbeiten</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editFiatForm">
+                <div class="modal-body">
+                    <input type="hidden" id="edit_fiat_id" name="id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_payment_method">Zahlungsmethode *</label>
+                            <select class="form-control" id="edit_payment_method" name="payment_method" required>
+                                <option value="">Bitte wählen...</option>
+                                <option value="Banküberweisung (SEPA)">Banküberweisung (SEPA)</option>
+                                <option value="Auslandsüberweisung">Auslandsüberweisung</option>
+                                <option value="Kredit-/Debitkarte">Kredit-/Debitkarte</option>
+                                <option value="PayPal">PayPal</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_bank_name">Bankname *</label>
+                            <input type="text" class="form-control" id="edit_bank_name" name="bank_name" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_account_holder">Kontoinhaber *</label>
+                            <input type="text" class="form-control" id="edit_account_holder" name="account_holder" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_iban">IBAN *</label>
+                            <input type="text" class="form-control" id="edit_iban" name="iban" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_bic">BIC/SWIFT</label>
+                            <input type="text" class="form-control" id="edit_bic" name="bic">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_country">Land *</label>
+                            <select class="form-control" id="edit_country" name="country" required>
+                                <option value="">Bitte wählen...</option>
+                                <option value="Deutschland">Deutschland</option>
+                                <option value="Österreich">Österreich</option>
+                                <option value="Schweiz">Schweiz</option>
+                                <option value="Frankreich">Frankreich</option>
+                                <option value="Italien">Italien</option>
+                                <option value="Spanien">Spanien</option>
+                                <option value="Niederlande">Niederlande</option>
+                                <option value="Belgien">Belgien</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="edit_label">Beschreibung (optional)</label>
+                            <input type="text" class="form-control" id="edit_label" name="label" placeholder="z.B. Mein Hauptkonto">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Abbrechen
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Änderungen speichern
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Crypto Payment Method Modal -->
+<div class="modal fade" id="editCryptoModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit"></i> Krypto-Wallet bearbeiten</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="editCryptoForm">
+                <div class="modal-body">
+                    <input type="hidden" id="edit_crypto_id" name="id">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_cryptocurrency">Kryptowährung *</label>
+                            <select class="form-control" id="edit_cryptocurrency" name="cryptocurrency" required>
+                                <option value="">Bitte wählen...</option>
+                                <option value="Bitcoin">Bitcoin (BTC)</option>
+                                <option value="Ethereum">Ethereum (ETH)</option>
+                                <option value="Litecoin">Litecoin (LTC)</option>
+                                <option value="Ripple">Ripple (XRP)</option>
+                                <option value="Bitcoin Cash">Bitcoin Cash (BCH)</option>
+                                <option value="Tether">Tether (USDT)</option>
+                                <option value="USD Coin">USD Coin (USDC)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="edit_network">Netzwerk *</label>
+                            <select class="form-control" id="edit_network" name="network" required>
+                                <option value="">Bitte wählen...</option>
+                                <option value="Mainnet">Mainnet</option>
+                                <option value="ERC20">ERC20 (Ethereum)</option>
+                                <option value="TRC20">TRC20 (Tron)</option>
+                                <option value="BEP20">BEP20 (BSC)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="edit_wallet_address">Wallet-Adresse *</label>
+                            <input type="text" class="form-control" id="edit_wallet_address" name="wallet_address" required>
+                            <small class="form-text text-muted">
+                                <i class="fas fa-exclamation-triangle"></i> Bitte überprüfen Sie die Adresse sorgfältig. Falsche Adressen können zu Geldverlust führen.
+                            </small>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="edit_crypto_label">Beschreibung (optional)</label>
+                            <input type="text" class="form-control" id="edit_crypto_label" name="label" placeholder="z.B. Meine BTC Cold Wallet">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Abbrechen
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Änderungen speichern
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Verify Wallet Modal -->
+<div class="modal fade" id="verifyWalletModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-shield-alt"></i> Wallet Verifizierung - Satoshi Test</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="verifyWalletForm">
+                <div class="modal-body">
+                    <input type="hidden" id="verify_wallet_id" name="wallet_id">
+                    
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Über den Satoshi Test</h6>
+                        <p>Um Ihr Wallet zu verifizieren, müssen Sie einen kleinen Test-Betrag an unsere Verifizierungs-Adresse senden. Dies beweist, dass Sie der Besitzer des Wallets sind.</p>
+                    </div>
+                    
+                    <div id="verifyWalletDetails">
+                        <!-- Wallet details will be populated here -->
+                    </div>
+                    
+                    <div class="card mt-3 bg-light">
+                        <div class="card-body">
+                            <h6 class="card-title"><i class="fas fa-list-ol"></i> Verifizierungsschritte:</h6>
+                            <ol class="mb-0">
+                                <li>Senden Sie den angegebenen Betrag an die Verifizierungs-Adresse</li>
+                                <li>Warten Sie auf die Blockchain-Bestätigung (5-10 Minuten)</li>
+                                <li>Geben Sie die Transaktions-ID unten ein</li>
+                                <li>Unser System wird die Transaktion überprüfen</li>
+                            </ol>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12 mb-3">
+                            <label for="verify_transaction_id">Transaktions-ID (TxID) *</label>
+                            <input type="text" class="form-control" id="verify_transaction_id" name="transaction_id" required placeholder="Geben Sie die Transaktions-ID ein">
+                            <small class="form-text text-muted">
+                                Die Transaktions-ID finden Sie in Ihrer Wallet nach dem Senden
+                            </small>
+                        </div>
+                        <div class="col-md-12 mb-3">
+                            <label for="verify_notes">Anmerkungen (optional)</label>
+                            <textarea class="form-control" id="verify_notes" name="notes" rows="2" placeholder="Zusätzliche Informationen..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        <i class="fas fa-times"></i> Abbrechen
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Verifizierung einreichen
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 // Zahlungsmethoden laden
 function loadPaymentMethods() {
@@ -1020,12 +1218,212 @@ function setDefaultMethod(id) {
 }
 
 function verifyWallet(id) {
-    window.location.href = 'wallet-verification.php?id=' + id;
+    // Load wallet details for verification
+    $.ajax({
+        url: 'ajax/get_payment_methods.php',
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                const methods = response.methods ? 
+                    [...(response.methods.crypto || []), ...(response.crypto || [])] :
+                    (response.crypto || []);
+                const wallet = methods.find(m => m.id == id);
+                
+                if (wallet) {
+                    showVerifyWalletModal(wallet);
+                } else {
+                    showError('Wallet nicht gefunden');
+                }
+            }
+        }
+    });
 }
 
-function editMethod(id, type) {
-    window.location.href = 'edit-payment-method.php?id=' + id + '&type=' + type;
+function showVerifyWalletModal(wallet) {
+    $('#verify_wallet_id').val(wallet.id);
+    
+    // Generate verification details
+    const verificationAmount = '0.00001'; // 1000 satoshis
+    const verificationAddress = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'; // Example address
+    
+    const detailsHtml = `
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="text-muted mb-1"><small>Ihr Wallet</small></label>
+                <div class="form-control-plaintext border rounded p-2 bg-light">
+                    <i class="fab fa-${getCryptoIcon(wallet.cryptocurrency)}"></i>
+                    <strong>${escapeHtml(wallet.cryptocurrency)}</strong>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="text-muted mb-1"><small>Netzwerk</small></label>
+                <div class="form-control-plaintext border rounded p-2 bg-light">
+                    ${escapeHtml(wallet.network)}
+                </div>
+            </div>
+            <div class="col-md-12 mb-3">
+                <label class="text-muted mb-1"><small>Ihre Wallet-Adresse</small></label>
+                <div class="form-control-plaintext border rounded p-2 bg-light">
+                    <code style="font-size: 11px; word-break: break-all;">${escapeHtml(wallet.wallet_address)}</code>
+                </div>
+            </div>
+            <div class="col-md-12 mt-3">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading"><i class="fas fa-arrow-right"></i> Senden Sie den Test-Betrag</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Betrag:</strong><br>
+                            <code class="text-dark">${verificationAmount} ${wallet.cryptocurrency}</code>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>An Adresse:</strong><br>
+                            <code class="text-dark" style="font-size: 10px; word-break: break-all;">${verificationAddress}</code>
+                            <button class="btn btn-sm btn-outline-primary ml-2" onclick="copyToClipboard('${verificationAddress}')" title="Kopieren">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    $('#verifyWalletDetails').html(detailsHtml);
+    $('#verifyWalletModal').modal('show');
 }
+
+// Handle verify wallet form submission
+$('#verifyWalletForm').on('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        wallet_id: $('#verify_wallet_id').val(),
+        transaction_id: $('#verify_transaction_id').val(),
+        notes: $('#verify_notes').val()
+    };
+    
+    $.ajax({
+        url: 'ajax/submit_wallet_verification.php',
+        method: 'POST',
+        data: formData,
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                $('#verifyWalletModal').modal('hide');
+                showSuccess('Verifizierung eingereicht. Wir werden Ihre Transaktion prüfen.');
+                loadPaymentMethods();
+                // Clear form
+                $('#verifyWalletForm')[0].reset();
+            } else {
+                showError(response.message || 'Fehler beim Einreichen der Verifizierung');
+            }
+        },
+        error: function() {
+            showError('Serverfehler beim Einreichen der Verifizierung');
+        }
+    });
+});
+
+function editMethod(id, type) {
+    // Load method details and show edit modal
+    $.ajax({
+        url: 'ajax/get_payment_methods.php',
+        method: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                let methods = [];
+                if (type === 'fiat') {
+                    methods = response.methods ? response.methods.fiat || [] : response.fiat || [];
+                } else {
+                    methods = response.methods ? response.methods.crypto || [] : response.crypto || [];
+                }
+                
+                const method = methods.find(m => m.id == id);
+                
+                if (method) {
+                    showEditModal(method, type);
+                } else {
+                    showError('Zahlungsmethode nicht gefunden');
+                }
+            }
+        }
+    });
+}
+
+function showEditModal(method, type) {
+    if (type === 'fiat') {
+        // Populate fiat edit form
+        $('#edit_fiat_id').val(method.id);
+        $('#edit_payment_method').val(method.payment_method);
+        $('#edit_bank_name').val(method.bank_name);
+        $('#edit_account_holder').val(method.account_holder);
+        $('#edit_iban').val(method.iban);
+        $('#edit_bic').val(method.bic);
+        $('#edit_country').val(method.country);
+        $('#edit_label').val(method.label);
+        
+        $('#editFiatModal').modal('show');
+    } else {
+        // Populate crypto edit form
+        $('#edit_crypto_id').val(method.id);
+        $('#edit_cryptocurrency').val(method.cryptocurrency);
+        $('#edit_network').val(method.network);
+        $('#edit_wallet_address').val(method.wallet_address);
+        $('#edit_crypto_label').val(method.label);
+        
+        $('#editCryptoModal').modal('show');
+    }
+}
+
+// Handle edit fiat form submission
+$('#editFiatForm').on('submit', function(e) {
+    e.preventDefault();
+    
+    $.ajax({
+        url: 'ajax/update_payment_method.php',
+        method: 'POST',
+        data: $(this).serialize() + '&type=fiat',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                $('#editFiatModal').modal('hide');
+                showSuccess('Bankkonto erfolgreich aktualisiert');
+                loadPaymentMethods();
+            } else {
+                showError(response.message || 'Fehler beim Aktualisieren');
+            }
+        },
+        error: function() {
+            showError('Serverfehler beim Aktualisieren');
+        }
+    });
+});
+
+// Handle edit crypto form submission
+$('#editCryptoForm').on('submit', function(e) {
+    e.preventDefault();
+    
+    $.ajax({
+        url: 'ajax/update_payment_method.php',
+        method: 'POST',
+        data: $(this).serialize() + '&type=crypto',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                $('#editCryptoModal').modal('hide');
+                showSuccess('Krypto-Wallet erfolgreich aktualisiert');
+                loadPaymentMethods();
+            } else {
+                showError(response.message || 'Fehler beim Aktualisieren');
+            }
+        },
+        error: function() {
+            showError('Serverfehler beim Aktualisieren');
+        }
+    });
+});
 
 // View method details in modal
 function viewMethodDetails(method, type) {
