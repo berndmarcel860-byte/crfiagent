@@ -297,6 +297,42 @@ include 'header.php';
     padding: 24px;
 }
 
+/* View Details Modal Styling */
+.form-control-plaintext {
+    font-size: 14px;
+    font-weight: 500;
+    color: #2d3748;
+}
+
+.form-control-plaintext code {
+    background: #f7fafc;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #2d3748;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #17a2b8, #117a8b);
+    border: none;
+    color: white;
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #138496, #0f6674);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+}
+
+#viewDetailsContent .row {
+    margin: 0;
+}
+
+#viewDetailsContent .col-md-6,
+#viewDetailsContent .col-md-4,
+#viewDetailsContent .col-md-12 {
+    padding: 0 8px;
+}
+
 .form-group label {
     font-weight: 600;
     color: #2d3748;
@@ -596,6 +632,30 @@ include 'header.php';
     </div>
 </div>
 
+<!-- View Payment Method Details Modal -->
+<div class="modal fade" id="viewDetailsModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-eye"></i> <span id="viewModalTitle">Zahlungsmethode Details</span></h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="viewDetailsContent">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                    <i class="fas fa-times"></i> Schließen
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Zahlungsmethoden laden
 function loadPaymentMethods() {
@@ -674,6 +734,9 @@ function displayFiatMethods(methods) {
                     <span class="date-text">${formatDate(method.created_at)}</span>
                 </td>
                 <td>
+                    <button class="action-btn btn-info" onclick='viewMethodDetails(${JSON.stringify(method)}, "fiat")' title="Details anzeigen">
+                        <i class="fas fa-eye"></i>
+                    </button>
                     <button class="action-btn btn-primary" onclick="editMethod(${method.id}, 'fiat')" title="Bearbeiten">
                         <i class="fas fa-edit"></i>
                     </button>
@@ -753,6 +816,9 @@ function displayCryptoMethods(methods) {
                     <span class="date-text">${formatDate(method.created_at)}</span>
                 </td>
                 <td>
+                    <button class="action-btn btn-info" onclick='viewMethodDetails(${JSON.stringify(method)}, "crypto")' title="Details anzeigen">
+                        <i class="fas fa-eye"></i>
+                    </button>
                     ${needsVerification ? `
                     <button class="action-btn btn-warning" onclick="verifyWallet(${method.id})" title="Verifizieren">
                         <i class="fas fa-shield-alt"></i>
@@ -959,6 +1025,201 @@ function verifyWallet(id) {
 
 function editMethod(id, type) {
     window.location.href = 'edit-payment-method.php?id=' + id + '&type=' + type;
+}
+
+// View method details in modal
+function viewMethodDetails(method, type) {
+    const modalTitle = type === 'fiat' ? 'Bankkonto Details' : 'Krypto-Wallet Details';
+    $('#viewModalTitle').html('<i class="fas fa-' + (type === 'fiat' ? 'university' : 'bitcoin') + '"></i> ' + modalTitle);
+    
+    let detailsHtml = '';
+    
+    if (type === 'fiat') {
+        detailsHtml = `
+            <div class="row">
+                <div class="col-md-12">
+                    <h6 class="mb-3" style="color: #4e73df; font-weight: 600;">
+                        <i class="fas fa-info-circle"></i> Allgemeine Informationen
+                    </h6>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted mb-1"><small>Zahlungsmethode</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${escapeHtml(method.payment_method || 'N/A')}
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted mb-1"><small>Bankname</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${escapeHtml(method.bank_name || 'N/A')}
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted mb-1"><small>Kontoinhaber</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${escapeHtml(method.account_holder || 'N/A')}
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted mb-1"><small>IBAN</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        <code style="font-size: 13px;">${escapeHtml(method.iban || 'N/A')}</code>
+                        <button class="btn btn-sm btn-outline-primary ml-2" onclick="copyToClipboard('${escapeHtml(method.iban)}')" title="Kopieren">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted mb-1"><small>BIC/SWIFT</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${escapeHtml(method.bic || 'N/A')}
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted mb-1"><small>Land</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${escapeHtml(method.country || 'N/A')}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label class="text-muted mb-1"><small>Beschreibung</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${escapeHtml(method.label || 'Keine Beschreibung')}
+                    </div>
+                </div>
+                <div class="col-md-12 mt-3">
+                    <h6 class="mb-3" style="color: #4e73df; font-weight: 600;">
+                        <i class="fas fa-check-circle"></i> Status & Daten
+                    </h6>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted mb-1"><small>Verifizierungsstatus</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        <span class="status-badge ${getStatusClass(method.verification_status)}">
+                            ${getStatusTextDE(method.verification_status)}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted mb-1"><small>Standard-Methode</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${method.is_default == 1 ? '<span class="badge badge-primary">Ja</span>' : '<span class="badge badge-secondary">Nein</span>'}
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted mb-1"><small>Hinzugefügt am</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${formatDate(method.created_at)}
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        // Crypto method
+        detailsHtml = `
+            <div class="row">
+                <div class="col-md-12">
+                    <h6 class="mb-3" style="color: #4e73df; font-weight: 600;">
+                        <i class="fas fa-info-circle"></i> Wallet Informationen
+                    </h6>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted mb-1"><small>Kryptowährung</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        <i class="fab fa-${getCryptoIcon(method.cryptocurrency)}"></i>
+                        ${escapeHtml(method.cryptocurrency || 'N/A')}
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="text-muted mb-1"><small>Netzwerk</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${escapeHtml(method.network || 'N/A')}
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label class="text-muted mb-1"><small>Wallet-Adresse</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        <code style="font-size: 12px; word-break: break-all;">${escapeHtml(method.wallet_address || 'N/A')}</code>
+                        <button class="btn btn-sm btn-outline-primary ml-2" onclick="copyToClipboard('${escapeHtml(method.wallet_address)}')" title="Kopieren">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <label class="text-muted mb-1"><small>Beschreibung</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${escapeHtml(method.label || 'Keine Beschreibung')}
+                    </div>
+                </div>
+                <div class="col-md-12 mt-3">
+                    <h6 class="mb-3" style="color: #4e73df; font-weight: 600;">
+                        <i class="fas fa-shield-alt"></i> Verifizierung & Status
+                    </h6>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted mb-1"><small>Verifizierungsstatus</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        <span class="status-badge ${getStatusClass(method.verification_status)}">
+                            ${getStatusTextDE(method.verification_status)}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted mb-1"><small>Standard-Methode</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${method.is_default == 1 ? '<span class="badge badge-primary">Ja</span>' : '<span class="badge badge-secondary">Nein</span>'}
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="text-muted mb-1"><small>Hinzugefügt am</small></label>
+                    <div class="form-control-plaintext border rounded p-2 bg-light">
+                        ${formatDate(method.created_at)}
+                    </div>
+                </div>
+                ${method.verification_status !== 'verified' ? `
+                <div class="col-md-12 mt-2">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Verifizierung erforderlich:</strong> Diese Wallet muss durch den Satoshi-Test verifiziert werden, bevor sie für Auszahlungen verwendet werden kann.
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+        `;
+    }
+    
+    $('#viewDetailsContent').html(detailsHtml);
+    $('#viewDetailsModal').modal('show');
+}
+
+// Copy to clipboard function
+function copyToClipboard(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+            showSuccess('In Zwischenablage kopiert!');
+        }, function() {
+            fallbackCopyToClipboard(text);
+        });
+    } else {
+        fallbackCopyToClipboard(text);
+    }
+}
+
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "fixed";
+    textArea.style.top = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        showSuccess('In Zwischenablage kopiert!');
+    } catch (err) {
+        showError('Kopieren fehlgeschlagen');
+    }
+    document.body.removeChild(textArea);
 }
 
 // Benachrichtigungen
