@@ -605,13 +605,17 @@ function loadPaymentMethods() {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                displayFiatMethods(response.fiat || []);
-                displayCryptoMethods(response.crypto || []);
+                // API returns response.methods.fiat and response.methods.crypto
+                const fiatMethods = (response.methods && response.methods.fiat) || response.fiat || [];
+                const cryptoMethods = (response.methods && response.methods.crypto) || response.crypto || [];
+                displayFiatMethods(fiatMethods);
+                displayCryptoMethods(cryptoMethods);
             } else {
                 showError(response.message || 'Fehler beim Laden der Zahlungsmethoden');
             }
         },
-        error: function() {
+        error: function(xhr, status, error) {
+            console.error('Error loading payment methods:', error);
             showError('Serverfehler beim Laden der Zahlungsmethoden');
         }
     });
