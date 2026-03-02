@@ -806,9 +806,46 @@ include 'header.php';
                 <div class="modal-body">
                     <input type="hidden" id="verify_wallet_id" name="wallet_id">
                     
+                    <div class="alert alert-danger">
+                        <h5 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Warum ist die Wallet-Verifizierung zwingend erforderlich?</h5>
+                        <p class="mb-2"><strong>Die Verifizierung Ihres Crypto-Wallets durch den Satoshi-Test ist aus folgenden kritischen Gründen erforderlich:</strong></p>
+                        
+                        <h6 class="mt-3"><i class="fas fa-lock"></i> Sicherheit & Betrugsschutz:</h6>
+                        <ul>
+                            <li><strong>Eigentumsnachweis:</strong> Nur der tatsächliche Wallet-Besitzer kann eine Transaktion von dieser Adresse initiieren</li>
+                            <li><strong>Schutz vor Identitätsdiebstahl:</strong> Verhindert, dass Dritte fremde Wallet-Adressen missbrauchen</li>
+                            <li><strong>Betrugsprävention:</strong> Reduziert das Risiko von Geldwäsche und betrügerischen Transaktionen</li>
+                        </ul>
+                        
+                        <h6 class="mt-3"><i class="fas fa-university"></i> Compliance & Regulierung:</h6>
+                        <ul>
+                            <li><strong>Gesetzliche Anforderungen:</strong> Erfüllt KYC/AML-Vorschriften (Know Your Customer / Anti-Money Laundering)</li>
+                            <li><strong>Finanzaufsicht:</strong> Entspricht den Richtlinien der Finanzregulierungsbehörden</li>
+                            <li><strong>Plattform-Schutz:</strong> Schützt unsere Plattform vor illegalen Aktivitäten</li>
+                        </ul>
+                        
+                        <h6 class="mt-3"><i class="fas fa-coins"></i> Transaktionssicherheit:</h6>
+                        <ul>
+                            <li><strong>Einzahlungen:</strong> Ohne Verifizierung können wir eingehende Zahlungen nicht sicher Ihrem Konto zuordnen</li>
+                            <li><strong>Auszahlungen:</strong> Verhindert versehentliche Überweisungen an falsche oder nicht kontrollierte Adressen</li>
+                            <li><strong>Rückabwicklung:</strong> Bei Problemen können verifizierte Transaktionen besser nachvollzogen werden</li>
+                        </ul>
+                        
+                        <h6 class="mt-3"><i class="fas fa-shield-alt"></i> Ihre Sicherheit:</h6>
+                        <ul>
+                            <li><strong>Schutz vor Verlusten:</strong> Verhindert, dass Gelder an falsche Adressen gesendet werden</li>
+                            <li><strong>Kontosicherheit:</strong> Zusätzliche Sicherheitsebene für Ihr Konto</li>
+                            <li><strong>Verantwortung:</strong> Sie behalten die volle Kontrolle über Ihre Krypto-Assets</li>
+                        </ul>
+                        
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <strong><i class="fas fa-ban"></i> Wichtig:</strong> Ohne verifiziertes Wallet können <u>keine Einzahlungen empfangen</u> und <u>keine Auszahlungen durchgeführt</u> werden. Die Verifizierung ist eine einmalige Maßnahme zum Schutz aller Beteiligten.
+                        </div>
+                    </div>
+                    
                     <div class="alert alert-info">
-                        <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Über den Satoshi Test</h6>
-                        <p>Um Ihr Wallet zu verifizieren, müssen Sie einen kleinen Test-Betrag an unsere Verifizierungs-Adresse senden. Dies beweist, dass Sie der Besitzer des Wallets sind.</p>
+                        <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Was ist der Satoshi Test?</h6>
+                        <p class="mb-0">Sie senden einen sehr kleinen Test-Betrag (meist 1000 Satoshi = 0.00001 BTC oder gleichwertig) von Ihrer Wallet an unsere Verifizierungs-Adresse. Dies beweist unwiderlegbar, dass Sie der Besitzer des Wallets sind und Zugriff auf die Private Keys haben.</p>
                     </div>
                     
                     <div id="verifyWalletDetails">
@@ -1243,11 +1280,10 @@ function verifyWallet(id) {
 function showVerifyWalletModal(wallet) {
     $('#verify_wallet_id').val(wallet.id);
     
-    // Generate verification details
-    const verificationAmount = '0.00001'; // 1000 satoshis
-    const verificationAddress = 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh'; // Example address
+    // Check if admin has set verification details
+    const hasVerificationDetails = wallet.verification_amount && wallet.verification_address;
     
-    const detailsHtml = `
+    let detailsHtml = `
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label class="text-muted mb-1"><small>Ihr Wallet</small></label>
@@ -1268,26 +1304,89 @@ function showVerifyWalletModal(wallet) {
                     <code style="font-size: 11px; word-break: break-all;">${escapeHtml(wallet.wallet_address)}</code>
                 </div>
             </div>
+            <div class="col-md-12 mb-3">
+                <label class="text-muted mb-1"><small>Verifizierungsstatus</small></label>
+                <div class="form-control-plaintext border rounded p-2 bg-light">
+                    <span class="status-badge ${getStatusClass(wallet.verification_status)}">
+                        ${getStatusTextDE(wallet.verification_status)}
+                    </span>
+                </div>
+            </div>
+    `;
+    
+    if (!hasVerificationDetails) {
+        // Admin hasn't set verification details yet
+        detailsHtml += `
+            <div class="col-md-12 mt-3">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading"><i class="fas fa-clock"></i> Warten auf Administrator-Einrichtung</h6>
+                    <p class="mb-2">Die Verifizierungsdetails für dieses Wallet wurden noch nicht vom Administrator eingerichtet.</p>
+                    <p class="mb-0">
+                        <strong>Was bedeutet das?</strong><br>
+                        Unser Administrator muss zunächst die Verifizierungs-Adresse und den Test-Betrag für Ihr ${escapeHtml(wallet.cryptocurrency)}-Wallet konfigurieren. 
+                        Dies ist ein einmaliger Prozess zur Sicherstellung der korrekten Netzwerk-Konfiguration.
+                    </p>
+                </div>
+                <div class="alert alert-info">
+                    <p class="mb-0">
+                        <i class="fas fa-info-circle"></i> <strong>Nächste Schritte:</strong><br>
+                        Sie werden per E-Mail benachrichtigt, sobald die Verifizierungsdetails bereitstehen. 
+                        Danach können Sie den Verifizierungsprozess abschließen und Ihr Wallet für Ein- und Auszahlungen freischalten.
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        // Hide the transaction form when details are not ready
+        $('#verifyWalletForm').find('.row.mt-4').hide();
+        $('#verifyWalletForm').find('button[type="submit"]').hide();
+    } else {
+        // Admin has set verification details - show them
+        const verificationAmount = wallet.verification_amount;
+        const verificationAddress = wallet.verification_address;
+        
+        detailsHtml += `
+            <div class="col-md-12 mt-3">
+                <div class="alert alert-success">
+                    <h6 class="alert-heading"><i class="fas fa-check-circle"></i> Verifizierung bereit</h6>
+                    <p class="mb-0">Die Verifizierungsdetails sind eingerichtet. Sie können jetzt den Test-Betrag senden.</p>
+                </div>
+            </div>
             <div class="col-md-12 mt-3">
                 <div class="alert alert-warning">
                     <h6 class="alert-heading"><i class="fas fa-arrow-right"></i> Senden Sie den Test-Betrag</h6>
                     <div class="row">
-                        <div class="col-md-6">
-                            <strong>Betrag:</strong><br>
-                            <code class="text-dark">${verificationAmount} ${wallet.cryptocurrency}</code>
+                        <div class="col-md-6 mb-2">
+                            <strong><i class="fas fa-coins"></i> Exakter Betrag:</strong><br>
+                            <code class="text-dark" style="font-size: 14px;">${verificationAmount} ${escapeHtml(wallet.cryptocurrency)}</code>
+                            <button class="btn btn-sm btn-outline-primary ml-2" onclick="copyToClipboard('${verificationAmount}')" title="Betrag kopieren">
+                                <i class="fas fa-copy"></i>
+                            </button>
                         </div>
-                        <div class="col-md-6">
-                            <strong>An Adresse:</strong><br>
-                            <code class="text-dark" style="font-size: 10px; word-break: break-all;">${verificationAddress}</code>
-                            <button class="btn btn-sm btn-outline-primary ml-2" onclick="copyToClipboard('${verificationAddress}')" title="Kopieren">
+                        <div class="col-md-6 mb-2">
+                            <strong><i class="fas fa-wallet"></i> An Verifizierungs-Adresse:</strong><br>
+                            <code class="text-dark" style="font-size: 10px; word-break: break-all;">${escapeHtml(verificationAddress)}</code>
+                            <button class="btn btn-sm btn-outline-primary ml-2" onclick="copyToClipboard('${verificationAddress}')" title="Adresse kopieren">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
                     </div>
+                    <div class="mt-2">
+                        <small class="text-muted">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            <strong>Wichtig:</strong> Senden Sie genau den angegebenen Betrag. Abweichungen können die Verifizierung verzögern.
+                        </small>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
+        
+        // Show the transaction form when details are ready
+        $('#verifyWalletForm').find('.row.mt-4').show();
+        $('#verifyWalletForm').find('button[type="submit"]').show();
+    }
+    
+    detailsHtml += `</div>`;
     
     $('#verifyWalletDetails').html(detailsHtml);
     $('#verifyWalletModal').modal('show');
