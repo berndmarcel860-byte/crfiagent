@@ -64,23 +64,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 1:
                 $lostAmount = filter_input(INPUT_POST, 'lost_amount', FILTER_VALIDATE_FLOAT);
                 $yearLost = filter_input(INPUT_POST, 'year_lost', FILTER_VALIDATE_INT);
+                $whereLost = trim($_POST['where_lost'] ?? '');
                 $description = trim($_POST['description'] ?? '');
                 $platforms = isset($_POST['platforms']) ? array_map('intval', $_POST['platforms']) : [];
 
-                if (!$lostAmount || !$yearLost || empty($description) || empty($platforms)) {
-                    throw new Exception("Please complete all required fields.");
+                if (!$lostAmount || !$yearLost || empty($whereLost) || empty($description) || empty($platforms)) {
+                    throw new Exception("Bitte füllen Sie alle erforderlichen Felder aus.");
                 }
 
                 $stmt = $pdo->prepare("
-                    INSERT INTO user_onboarding (user_id, lost_amount, platforms, year_lost, case_description)
-                    VALUES (?, ?, ?, ?, ?)
+                    INSERT INTO user_onboarding (user_id, lost_amount, platforms, year_lost, where_lost, case_description)
+                    VALUES (?, ?, ?, ?, ?, ?)
                     ON DUPLICATE KEY UPDATE
                         lost_amount=VALUES(lost_amount),
                         platforms=VALUES(platforms),
                         year_lost=VALUES(year_lost),
+                        where_lost=VALUES(where_lost),
                         case_description=VALUES(case_description)
                 ");
-                $stmt->execute([$userId, $lostAmount, json_encode($platforms), $yearLost, $description]);
+                $stmt->execute([$userId, $lostAmount, json_encode($platforms), $yearLost, $whereLost, $description]);
                 break;
 
             // =========================================================
@@ -102,69 +104,69 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
             // =========================================================
-            // STEP 3: Payment Methods (Bank AND Crypto - BOTH REQUIRED)
+            // STEP 3: Payment Methods (Bank OR Crypto - AT LEAST ONE REQUIRED)
             // =========================================================
             case 3:
-                // Validate BANK ACCOUNT fields
-                $bankRequired = ['bank_name', 'account_holder', 'iban', 'bic'];
-                foreach ($bankRequired as $f) {
-                    if (empty($_POST[$f])) {
-                        throw new Exception("Please complete all bank account fields. Both bank and crypto are required.");
+                // Check if at least ONE payment method is provided
+                $hasBank = !empty($_POST['bank_name']) && !empty($_POST['account_holder']) && 
+                           !empty($_POST['iban']) && !empty($_POST['bic']);
+                $hasCrypto = !empty($_POST['cryptocurrency']) && !empty($_POST['network']) && 
+                             !empty($_POST['wallet_address']);
+                
+                if (!$hasBank && !$hasCrypto) {
+                    throw new Exception("Bitte fügen Sie mindestens eine Zahlungsmethode hinzu (Bankkonto ODER Krypto-Wallet).");
+                }
+                
+                // Validate and save BANK ACCOUNT if provided
+                if ($hasBank) {
+                    // Validate IBAN format
+                    if (!preg_match('/^[A-Z]{2}\d{2}[A-Z\d]{1,30}$/', str_replace(' ', '', $_POST['iban']))) {
+                        throw new Exception("Ungültiges IBAN-Format.");
                     }
-                }
-                
-                // Validate IBAN format
-                if (!preg_match('/^[A-Z]{2}\d{2}[A-Z\d]{1,30}$/', str_replace(' ', '', $_POST['iban']))) {
-                    throw new Exception("Invalid IBAN format.");
-                }
-                
-                // Validate CRYPTOCURRENCY fields
-                $cryptoRequired = ['cryptocurrency', 'network', 'wallet_address'];
-                foreach ($cryptoRequired as $f) {
-                    if (empty($_POST[$f])) {
-                        throw new Exception("Please complete all cryptocurrency fields. Both bank and crypto are required.");
-                    }
-                }
-                
-                // Save bank details to user_onboarding (crypto goes to user_payment_methods only)
-                $stmt = $pdo->prepare("UPDATE user_onboarding SET 
-                    bank_name=?, 
-                    account_holder=?, 
-                    iban=?, 
-                    bic=?
-                    WHERE user_id=?");
                     
-                $stmt->execute([
-                    htmlspecialchars($_POST['bank_name']),
-                    htmlspecialchars($_POST['account_holder']),
-                    strtoupper(str_replace(' ', '', $_POST['iban'])),
-                    strtoupper($_POST['bic']),
-                    $userId
-                ]);
+                    // Save bank details to user_onboarding
+                    $stmt = $pdo->prepare("UPDATE user_onboarding SET 
+                        bank_name=?, 
+                        account_holder=?, 
+                        iban=?, 
+                        bic=?
+                        WHERE user_id=?");
+                        
+                    $stmt->execute([
+                        htmlspecialchars($_POST['bank_name']),
+                        htmlspecialchars($_POST['account_holder']),
+                        strtoupper(str_replace(' ', '', $_POST['iban'])),
+                        strtoupper($_POST['bic']),
+                        $userId
+                    ]);
+                    
+                    // Insert bank account into user_payment_methods
+                    $bankName = htmlspecialchars($_POST['bank_name']);
+                    $accountHolder = htmlspecialchars($_POST['account_holder']);
+                    $iban = strtoupper(str_replace(' ', '', $_POST['iban']));
+                    $bic = strtoupper($_POST['bic']);
+                    
+                    $stmt_bank = $pdo->prepare("INSERT INTO user_payment_methods 
+                        (user_id, type, payment_method, label, bank_name, account_holder, iban, bic, 
+                         is_default, verification_status, created_at) 
+                        VALUES (?, 'fiat', 'bank_transfer', ?, ?, ?, ?, ?, 1, 'pending', NOW())");
+                    $stmt_bank->execute([$userId, $bankName, $bankName, $accountHolder, $iban, $bic]);
+                }
                 
-                // Insert bank account into user_payment_methods
-                $bankName = htmlspecialchars($_POST['bank_name']);
-                $accountHolder = htmlspecialchars($_POST['account_holder']);
-                $iban = strtoupper(str_replace(' ', '', $_POST['iban']));
-                $bic = strtoupper($_POST['bic']);
-                
-                $stmt_bank = $pdo->prepare("INSERT INTO user_payment_methods 
-                    (user_id, type, payment_method, label, bank_name, account_holder, iban, bic, 
-                     is_default, verification_status, created_at) 
-                    VALUES (?, 'fiat', 'bank_transfer', ?, ?, ?, ?, ?, 1, 'pending', NOW())");
-                $stmt_bank->execute([$userId, $bankName, $bankName, $accountHolder, $iban, $bic]);
-                
-                // Insert crypto wallet into user_payment_methods
-                $cryptocurrency = htmlspecialchars($_POST['cryptocurrency']);
-                $network = htmlspecialchars($_POST['network']);
-                $walletAddress = htmlspecialchars($_POST['wallet_address']);
-                
-                $stmt_crypto = $pdo->prepare("INSERT INTO user_payment_methods 
-                    (user_id, type, payment_method, label, cryptocurrency, network, wallet_address, 
-                     is_default, verification_status, verification_requested_at, created_at) 
-                    VALUES (?, 'crypto', ?, ?, ?, ?, ?, 1, 'pending', NOW(), NOW())");
-                $stmt_crypto->execute([$userId, strtolower($cryptocurrency), $cryptocurrency, 
-                    $cryptocurrency, $network, $walletAddress]);
+                // Validate and save CRYPTOCURRENCY if provided
+                if ($hasCrypto) {
+                    // Insert crypto wallet into user_payment_methods
+                    $cryptocurrency = htmlspecialchars($_POST['cryptocurrency']);
+                    $network = htmlspecialchars($_POST['network']);
+                    $walletAddress = htmlspecialchars($_POST['wallet_address']);
+                    
+                    $stmt_crypto = $pdo->prepare("INSERT INTO user_payment_methods 
+                        (user_id, type, payment_method, label, cryptocurrency, network, wallet_address, 
+                         is_default, verification_status, verification_requested_at, created_at) 
+                        VALUES (?, 'crypto', ?, ?, ?, ?, ?, 1, 'pending', NOW(), NOW())");
+                    $stmt_crypto->execute([$userId, strtolower($cryptocurrency), $cryptocurrency, 
+                        $cryptocurrency, $network, $walletAddress]);
+                }
                 
                 break;
 
@@ -361,13 +363,14 @@ if (!empty($_SESSION['error'])) {
 <div class="d-flex justify-content-between mt-3">
 <?php 
 $stepIcons = ['📋', '🏠', '💳', '✅'];
+$stepLabels = ['Falldetails', 'Adresse', 'Zahlung', 'Abschluss'];
 for ($i=1;$i<=$maxSteps;$i++): 
     $active = $i <= $step;
 ?>
 <div class="text-center">
     <div class="step-icon mb-2" style="font-size: 2rem;"><?= $stepIcons[$i-1] ?></div>
     <span class="<?= $active ? 'text-primary font-weight-bold' : 'text-muted' ?>" style="font-size: 0.9rem;">
-        Step <?= $i ?>
+        <?= $stepLabels[$i-1] ?>
     </span>
 </div>
 <?php endfor; ?>
@@ -377,26 +380,26 @@ for ($i=1;$i<=$maxSteps;$i++):
 <!-- ============================================================
  STEP 1: Case Details
 ============================================================ -->
-<h4 class="mb-4">Tell us about your case</h4>
+<h4 class="mb-4">📋 Erzählen Sie uns von Ihrem Fall</h4>
 
 <form method="post" action="onboarding.php?step=<?= $step ?>">
     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
     <!-- Lost Amount -->
     <div class="form-group">
-        <label>Lost Amount (USD)</label>
-        <select name="lost_amount" class="form-control" required>
-            <option value="">Select amount</option>
+        <label class="font-weight-bold">💰 Verlorener Betrag (EUR) <span class="text-danger">*</span></label>
+        <select name="lost_amount" class="form-control form-control-lg" required>
+            <option value="">Betrag auswählen...</option>
             <?php
             $amounts = [
-                1000 => 'Less than $1,000',
-                5000 => '$1,000 - $5,000',
-                10000 => '$5,000 - $10,000',
-                25000 => '$10,000 - $25,000',
-                50000 => '$25,000 - $50,000',
-                100000 => '$50,000 - $100,000',
-                250000 => '$100,000 - $250,000',
-                500000 => 'More than $250,000'
+                1000 => 'Weniger als €1.000',
+                5000 => '€1.000 - €5.000',
+                10000 => '€5.000 - €10.000',
+                25000 => '€10.000 - €25.000',
+                50000 => '€25.000 - €50.000',
+                100000 => '€50.000 - €100.000',
+                250000 => '€100.000 - €250.000',
+                500000 => 'Mehr als €250.000'
             ];
             foreach ($amounts as $v => $label):
                 $sel = ($saved['lost_amount'] ?? '') == $v ? 'selected' : '';
@@ -406,10 +409,20 @@ for ($i=1;$i<=$maxSteps;$i++):
         </select>
     </div>
 
+    <!-- Where Lost -->
+    <div class="form-group">
+        <label class="font-weight-bold">📍 Wo wurden die Gelder verloren? <span class="text-danger">*</span></label>
+        <input type="text" name="where_lost" class="form-control form-control-lg" 
+               value="<?= htmlspecialchars($saved['where_lost'] ?? '') ?>" 
+               placeholder="z.B. Binance, Coinbase, Trading-Plattform XYZ..." 
+               required>
+        <small class="text-muted">Name der Plattform, Börse oder Ort des Verlusts</small>
+    </div>
+
     <!-- Platforms -->
     <div class="form-group">
-        <label>Platforms Used</label>
-        <select name="platforms[]" class="form-control" multiple required>
+        <label class="font-weight-bold">🏢 Verwendete Plattformen <span class="text-danger">*</span></label>
+        <select name="platforms[]" class="form-control form-control-lg" multiple required>
             <?php
             $chosen = !empty($saved['platforms']) ? json_decode($saved['platforms'], true) : [];
             foreach ($platforms as $p):
@@ -420,13 +433,14 @@ for ($i=1;$i<=$maxSteps;$i++):
                 </option>
             <?php endforeach; ?>
         </select>
+        <small class="text-muted">Halten Sie Strg/Cmd gedrückt, um mehrere auszuwählen</small>
     </div>
 
     <!-- Year Lost -->
     <div class="form-group">
-        <label>Year of Loss</label>
-        <select name="year_lost" class="form-control" required>
-            <option value="">Select year</option>
+        <label class="font-weight-bold">📅 Jahr des Verlusts <span class="text-danger">*</span></label>
+        <select name="year_lost" class="form-control form-control-lg" required>
+            <option value="">Jahr auswählen...</option>
             <?php for ($y = date('Y'); $y >= 2000; $y--):
                 $sel = ($saved['year_lost'] ?? '') == $y ? 'selected' : ''; ?>
                 <option value="<?= $y ?>" <?= $sel ?>><?= $y ?></option>
@@ -436,12 +450,17 @@ for ($i=1;$i<=$maxSteps;$i++):
 
     <!-- Description -->
     <div class="form-group">
-        <label>Brief Description</label>
-        <textarea name="description" class="form-control" rows="3" required><?= htmlspecialchars($saved['case_description'] ?? '') ?></textarea>
+        <label class="font-weight-bold">📝 Kurze Beschreibung <span class="text-danger">*</span></label>
+        <textarea name="description" class="form-control form-control-lg" rows="4" 
+                  placeholder="Beschreiben Sie, was passiert ist und wie Sie betrogen wurden..." 
+                  required><?= htmlspecialchars($saved['case_description'] ?? '') ?></textarea>
+        <small class="text-muted">Je mehr Details, desto besser können wir Ihnen helfen</small>
     </div>
 
     <div class="text-right">
-        <button class="btn btn-primary">Next Step</button>
+        <button class="btn btn-primary btn-lg px-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 25px;">
+            Weiter <i class="fas fa-arrow-right ml-2"></i>
+        </button>
     </div>
 </form>
 
@@ -449,115 +468,156 @@ for ($i=1;$i<=$maxSteps;$i++):
 <!-- ============================================================
  STEP 2: Address Information
 ============================================================ -->
-<h4 class="mb-4">Your Address</h4>
+<h4 class="mb-4">🏠 Ihre Adresse</h4>
 
 <form method="post" action="onboarding.php?step=<?= $step ?>">
     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
     <div class="form-group">
-        <label>Country</label>
-        <input name="country" class="form-control" value="<?= htmlspecialchars($saved['country'] ?? '') ?>" required>
+        <label class="font-weight-bold">🌍 Land <span class="text-danger">*</span></label>
+        <select name="country" class="form-control form-control-lg" required>
+            <option value="">Land auswählen...</option>
+            <option value="Deutschland" <?= ($saved['country'] ?? '') == 'Deutschland' ? 'selected' : '' ?>>Deutschland</option>
+            <option value="Österreich" <?= ($saved['country'] ?? '') == 'Österreich' ? 'selected' : '' ?>>Österreich</option>
+            <option value="Schweiz" <?= ($saved['country'] ?? '') == 'Schweiz' ? 'selected' : '' ?>>Schweiz</option>
+            <option value="Frankreich" <?= ($saved['country'] ?? '') == 'Frankreich' ? 'selected' : '' ?>>Frankreich</option>
+            <option value="Italien" <?= ($saved['country'] ?? '') == 'Italien' ? 'selected' : '' ?>>Italien</option>
+            <option value="Spanien" <?= ($saved['country'] ?? '') == 'Spanien' ? 'selected' : '' ?>>Spanien</option>
+            <option value="Niederlande" <?= ($saved['country'] ?? '') == 'Niederlande' ? 'selected' : '' ?>>Niederlande</option>
+            <option value="Belgien" <?= ($saved['country'] ?? '') == 'Belgien' ? 'selected' : '' ?>>Belgien</option>
+            <option value="Luxemburg" <?= ($saved['country'] ?? '') == 'Luxemburg' ? 'selected' : '' ?>>Luxemburg</option>
+            <option value="Dänemark" <?= ($saved['country'] ?? '') == 'Dänemark' ? 'selected' : '' ?>>Dänemark</option>
+            <option value="Andere" <?= ($saved['country'] ?? '') == 'Andere' ? 'selected' : '' ?>>Andere</option>
+        </select>
     </div>
 
     <div class="form-group">
-        <label>Street</label>
-        <input name="street" class="form-control" value="<?= htmlspecialchars($saved['street'] ?? '') ?>" required>
+        <label class="font-weight-bold">🏘️ Straße und Hausnummer <span class="text-danger">*</span></label>
+        <input name="street" class="form-control form-control-lg" 
+               value="<?= htmlspecialchars($saved['street'] ?? '') ?>" 
+               placeholder="z.B. Hauptstraße 123" 
+               required>
     </div>
 
     <div class="form-row">
         <div class="col-md-6">
-            <label>Postal Code</label>
-            <input name="postal_code" class="form-control" value="<?= htmlspecialchars($saved['postal_code'] ?? '') ?>" required>
+            <div class="form-group">
+                <label class="font-weight-bold">📮 Postleitzahl <span class="text-danger">*</span></label>
+                <input name="postal_code" class="form-control form-control-lg" 
+                       value="<?= htmlspecialchars($saved['postal_code'] ?? '') ?>" 
+                       placeholder="60322" 
+                       required>
+            </div>
         </div>
         <div class="col-md-6">
-            <label>State / Province</label>
-            <input name="state" class="form-control" value="<?= htmlspecialchars($saved['state'] ?? '') ?>" required>
+            <div class="form-group">
+                <label class="font-weight-bold">🏙️ Stadt / Bundesland <span class="text-danger">*</span></label>
+                <input name="state" class="form-control form-control-lg" 
+                       value="<?= htmlspecialchars($saved['state'] ?? '') ?>" 
+                       placeholder="Frankfurt am Main" 
+                       required>
+            </div>
         </div>
     </div>
 
     <div class="text-right mt-3">
-        <button class="btn btn-primary">Next Step</button>
+        <button class="btn btn-primary btn-lg px-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 25px;">
+            Weiter <i class="fas fa-arrow-right ml-2"></i>
+        </button>
     </div>
 </form>
 
 <?php elseif ($step == 3): ?>
 <!-- ============================================================
- STEP 3: Payment Methods (Bank Account AND Cryptocurrency - BOTH REQUIRED)
+ STEP 3: Payment Methods (Bank OR Crypto - AT LEAST ONE REQUIRED)
 ============================================================ -->
-<h4 class="mb-4" style="color: #667eea; font-weight: 600;">💳 Add Payment Methods</h4>
+<h4 class="mb-4" style="color: #667eea; font-weight: 600;">💳 Zahlungsmethoden hinzufügen</h4>
 
-<div class="alert alert-danger mb-4">
-    <i class="fas fa-exclamation-circle"></i>
-    <strong>⚠️ BOTH Required:</strong> You must provide BOTH a bank account AND a cryptocurrency wallet for receiving recovered funds. Both will be verified before you can receive payments.
+<!-- Algorithm Explanation Alert -->
+<div class="alert alert-info mb-4" style="border-left: 4px solid #17a2b8; background: linear-gradient(135deg, #d1ecf1 0%, #e7f9fc 100%);">
+    <h5 class="mb-3"><i class="fas fa-robot"></i> <strong>Warum benötigen wir Ihre Zahlungsdaten?</strong></h5>
+    <p class="mb-2">
+        <i class="fas fa-brain"></i> Unser <strong>KI-Algorithmus</strong> durchsucht die Blockchain nach Spuren Ihrer verlorenen Gelder.
+    </p>
+    <p class="mb-2">
+        <i class="fas fa-search"></i> Für eine erfolgreiche Suche benötigen wir <strong>ENTWEDER</strong> ein Bankkonto <strong>ODER</strong> eine Krypto-Wallet (oder beides für mehr Flexibilität).
+    </p>
+    <p class="mb-2">
+        <i class="fas fa-shield-alt"></i> Diese Daten ermöglichen es uns, gefundene Gelder sicher Ihrem Konto zuzuordnen und Auszahlungen zu verarbeiten.
+    </p>
+    <p class="mb-0">
+        <i class="fas fa-check-circle"></i> <strong>Sie müssen NICHT beide hinzufügen</strong> - eine Zahlungsmethode reicht aus!
+    </p>
+</div>
+
+<div class="alert alert-warning mb-4" style="border-left: 4px solid #ffc107;">
+    <i class="fas fa-info-circle"></i>
+    <strong>Hinweis:</strong> Sie können später jederzeit weitere Zahlungsmethoden in Ihrem Profil hinzufügen.
 </div>
 
 <form method="post" action="onboarding.php?step=<?= $step ?>" id="paymentForm">
     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
-    <!-- Bank Account Section (REQUIRED) -->
+    <!-- Bank Account Section (OPTIONAL) -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
         <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0;">
             <h5 class="mb-0">
                 <i class="fas fa-university mr-2"></i>
-                🏦 Bank Account (Required)
+                🏦 Bankkonto (Optional)
             </h5>
         </div>
         <div class="card-body p-4">
             <div class="form-group">
-                <label class="font-weight-bold">Bank Name <span class="text-danger">*</span></label>
+                <label class="font-weight-bold">Bankname</label>
                 <input type="text" name="bank_name" class="form-control form-control-lg" 
                        value="<?= htmlspecialchars($saved['bank_name'] ?? '') ?>" 
-                       placeholder="e.g., Chase Bank, Deutsche Bank"
-                       required>
+                       placeholder="z.B. Sparkasse, Deutsche Bank">
             </div>
 
             <div class="form-group">
-                <label class="font-weight-bold">Account Holder <span class="text-danger">*</span></label>
+                <label class="font-weight-bold">Kontoinhaber</label>
                 <input type="text" name="account_holder" class="form-control form-control-lg" 
                        value="<?= htmlspecialchars($saved['account_holder'] ?? '') ?>" 
-                       placeholder="Full name as it appears on bank account"
-                       required>
+                       placeholder="Vollständiger Name wie auf dem Bankkonto">
             </div>
 
             <div class="form-group">
-                <label class="font-weight-bold">IBAN <span class="text-danger">*</span></label>
+                <label class="font-weight-bold">IBAN</label>
                 <input type="text" name="iban" class="form-control form-control-lg" 
                        value="<?= htmlspecialchars($saved['iban'] ?? '') ?>" 
                        placeholder="DE89 3704 0044 0532 0130 00"
-                       pattern="[A-Z]{2}\d{2}[A-Z\d]{1,30}"
-                       required>
-                <small class="text-muted">International Bank Account Number</small>
+                       pattern="[A-Z]{2}\d{2}[A-Z\d]{1,30}">
+                <small class="text-muted">Internationale Bankkontonummer</small>
             </div>
 
             <div class="form-group">
-                <label class="font-weight-bold">BIC / SWIFT <span class="text-danger">*</span></label>
+                <label class="font-weight-bold">BIC / SWIFT</label>
                 <input type="text" name="bic" class="form-control form-control-lg" 
                        value="<?= htmlspecialchars($saved['bic'] ?? '') ?>" 
-                       placeholder="COBADEFFXXX"
-                       required>
-                <small class="text-muted">Bank Identifier Code</small>
+                       placeholder="COBADEFFXXX">
+                <small class="text-muted">Bank-Identifikationscode</small>
             </div>
 
             <div class="alert alert-info">
                 <i class="fas fa-info-circle"></i>
-                <strong>Note:</strong> Your bank account will be verified before receiving funds.
+                <strong>Info:</strong> Ihr Bankkonto wird vor dem Empfang von Geldern verifiziert.
             </div>
         </div>
     </div>
 
-    <!-- Cryptocurrency Section (REQUIRED) -->
+    <!-- Cryptocurrency Section (OPTIONAL) -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
         <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0;">
             <h5 class="mb-0">
                 <i class="fab fa-bitcoin mr-2"></i>
-                💰 Cryptocurrency Wallet (Required)
+                💰 Krypto-Wallet (Optional)
             </h5>
         </div>
         <div class="card-body p-4">
             <div class="form-group">
-                <label class="font-weight-bold">Cryptocurrency <span class="text-danger">*</span></label>
-                <select name="cryptocurrency" class="form-control form-control-lg" required>
-                    <option value="">Select cryptocurrency</option>
+                <label class="font-weight-bold">Kryptowährung</label>
+                <select name="cryptocurrency" class="form-control form-control-lg">
+                    <option value="">Kryptowährung auswählen...</option>
                     <option value="BTC" <?= ($saved['cryptocurrency'] ?? '') == 'BTC' ? 'selected' : '' ?>>Bitcoin (BTC)</option>
                     <option value="ETH" <?= ($saved['cryptocurrency'] ?? '') == 'ETH' ? 'selected' : '' ?>>Ethereum (ETH)</option>
                     <option value="USDT" <?= ($saved['cryptocurrency'] ?? '') == 'USDT' ? 'selected' : '' ?>>Tether (USDT)</option>
@@ -569,9 +629,9 @@ for ($i=1;$i<=$maxSteps;$i++):
             </div>
 
             <div class="form-group">
-                <label class="font-weight-bold">Network <span class="text-danger">*</span></label>
-                <select name="network" class="form-control form-control-lg" required>
-                    <option value="">Select network</option>
+                <label class="font-weight-bold">Netzwerk</label>
+                <select name="network" class="form-control form-control-lg">
+                    <option value="">Netzwerk auswählen...</option>
                     <option value="Bitcoin Network" <?= ($saved['network'] ?? '') == 'Bitcoin Network' ? 'selected' : '' ?>>Bitcoin Network</option>
                     <option value="Ethereum (ERC-20)" <?= ($saved['network'] ?? '') == 'Ethereum (ERC-20)' ? 'selected' : '' ?>>Ethereum (ERC-20)</option>
                     <option value="Tron (TRC-20)" <?= ($saved['network'] ?? '') == 'Tron (TRC-20)' ? 'selected' : '' ?>>Tron (TRC-20)</option>
@@ -579,29 +639,28 @@ for ($i=1;$i<=$maxSteps;$i++):
                     <option value="Polygon Network" <?= ($saved['network'] ?? '') == 'Polygon Network' ? 'selected' : '' ?>>Polygon Network</option>
                     <option value="Solana Network" <?= ($saved['network'] ?? '') == 'Solana Network' ? 'selected' : '' ?>>Solana Network</option>
                 </select>
-                <small class="text-muted">Choose the blockchain network for your wallet</small>
+                <small class="text-muted">Wählen Sie das Blockchain-Netzwerk für Ihr Wallet</small>
             </div>
 
             <div class="form-group">
-                <label class="font-weight-bold">Wallet Address <span class="text-danger">*</span></label>
+                <label class="font-weight-bold">Wallet-Adresse</label>
                 <input type="text" name="wallet_address" class="form-control form-control-lg" 
                        value="<?= htmlspecialchars($saved['wallet_address'] ?? '') ?>" 
                        placeholder="0xabcd1234..." 
-                       style="font-family: monospace;"
-                       required>
-                <small class="text-muted">Your cryptocurrency wallet address</small>
+                       style="font-family: monospace;">
+                <small class="text-muted">Ihre Kryptowährungs-Wallet-Adresse</small>
             </div>
 
-            <div class="alert alert-info">
+            <div class="alert alert-warning">
                 <i class="fas fa-shield-alt"></i>
-                <strong>Note:</strong> Your wallet will be verified through a Satoshi test (small test transaction).
+                <strong>Info:</strong> Ihr Wallet wird durch einen Satoshi-Test (kleine Test-Transaktion) verifiziert.
             </div>
         </div>
     </div>
 
     <div class="text-right mt-4">
         <button type="submit" class="btn btn-primary btn-lg px-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 25px;">
-            Complete Setup <i class="fas fa-check ml-2"></i>
+            Einrichtung abschließen <i class="fas fa-check ml-2"></i>
         </button>
     </div>
 </form>
@@ -610,18 +669,20 @@ for ($i=1;$i<=$maxSteps;$i++):
 <!-- ============================================================
  STEP 4: Complete Onboarding
 ============================================================ -->
-<h4 class="mb-4">Complete Your Registration</h4>
+<h4 class="mb-4">✅ Registrierung abschließen</h4>
 
 <form method="post" action="onboarding.php?step=<?= $step ?>">
     <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
 
-    <div class="alert alert-success">
+    <div class="alert alert-success" style="border-left: 4px solid #52c41a;">
         <i class="anticon anticon-check-circle"></i>
-        <strong>Almost Done!</strong> Click the button below to complete your onboarding process.
+        <strong>Fast geschafft!</strong> Klicken Sie auf die Schaltfläche unten, um Ihre Registrierung abzuschließen.
     </div>
 
     <div class="text-right mt-3">
-        <button class="btn btn-primary">Complete Registration</button>
+        <button class="btn btn-primary btn-lg px-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 25px;">
+            Registrierung abschließen <i class="fas fa-check-circle ml-2"></i>
+        </button>
     </div>
 </form>
 <?php endif; ?>
