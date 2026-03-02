@@ -6,7 +6,7 @@
 
                 <!-- Dashboard -->
                 <li class="nav-item">
-                    <a href="index.php" title="Dashboard Overview">
+                    <a href="dashboard.php" title="Dashboard Overview">
                         <span class="icon-holder">
                             <i class="anticon anticon-dashboard"></i>
                         </span>

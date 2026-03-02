@@ -21,28 +21,18 @@ require_once __DIR__ . '/includes/dashboard-data.php';
 ?>
 
 <?php
-// Include HTML sections
+// Include all modals
 require_once __DIR__ . '/includes/dashboard/modals.php';
-?>
 
-<!-- Main Dashboard Content -->
-<div class="page-wrapper">
-    <?php require_once __DIR__ . '/includes/dashboard/welcome-banner.php'; ?>
-    
-    <?php require_once __DIR__ . '/includes/dashboard/verification-alerts.php'; ?>
-    
-    <?php require_once __DIR__ . '/includes/dashboard/statistics-cards.php'; ?>
-    
-    <?php require_once __DIR__ . '/includes/dashboard/case-cards.php'; ?>
-</div>
+// Include main dashboard content
+require_once __DIR__ . '/includes/dashboard/content.php';
 
-<?php
-// Include scripts and styles
+// Include scripts
 require_once __DIR__ . '/includes/dashboard/scripts.php';
-require_once __DIR__ . '/includes/dashboard/styles.php';
-?>
 
-<?php
+// Include styles  
+require_once __DIR__ . '/includes/dashboard/styles.php';
+
 // Include footer
 if (file_exists(__DIR__ . '/footer.php')) {
     require_once __DIR__ . '/footer.php';
