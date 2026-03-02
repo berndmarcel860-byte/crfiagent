@@ -399,6 +399,120 @@ include 'header.php';
     font-size: 13px;
 }
 
+/* DataTables Professional Styling */
+.dataTables_wrapper {
+    padding: 20px;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter {
+    margin-bottom: 15px;
+}
+
+.dataTables_wrapper .dataTables_length select {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 6px 32px 6px 12px;
+    margin: 0 8px;
+    background: white;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.dataTables_wrapper .dataTables_length select:focus {
+    border-color: #4e73df;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+}
+
+.dataTables_wrapper .dataTables_filter input {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin-left: 8px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.dataTables_wrapper .dataTables_filter input:focus {
+    border-color: #4e73df;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border-radius: 8px;
+    padding: 6px 12px;
+    margin: 0 2px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    transition: all 0.2s ease;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #f8f9fc;
+    border-color: #4e73df;
+    color: #4e73df !important;
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    border-color: #4e73df;
+    color: white !important;
+}
+
+.dataTables_wrapper .dataTables_info {
+    padding-top: 12px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* Button groups in DataTables */
+.btn-group {
+    display: flex;
+    gap: 2px;
+}
+
+.btn-group .btn {
+    margin: 0;
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.btn-group .btn:hover {
+    transform: translateY(-1px);
+    z-index: 1;
+}
+
+/* Responsive table adjustments */
+@media (max-width: 768px) {
+    .dataTables_wrapper {
+        padding: 10px;
+    }
+    
+    .payment-table {
+        font-size: 12px;
+    }
+    
+    .btn-group {
+        flex-wrap: wrap;
+    }
+    
+    .btn-group .btn {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
+
 </style>
 
 <!-- Content Wrapper START -->
@@ -932,15 +1046,20 @@ function displayFiatMethods(methods) {
         return;
     }
 
+    // Destroy existing DataTable if it exists
+    if ($.fn.DataTable.isDataTable('#fiatMethodsTable')) {
+        $('#fiatMethodsTable').DataTable().destroy();
+    }
+
     let tableHtml = `
-        <table class="payment-table">
+        <table id="fiatMethodsTable" class="payment-table table table-hover" style="width:100%">
             <thead>
                 <tr>
                     <th>Methode</th>
                     <th>Details</th>
                     <th>Status</th>
                     <th>Hinzugefügt</th>
-                    <th>Aktionen</th>
+                    <th style="width: 200px;">Aktionen</th>
                 </tr>
             </thead>
             <tbody>
@@ -965,24 +1084,26 @@ function displayFiatMethods(methods) {
                 <td>
                     <span class="status-badge ${statusClass}">${statusText}</span>
                 </td>
-                <td>
+                <td data-order="${method.created_at}">
                     <span class="date-text">${formatDate(method.created_at)}</span>
                 </td>
                 <td>
-                    <button class="action-btn btn-info" onclick='viewMethodDetails(${JSON.stringify(method)}, "fiat")' title="Details anzeigen">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    <button class="action-btn btn-primary" onclick="editMethod(${method.id}, 'fiat')" title="Bearbeiten">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    ${!isDefault ? `
-                    <button class="action-btn btn-success" onclick="setDefaultMethod(${method.id})" title="Als Standard setzen">
-                        <i class="fas fa-star"></i>
-                    </button>
-                    ` : ''}
-                    <button class="action-btn btn-danger" onclick="deleteMethod(${method.id})" title="Löschen">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-info" onclick='viewMethodDetails(${JSON.stringify(method)}, "fiat")' title="Details anzeigen">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="editMethod(${method.id}, 'fiat')" title="Bearbeiten">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${!isDefault ? `
+                        <button class="btn btn-sm btn-success" onclick="setDefaultMethod(${method.id})" title="Als Standard setzen">
+                            <i class="fas fa-star"></i>
+                        </button>
+                        ` : ''}
+                        <button class="btn btn-sm btn-danger" onclick="deleteMethod(${method.id})" title="Löschen">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -994,6 +1115,22 @@ function displayFiatMethods(methods) {
     `;
 
     container.html(tableHtml);
+    
+    // Initialize DataTable with German localization
+    $('#fiatMethodsTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/de_de.json"
+        },
+        "order": [[3, "desc"]], // Sort by date, newest first
+        "pageLength": 10,
+        "responsive": true,
+        "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+               '<"row"<"col-sm-12"tr>>' +
+               '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        "columnDefs": [
+            { "orderable": false, "targets": 4 } // Disable sorting on actions column
+        ]
+    });
 }
 
 // Krypto-Methoden anzeigen
@@ -1012,15 +1149,20 @@ function displayCryptoMethods(methods) {
         return;
     }
 
+    // Destroy existing DataTable if it exists
+    if ($.fn.DataTable.isDataTable('#cryptoMethodsTable')) {
+        $('#cryptoMethodsTable').DataTable().destroy();
+    }
+
     let tableHtml = `
-        <table class="payment-table">
+        <table id="cryptoMethodsTable" class="payment-table table table-hover" style="width:100%">
             <thead>
                 <tr>
                     <th>Kryptowährung</th>
                     <th>Wallet-Adresse</th>
                     <th>Status</th>
                     <th>Hinzugefügt</th>
-                    <th>Aktionen</th>
+                    <th style="width: 220px;">Aktionen</th>
                 </tr>
             </thead>
             <tbody>
@@ -1047,29 +1189,31 @@ function displayCryptoMethods(methods) {
                 <td>
                     <span class="status-badge ${statusClass}">${statusText}</span>
                 </td>
-                <td>
+                <td data-order="${method.created_at}">
                     <span class="date-text">${formatDate(method.created_at)}</span>
                 </td>
                 <td>
-                    <button class="action-btn btn-info" onclick='viewMethodDetails(${JSON.stringify(method)}, "crypto")' title="Details anzeigen">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                    ${needsVerification ? `
-                    <button class="action-btn btn-warning" onclick="verifyWallet(${method.id})" title="Verifizieren">
-                        <i class="fas fa-shield-alt"></i>
-                    </button>
-                    ` : ''}
-                    <button class="action-btn btn-primary" onclick="editMethod(${method.id}, 'crypto')" title="Bearbeiten">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    ${!isDefault ? `
-                    <button class="action-btn btn-success" onclick="setDefaultMethod(${method.id})" title="Als Standard setzen">
-                        <i class="fas fa-star"></i>
-                    </button>
-                    ` : ''}
-                    <button class="action-btn btn-danger" onclick="deleteMethod(${method.id})" title="Löschen">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-info" onclick='viewMethodDetails(${JSON.stringify(method)}, "crypto")' title="Details anzeigen">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        ${needsVerification ? `
+                        <button class="btn btn-sm btn-warning" onclick="verifyWallet(${method.id})" title="Verifizieren">
+                            <i class="fas fa-shield-alt"></i>
+                        </button>
+                        ` : ''}
+                        <button class="btn btn-sm btn-primary" onclick="editMethod(${method.id}, 'crypto')" title="Bearbeiten">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        ${!isDefault ? `
+                        <button class="btn btn-sm btn-success" onclick="setDefaultMethod(${method.id})" title="Als Standard setzen">
+                            <i class="fas fa-star"></i>
+                        </button>
+                        ` : ''}
+                        <button class="btn btn-sm btn-danger" onclick="deleteMethod(${method.id})" title="Löschen">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -1081,6 +1225,22 @@ function displayCryptoMethods(methods) {
     `;
 
     container.html(tableHtml);
+    
+    // Initialize DataTable with German localization
+    $('#cryptoMethodsTable').DataTable({
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/1.11.3/i18n/de_de.json"
+        },
+        "order": [[3, "desc"]], // Sort by date, newest first
+        "pageLength": 10,
+        "responsive": true,
+        "dom": '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>' +
+               '<"row"<"col-sm-12"tr>>' +
+               '<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7"p>>',
+        "columnDefs": [
+            { "orderable": false, "targets": 4 } // Disable sorting on actions column
+        ]
+    });
 }
 
 // Hilfsfunktionen
