@@ -34,6 +34,28 @@
                     </a>
                 </li>
 
+                <!-- Notifications -->
+                <li class="nav-item">
+                    <a href="notifications.php" title="Benachrichtigungen">
+                        <span class="icon-holder">
+                            <i class="anticon anticon-bell"></i>
+                        </span>
+                        <span class="title">Benachrichtigungen</span>
+                        <?php 
+                        try {
+                            $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
+                            $stmt->execute([$_SESSION['user_id']]);
+                            $unreadNotifications = $stmt->fetchColumn();
+                            if ($unreadNotifications > 0): ?>
+                                <span class="badge badge-primary ml-auto"><?= $unreadNotifications ?></span>
+                            <?php endif;
+                        } catch (PDOException $e) {
+                            // Table might not exist yet
+                        }
+                        ?>
+                    </a>
+                </li>
+
                 <!-- Payment Methods -->
                 <li class="nav-item">
                     <a href="payment-methods.php" title="Manage Payment Methods">
