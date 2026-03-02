@@ -8,272 +8,215 @@ include 'header.php';
 ?>
 
 <style>
-/* Moderne Tabellen-Styles */
-.payment-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+/* cases.php-inspired Professional Styling */
+.main-content {
+    padding: 20px;
 }
 
-.payment-table thead {
-    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-    color: white;
-}
-
-.payment-table thead th {
-    padding: 16px 20px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 3px solid #1e3a8a;
-}
-
-.payment-table tbody tr {
-    border-bottom: 1px solid #e5e7eb;
-    transition: all 0.2s ease;
-}
-
-.payment-table tbody tr:hover {
-    background: #f8f9fc;
-    transform: scale(1.01);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.payment-table tbody td {
-    padding: 16px 20px;
-    vertical-align: middle;
-    font-size: 14px;
-}
-
-.payment-table tbody tr:last-child {
-    border-bottom: none;
-}
-
-/* Status-Badges */
-.status-badge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.status-badge.verified {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-}
-
-.status-badge.pending {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
-}
-
-.status-badge.failed {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-}
-
-.status-badge.not-verified {
-    background: linear-gradient(135deg, #6b7280, #4b5563);
-    color: white;
-    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.3);
-}
-
-/* Standard-Badge */
-.default-badge {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-/* Aktions-Buttons */
-.action-btn {
-    padding: 6px 12px;
-    margin: 0 2px;
-    border: none;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.action-btn.btn-primary {
-    background: linear-gradient(135deg, #4e73df, #224abe);
-    color: white;
-}
-
-.action-btn.btn-success {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-}
-
-.action-btn.btn-danger {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-}
-
-.action-btn.btn-warning {
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: white;
-}
-
-/* Seitenkopf */
+/* Page Header (matches cases.php) */
 .page-header {
-    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-    color: white;
-    padding: 32px;
-    border-radius: 12px;
     margin-bottom: 24px;
-    box-shadow: 0 4px 16px rgba(78, 115, 223, 0.3);
 }
 
-.page-header h2 {
-    font-size: 2em;
+.page-title {
+    font-size: 24px;
     font-weight: 700;
-    margin: 0 0 8px 0;
-}
-
-.page-header p {
+    color: #2d3748;
     margin: 0;
-    opacity: 0.9;
-    font-size: 1.1em;
 }
 
-/* Add-Button */
-.add-method-btn {
-    width: 100%;
-    padding: 16px;
-    margin-top: 16px;
-    border: 2px dashed #cbd5e0;
-    background: linear-gradient(135deg, #f7fafc 0%, #ffffff 100%);
-    color: #4a5568;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.add-method-btn:hover {
-    border-style: solid;
-    border-color: #4e73df;
-    background: linear-gradient(135deg, #e7f1ff 0%, #f0f7ff 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(78, 115, 223, 0.15);
-    color: #4e73df;
-}
-
-.add-method-btn i {
-    font-size: 1.3em;
-}
-
-/* Karten-Container */
-.card {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-    margin-bottom: 24px;
-    overflow: hidden;
-}
-
-.card-header {
-    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-    color: white;
-    padding: 20px;
-    border-bottom: none;
-}
-
-.card-header h4 {
-    margin: 0;
-    font-size: 1.4em;
-    font-weight: 700;
-}
-
-.card-body {
-    padding: 0;
-}
-
-/* Info-Alert */
-.info-alert {
-    background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
-    border: none;
-    border-left: 5px solid #3b82f6;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 24px;
-    box-shadow: 0 2px 12px rgba(59, 130, 246, 0.1);
-}
-
-.info-alert h5 {
-    color: #1e40af;
-    font-weight: 700;
-    margin-bottom: 12px;
-}
-
-.info-alert p {
-    color: #1e40af;
-    margin-bottom: 8px;
-}
-
-/* Leerzustand */
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
+.m-b-10 {
+    margin-bottom: 10px;
     color: #718096;
 }
 
-.empty-state i {
-    font-size: 64px;
-    margin-bottom: 20px;
-    color: #cbd5e0;
+/* Card Styling (matches cases.php) */
+.card {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 24px;
 }
 
-.empty-state h5 {
-    font-size: 1.3em;
+.card-header {
+    background: #fff;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 16px 20px;
+}
+
+.card-title {
+    font-size: 16px;
     font-weight: 600;
-    margin-bottom: 12px;
+    color: #2d3748;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* Refresh Button */
+.refresh-btn {
+    padding: 6px 12px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.refresh-btn:hover {
+    background: #f7fafc;
+    border-color: #cbd5e0;
+}
+
+/* Table Styling (matches cases.php) */
+.payment-table {
+    width: 100%;
+}
+
+.payment-table.table-borderless thead th {
+    border-bottom: 2px solid #e2e8f0;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    color: #4a5568;
+    letter-spacing: 0.5px;
+}
+
+.payment-table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.payment-table tbody tr:hover {
+    background: #f7fafc;
+}
+
+.payment-table tbody td {
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+
+.align-middle {
+    vertical-align: middle !important;
+}
+
+.nowrap {
+    white-space: nowrap;
+}
+
+/* Status Badges */
+.badge {
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+}
+
+.badge.bg-success {
+    background-color: #10b981 !important;
+}
+
+.badge.bg-warning {
+    background-color: #f59e0b !important;
+}
+
+.badge.bg-danger {
+    background-color: #ef4444 !important;
+}
+
+.badge.bg-secondary {
+    background-color: #6b7280 !important;
+}
+
+.badge.bg-info {
+    background-color: #3b82f6 !important;
+}
+
+/* Button Groups */
+.btn-group {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.btn-sm {
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+}
+
+.btn-primary {
+    background-color: #4e73df;
+    border-color: #4e73df;
+    color: white;
+}
+
+.btn-success {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: white;
+}
+
+.btn-warning {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+
+.btn-danger {
+    background-color: #ef4444;
+    border-color: #ef4444;
+    color: white;
+}
+
+.btn-light {
+    background-color: #f7fafc;
+    border-color: #e2e8f0;
     color: #4a5568;
 }
 
-/* Ladezustand */
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+/* Modal Styling (matches cases.php) */
+.modal-header.bg-light {
+    background-color: #f7fafc !important;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3748;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    border-top: 1px solid #e2e8f0;
+    padding: 16px 20px;
+}
+
+/* Loading State */
 .loading-state {
     text-align: center;
     padding: 40px 20px;
+    color: #718096;
 }
 
 .loading-state i {
-    font-size: 48px;
-    color: #4e73df;
+    font-size: 32px;
+    margin-bottom: 12px;
     animation: spin 1s linear infinite;
 }
 
@@ -282,68 +225,24 @@ include 'header.php';
     to { transform: rotate(360deg); }
 }
 
-/* Modal-Verbesserungen */
-.modal-header {
-    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-    color: white;
-    border-bottom: none;
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #718096;
 }
 
-.modal-title {
-    font-weight: 700;
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #cbd5e0;
 }
 
-.modal-body {
-    padding: 24px;
-}
-
-/* View Details Modal Styling */
-.form-control-plaintext {
-    font-size: 14px;
-    font-weight: 500;
-    color: #2d3748;
-}
-
-.form-control-plaintext code {
-    background: #f7fafc;
-    padding: 2px 6px;
-    border-radius: 4px;
-    color: #2d3748;
-}
-
-.btn-info {
-    background: linear-gradient(135deg, #17a2b8, #117a8b);
-    border: none;
-    color: white;
-}
-
-.btn-info:hover {
-    background: linear-gradient(135deg, #138496, #0f6674);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
-}
-
-#viewDetailsContent .row {
-    margin: 0;
-}
-
-#viewDetailsContent .col-md-6,
-#viewDetailsContent .col-md-4,
-#viewDetailsContent .col-md-12 {
-    padding: 0 8px;
-}
-
-.form-group label {
-    font-weight: 600;
-    color: #2d3748;
-    margin-bottom: 8px;
-}
-
+/* Form Controls */
 .form-control {
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 10px 14px;
-    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 8px 12px;
 }
 
 .form-control:focus {
@@ -351,238 +250,144 @@ include 'header.php';
     box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
 }
 
-/* Badge in Header */
-.badge-light {
-    background: rgba(255,255,255,0.2);
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-weight: 600;
-    backdrop-filter: blur(10px);
+/* Utilities */
+.text-end {
+    text-align: right !important;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .payment-table {
-        font-size: 12px;
-    }
-    
-    .payment-table thead th,
-    .payment-table tbody td {
-        padding: 12px 10px;
-    }
-    
-    .action-btn {
-        padding: 4px 8px;
-        font-size: 11px;
-    }
-    
-    .page-header {
-        padding: 24px;
-    }
-    
-    .page-header h2 {
-        font-size: 1.6em;
-    }
+.me-1 {
+    margin-right: 4px !important;
 }
 
-/* Methodentyp-Icons */
-.method-icon {
-    font-size: 1.3em;
-    margin-right: 8px;
-    color: #4e73df;
+.me-2 {
+    margin-right: 8px !important;
 }
 
-/* Datum-Formatierung */
-.date-text {
-    color: #6b7280;
-    font-size: 13px;
+.mb-4 {
+    margin-bottom: 24px !important;
 }
 
-/* DataTables Professional Styling */
+.d-flex {
+    display: flex !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+.justify-content-between {
+    justify-content: space-between !important;
+}
+
+.m-0 {
+    margin: 0 !important;
+}
+
+/* DataTables Custom Styling */
 .dataTables_wrapper {
-    padding: 20px;
+    padding: 0;
 }
 
-.dataTables_wrapper .dataTables_length,
-.dataTables_wrapper .dataTables_filter {
-    margin-bottom: 15px;
-}
-
-.dataTables_wrapper .dataTables_length select {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 6px 32px 6px 12px;
-    margin: 0 8px;
-    background: white;
+.dataTables_length select,
+.dataTables_filter input {
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 6px 12px;
     font-size: 14px;
-    transition: all 0.2s ease;
 }
 
-.dataTables_wrapper .dataTables_length select:focus {
-    border-color: #4e73df;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
-}
-
-.dataTables_wrapper .dataTables_filter input {
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 8px 16px;
-    margin-left: 8px;
-    font-size: 14px;
-    transition: all 0.2s ease;
-}
-
-.dataTables_wrapper .dataTables_filter input:focus {
-    border-color: #4e73df;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1);
-}
-
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    border-radius: 8px;
+.dataTables_paginate .paginate_button {
     padding: 6px 12px;
     margin: 0 2px;
-    border: 1px solid #e5e7eb;
-    background: white;
-    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #fff;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
-    background: #f8f9fc;
-    border-color: #4e73df;
-    color: #4e73df !important;
-}
-
-.dataTables_wrapper .dataTables_paginate .paginate_button.current {
-    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
-    border-color: #4e73df;
+.dataTables_paginate .paginate_button.current {
+    background: #4e73df;
     color: white !important;
+    border-color: #4e73df;
 }
-
-.dataTables_wrapper .dataTables_info {
-    padding-top: 12px;
-    color: #6b7280;
-    font-size: 14px;
-}
-
-/* Button groups in DataTables */
-.btn-group {
-    display: flex;
-    gap: 2px;
-}
-
-.btn-group .btn {
-    margin: 0;
-    border-radius: 0;
-}
-
-.btn-group .btn:first-child {
-    border-top-left-radius: 6px;
-    border-bottom-left-radius: 6px;
-}
-
-.btn-group .btn:last-child {
-    border-top-right-radius: 6px;
-    border-bottom-right-radius: 6px;
-}
-
-.btn-group .btn:hover {
-    transform: translateY(-1px);
-    z-index: 1;
-}
-
-/* Responsive table adjustments */
-@media (max-width: 768px) {
-    .dataTables_wrapper {
-        padding: 10px;
-    }
-    
-    .payment-table {
-        font-size: 12px;
-    }
-    
-    .btn-group {
-        flex-wrap: wrap;
-    }
-    
-    .btn-group .btn {
-        font-size: 11px;
-        padding: 4px 8px;
-    }
-}
-
 </style>
 
-<!-- Content Wrapper START -->
 <div class="main-content">
     <div class="container-fluid">
+        <!-- Page Header -->
         <div class="page-header">
-            <h2><i class="fas fa-wallet"></i> Zahlungsmethoden</h2>
-            <p>Verwalten Sie Ihre Fiat- und Kryptowährungs-Zahlungsmethoden sicher</p>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2 class="page-title">Zahlungsmethoden</h2>
+                    <p class="m-b-10">Verwalten Sie Ihre Fiat- und Kryptowährungs-Zahlungsmethoden sicher</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-primary btn-lg me-2" onclick="showAddFiatModal()">
+                        <i class="anticon anticon-plus"></i> Bankkonto hinzufügen
+                    </button>
+                    <button class="btn btn-success btn-lg" onclick="showAddCryptoModal()">
+                        <i class="anticon anticon-plus"></i> Krypto-Wallet hinzufügen
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <!-- Info-Alert -->
-        <div class="info-alert alert-dismissible fade show" role="alert">
-            <h5>
-                <i class="fas fa-shield-alt"></i> Über die Kryptowährungs-Wallet-Verifizierung
-            </h5>
-            <p class="mb-2">
-                Kryptowährungs-Wallets erfordern eine Verifizierung durch einen <strong>Satoshi-Test</strong>, bevor sie für Auszahlungen verwendet werden können. 
-                Dies ist eine Sicherheitsmaßnahme zum Nachweis des Wallet-Eigentums und zum Schutz Ihrer Gelder.
-            </p>
-            <p class="mb-0">
-                <a href="satoshi-test-guide.php" class="btn btn-sm btn-primary">
-                    <i class="fas fa-book-open"></i> Mehr über den Satoshi-Test erfahren
-                </a>
-            </p>
-            <button type="button" class="close" data-dismiss="alert" aria-label="Schließen">
-                <span aria-hidden="true">&times;</span>
-            </button>
+        <!-- Info Alert -->
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="anticon anticon-info-circle me-2"></i>
+            <strong>Über die Kryptowährungs-Wallet-Verifizierung:</strong> 
+            Kryptowährungs-Wallets erfordern eine Verifizierung durch einen Satoshi-Test, bevor sie für Auszahlungen verwendet werden können.
+            <a href="satoshi-test-guide.php" class="alert-link ms-2">Mehr erfahren</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
+        <!-- Payment Methods Tables -->
         <div class="row">
-            <!-- Fiat-Zahlungsmethoden -->
-            <div class="col-lg-6 mb-4">
+            <!-- Fiat Payment Methods Card -->
+            <div class="col-lg-12 mb-4">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4><i class="fas fa-university"></i> Bankkonten</h4>
-                        <span class="badge badge-light" id="fiatCount">0</span>
+                        <h4 class="card-title d-flex align-items-center m-0">
+                            <i class="anticon anticon-bank me-2"></i>
+                            Bankkonten
+                        </h4>
+                        <button class="btn btn-light refresh-btn" onclick="loadPaymentMethods()" title="Tabelle aktualisieren">
+                            <i class="anticon anticon-reload"></i>
+                        </button>
                     </div>
                     <div class="card-body">
-                        <div id="fiatMethodsContainer">
-                            <div class="loading-state">
-                                <i class="fas fa-spinner"></i>
-                                <p>Lade Bankkonten...</p>
+                        <div class="table-responsive">
+                            <div id="fiatMethodsContainer">
+                                <div class="loading-state">
+                                    <i class="fas fa-spinner"></i>
+                                    <p>Lade Bankkonten...</p>
+                                </div>
                             </div>
                         </div>
-                        <button class="add-method-btn" onclick="showAddFiatModal()">
-                            <i class="fas fa-plus-circle"></i>
-                            <span>Bankkonto hinzufügen</span>
-                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Krypto-Wallets -->
-            <div class="col-lg-6 mb-4">
+            <!-- Crypto Wallets Card -->
+            <div class="col-lg-12 mb-4">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4><i class="fab fa-bitcoin"></i> Krypto-Wallets</h4>
-                        <span class="badge badge-light" id="cryptoCount">0</span>
+                        <h4 class="card-title d-flex align-items-center m-0">
+                            <i class="anticon anticon-bitcoin me-2"></i>
+                            Krypto-Wallets
+                        </h4>
+                        <button class="btn btn-light refresh-btn" onclick="loadPaymentMethods()" title="Tabelle aktualisieren">
+                            <i class="anticon anticon-reload"></i>
+                        </button>
                     </div>
                     <div class="card-body">
-                        <div id="cryptoMethodsContainer">
-                            <div class="loading-state">
-                                <i class="fas fa-spinner"></i>
-                                <p>Lade Krypto-Wallets...</p>
+                        <div class="table-responsive">
+                            <div id="cryptoMethodsContainer">
+                                <div class="loading-state">
+                                    <i class="fas fa-spinner"></i>
+                                    <p>Lade Krypto-Wallets...</p>
+                                </div>
                             </div>
                         </div>
-                        <button class="add-method-btn" onclick="showAddCryptoModal()">
-                            <i class="fas fa-plus-circle"></i>
-                            <span>Krypto-Wallet hinzufügen</span>
-                        </button>
                     </div>
                 </div>
             </div>
@@ -595,11 +400,12 @@ include 'header.php';
 <div class="modal fade" id="addFiatModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-university"></i> Bankkonto hinzufügen</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <i class="anticon anticon-bank me-2"></i>
+                    Bankkonto hinzufügen
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="addFiatForm">
                 <div class="modal-body">
@@ -678,11 +484,12 @@ include 'header.php';
 <div class="modal fade" id="addCryptoModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fab fa-bitcoin"></i> Krypto-Wallet hinzufügen</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <i class="anticon anticon-bitcoin me-2"></i>
+                    Krypto-Wallet hinzufügen
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="addCryptoForm">
                 <div class="modal-body">
@@ -750,11 +557,12 @@ include 'header.php';
 <div class="modal fade" id="viewDetailsModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-eye"></i> <span id="viewModalTitle">Zahlungsmethode Details</span></h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <i class="anticon anticon-eye me-2"></i>
+                    <span id="viewModalTitle">Zahlungsmethode Details</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div id="viewDetailsContent">
@@ -774,11 +582,12 @@ include 'header.php';
 <div class="modal fade" id="editFiatModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-edit"></i> Bankkonto bearbeiten</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <i class="anticon anticon-edit me-2"></i>
+                    Bankkonto bearbeiten
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editFiatForm">
                 <div class="modal-body">
@@ -847,11 +656,12 @@ include 'header.php';
 <div class="modal fade" id="editCryptoModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-edit"></i> Krypto-Wallet bearbeiten</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <i class="anticon anticon-edit me-2"></i>
+                    Krypto-Wallet bearbeiten
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editCryptoForm">
                 <div class="modal-body">
@@ -910,11 +720,12 @@ include 'header.php';
 <div class="modal fade" id="verifyWalletModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-shield-alt"></i> Wallet Verifizierung - Satoshi Test</h5>
-                <button type="button" class="close text-white" data-dismiss="modal">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+            <div class="modal-header bg-light">
+                <h5 class="modal-title">
+                    <i class="anticon anticon-safety me-2"></i>
+                    Wallet Verifizierung - Satoshi Test
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="verifyWalletForm">
                 <div class="modal-body">
