@@ -42,8 +42,10 @@ if (!extension_loaded('pdo_mysql')) {
 }
 
 // Helper function for safe text
-function safe_text($text) {
-    return iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $text ?? '');
+if (!function_exists('safe_text')) {
+    function safe_text($text) {
+        return iconv('UTF-8', 'ISO-8859-1//TRANSLIT', $text ?? '');
+    }
 }
 
 /* =========================
