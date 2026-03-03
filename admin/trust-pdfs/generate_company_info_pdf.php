@@ -13,9 +13,9 @@
 
 declare(strict_types=1);
 
-use setasign\Fpdi\Fpdf\Fpdf as FPDF;
-
 require_once __DIR__ . '/../../vendor/autoload.php';
+
+use setasign\Fpdi\FpdfTpl as FPDF;
 
 // Database connection (with fallback)
 $pdo = null;

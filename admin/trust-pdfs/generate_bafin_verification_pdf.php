@@ -13,14 +13,14 @@
 
 declare(strict_types=1);
 
-use setasign\Fpdi\Fpdf\Fpdf as FPDF;
-
 // Autoload
 $autoloadPath = __DIR__ . '/../../vendor/autoload.php';
 if (!file_exists($autoloadPath)) {
     die("Error: Composer vendor/autoload.php not found. Run: composer install\n");
 }
 require_once $autoloadPath;
+
+use setasign\Fpdi\FpdfTpl as FPDF;
 
 // Database connection (with fallback)
 $pdo = null;
