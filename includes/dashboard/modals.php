@@ -246,7 +246,7 @@
 
                     <!-- AMOUNT -->
                     <div class="form-group">
-                        <label class="font-weight-600" style="color: #2c3e50;">Amount (EUR €)</label>
+                        <label class="font-weight-600" style="color: #2c3e50;">Betrag (EUR €)</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; font-weight: 600;">€</span>
