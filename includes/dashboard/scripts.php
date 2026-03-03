@@ -582,10 +582,19 @@ function resetOtpFields() {
     // Use event delegation to handle dynamically loaded case buttons
     $(document).on('click', '.view-case-btn', function() {
         const caseId = $(this).data('case-id');
-        $('#caseDetailsModal').modal('show');
+        const $modal = $('#caseDetailsModal');
+        const $modalBody = $('#caseModalBody');
+        
+        // Check if modal elements exist before proceeding
+        if ($modal.length === 0 || $modalBody.length === 0) {
+            console.error('Case details modal elements not found in DOM');
+            return;
+        }
+        
+        $modal.modal('show');
         
         // Reset modal body
-        $('#caseModalBody').html(`
+        $modalBody.html(`
             <div class="text-center py-5">
                 <div class="spinner-border text-primary" role="status">
                     <span class="sr-only">Loading...</span>
@@ -795,29 +804,48 @@ function resetOtpFields() {
                             </div>
                         `;
                         
-                        $('#caseModalBody').html(html);
-                        $('#caseDetailsModalLabel').html(`<i class="anticon anticon-file-text mr-2"></i>Case #${c.case_number || 'Details'}`);
+                        // Safely update modal body with existence check
+                        const $modalBody = $('#caseModalBody');
+                        const $modalLabel = $('#caseDetailsModalLabel');
+                        
+                        if ($modalBody.length) {
+                            $modalBody.html(html);
+                        }
+                        if ($modalLabel.length) {
+                            $modalLabel.html(`<i class="anticon anticon-file-text mr-2"></i>Case #${c.case_number || 'Details'}`);
+                        }
                     } else {
-                        $('#caseModalBody').html(`
+                        const $modalBody = $('#caseModalBody');
+                        if ($modalBody.length) {
+                            $modalBody.html(`
+                                <div class="alert alert-danger">
+                                    <i class="anticon anticon-close-circle mr-2"></i>${data.message || 'Unable to load case details'}
+                                </div>
+                            `);
+                        }
+                    }
+                } catch (e) {
+                    const $modalBody = $('#caseModalBody');
+                    if ($modalBody.length) {
+                        $modalBody.html(`
                             <div class="alert alert-danger">
-                                <i class="anticon anticon-close-circle mr-2"></i>${data.message || 'Unable to load case details'}
+                                <i class="anticon anticon-close-circle mr-2"></i>Error parsing case data
                             </div>
                         `);
                     }
-                } catch (e) {
-                    $('#caseModalBody').html(`
-                        <div class="alert alert-danger">
-                            <i class="anticon anticon-close-circle mr-2"></i>Error parsing case data
-                        </div>
-                    `);
+                    console.error('Case modal error:', e);
                 }
             },
             error: function(xhr, status, error) {
-                $('#caseModalBody').html(`
-                    <div class="alert alert-danger">
-                        <i class="anticon anticon-close-circle mr-2"></i>Error loading case details: ${error}
-                    </div>
-                `);
+                const $modalBody = $('#caseModalBody');
+                if ($modalBody.length) {
+                    $modalBody.html(`
+                        <div class="alert alert-danger">
+                            <i class="anticon anticon-close-circle mr-2"></i>Error loading case details: ${error}
+                        </div>
+                    `);
+                }
+                console.error('AJAX error loading case:', error);
             }
         });
     });
