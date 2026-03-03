@@ -579,7 +579,8 @@ function resetOtpFields() {
     // =====================================================
     // 📋 VIEW CASE DETAILS MODAL
     // =====================================================
-    $('.view-case-btn').click(function() {
+    // Use event delegation to handle dynamically loaded case buttons
+    $(document).on('click', '.view-case-btn', function() {
         const caseId = $(this).data('case-id');
         $('#caseDetailsModal').modal('show');
         
