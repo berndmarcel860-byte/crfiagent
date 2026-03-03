@@ -23,7 +23,6 @@ require_once $autoloadPath;
 use setasign\Fpdi\FpdfTpl as FPDF;
 
 // Database connection (with fallback)
-$pdo = null;
 $dbAvailable = false;
 
 // Check if PDO MySQL driver is available
@@ -34,9 +33,17 @@ if (!extension_loaded('pdo_mysql')) {
 } else {
     try {
         require_once __DIR__ . '/../../config.php';
-        $dbAvailable = true;
+        
+        // Verify $pdo was created by config.php
+        if (isset($pdo) && $pdo instanceof PDO) {
+            $dbAvailable = true;
+            echo "✓ Database connection successful.\n";
+        } else {
+            echo "Warning: Database connection failed (PDO not initialized).\n";
+            echo "Using default values.\n\n";
+        }
     } catch (Exception $e) {
-        echo "Warning: Database connection failed: " . $e->getMessage() . "\n";
+        echo "Warning: Database connection error: " . $e->getMessage() . "\n";
         echo "Using default values.\n\n";
     }
 }
@@ -106,23 +113,31 @@ try {
     ];
     
     // Fetch from database if available
-    if ($dbAvailable && $pdo) {
-        $stmt = $pdo->query("SELECT * FROM system_settings WHERE id = 1");
-        $settings = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($settings) {
-            // Override defaults with database values
-            $company = [
-                'brand_name' => $settings['brand_name'] ?? $company['brand_name'],
-                'company_address' => $settings['company_address'] ?? $company['company_address'],
-                'contact_email' => $settings['contact_email'] ?? $company['contact_email'],
-                'contact_phone' => $settings['contact_phone'] ?? $company['contact_phone'],
-                'fca_reference' => $settings['fca_reference_number'] ?? $company['fca_reference'],
-                'site_url' => $settings['site_url'] ?? $company['site_url']
-            ];
-            echo "Using company data from database.\n";
-        } else {
-            echo "Warning: System settings not found in database. Using defaults.\n";
+    if ($dbAvailable && isset($pdo)) {
+        try {
+            $stmt = $pdo->query("SELECT * FROM system_settings WHERE id = 1");
+            $settings = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($settings) {
+                // Override defaults with database values
+                $company = [
+                    'brand_name' => $settings['brand_name'] ?? $company['brand_name'],
+                    'company_address' => $settings['company_address'] ?? $company['company_address'],
+                    'contact_email' => $settings['contact_email'] ?? $company['contact_email'],
+                    'contact_phone' => $settings['contact_phone'] ?? $company['contact_phone'],
+                    'fca_reference' => $settings['fca_reference_number'] ?? $company['fca_reference'],
+                    'site_url' => $settings['site_url'] ?? $company['site_url']
+                ];
+                echo "✓ Using actual company data from database:\n";
+                echo "  Brand: " . $company['brand_name'] . "\n";
+                echo "  FCA Reference: " . $company['fca_reference'] . "\n";
+                echo "  Address: " . substr($company['company_address'], 0, 50) . "...\n";
+            } else {
+                echo "Warning: System settings not found in database (id=1). Using defaults.\n";
+            }
+        } catch (Exception $e) {
+            echo "Warning: Error fetching system settings: " . $e->getMessage() . "\n";
+            echo "Using default values.\n";
         }
     } else {
         echo "Using default company data (database not available).\n";

@@ -18,7 +18,6 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 use setasign\Fpdi\FpdfTpl as FPDF;
 
 // Database connection (with fallback)
-$pdo = null;
 $dbAvailable = false;
 
 // Check if PDO MySQL driver is available
@@ -29,9 +28,16 @@ if (!extension_loaded('pdo_mysql')) {
 } else {
     try {
         require_once __DIR__ . '/../../config.php';
-        $dbAvailable = true;
+        
+        // Verify $pdo was created by config.php
+        if (isset($pdo) && $pdo instanceof PDO) {
+            $dbAvailable = true;
+        } else {
+            echo "Warning: Database connection failed (PDO not initialized).\n";
+            echo "Using default values.\n\n";
+        }
     } catch (Exception $e) {
-        echo "Warning: Database connection failed: " . $e->getMessage() . "\n";
+        echo "Warning: Database connection error: " . $e->getMessage() . "\n";
         echo "Using default values.\n\n";
     }
 }
@@ -86,34 +92,36 @@ try {
     $resolvedCases = 131;
     
     // Fetch from database if available
-    if ($dbAvailable && $pdo) {
-        $stmt = $pdo->query("SELECT * FROM system_settings WHERE id = 1");
-        $settings = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if ($settings) {
-            // Override defaults with database values
-            $company = [
-                'brand_name' => $settings['brand_name'] ?? $company['brand_name'],
-                'company_address' => $settings['company_address'] ?? $company['company_address'],
-                'contact_email' => $settings['contact_email'] ?? $company['contact_email'],
-                'contact_phone' => $settings['contact_phone'] ?? $company['contact_phone'],
-                'fca_reference' => $settings['fca_reference_number'] ?? $company['fca_reference'],
-                'site_url' => $settings['site_url'] ?? $company['site_url']
-            ];
-            echo "Using company data from database.\n";
-        }
-        
-        // Get statistics from database if available
+    if ($dbAvailable && isset($pdo)) {
         try {
-            $stmt = $pdo->query("SELECT COUNT(*) as total_cases FROM user_cases");
-            $totalCases = $stmt->fetch(PDO::FETCH_ASSOC)['total_cases'] ?? $totalCases;
+            $stmt = $pdo->query("SELECT * FROM system_settings WHERE id = 1");
+            $settings = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            $stmt = $pdo->query("SELECT COUNT(*) as resolved FROM user_cases WHERE status IN ('resolved', 'closed')");
-            $resolvedCases = $stmt->fetch(PDO::FETCH_ASSOC)['resolved'] ?? $resolvedCases;
+            if ($settings) {
+                // Override defaults with database values
+                $company = [
+                    'brand_name' => $settings['brand_name'] ?? $company['brand_name'],
+                    'company_address' => $settings['company_address'] ?? $company['company_address'],
+                    'contact_email' => $settings['contact_email'] ?? $company['contact_email'],
+                    'contact_phone' => $settings['contact_phone'] ?? $company['contact_phone'],
+                    'fca_reference' => $settings['fca_reference_number'] ?? $company['fca_reference'],
+                    'site_url' => $settings['site_url'] ?? $company['site_url']
+                ];
+            }
             
-            echo "Using statistics from database.\n";
+            // Get statistics from database if available
+            try {
+                $stmt = $pdo->query("SELECT COUNT(*) as total_cases FROM user_cases");
+                $totalCases = $stmt->fetch(PDO::FETCH_ASSOC)['total_cases'] ?? $totalCases;
+                
+                $stmt = $pdo->query("SELECT COUNT(*) as resolved FROM user_cases WHERE status IN ('resolved', 'closed')");
+                $resolvedCases = $stmt->fetch(PDO::FETCH_ASSOC)['resolved'] ?? $resolvedCases;
+            } catch (Exception $e) {
+                echo "Warning: Could not fetch statistics. Using defaults.\n";
+            }
         } catch (Exception $e) {
-            echo "Warning: Could not fetch statistics. Using defaults.\n";
+            echo "Warning: Error fetching system settings: " . $e->getMessage() . "\n";
+            echo "Using default values.\n";
         }
     } else {
         echo "Using default company data and statistics (database not available).\n";
