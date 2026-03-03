@@ -6,14 +6,14 @@
         <div class="modal-content shadow-lg border-0">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title mb-0" id="passwordChangeModalLabel">
-                    <i class="anticon anticon-lock m-r-5"></i> Password Change Required
+                    <i class="anticon anticon-lock m-r-5"></i> Passwortänderung erforderlich
                 </h5>
             </div>
 
             <div class="modal-body">
                 <div class="alert alert-warning mb-4" role="alert">
                     <i class="anticon anticon-info-circle"></i>
-                    For your security, please update your password before continuing.
+                    Zu Ihrer Sicherheit aktualisieren Sie bitte Ihr Passwort, bevor Sie fortfahren.
                 </div>
 
                 <form id="passwordChangeForm" novalidate>
@@ -21,45 +21,45 @@
 
                     <!-- Current Password -->
                     <div class="form-group">
-                        <label for="currentPassword">Current Password</label>
+                        <label for="currentPassword">Aktuelles Passwort</label>
                         <input type="password" class="form-control" id="currentPassword" required aria-required="true" autocomplete="current-password">
                     </div>
 
                     <!-- New Password -->
                     <div class="form-group">
-                        <label for="newPassword">New Password</label>
+                        <label for="newPassword">Neues Passwort</label>
                         <input type="password" class="form-control" id="newPassword" required minlength="8" aria-describedby="passwordHelp" autocomplete="new-password">
                         <small id="passwordHelp" class="form-text text-muted">
-                            Use a unique password. We enforce a minimum of 8 characters.
+                            Verwenden Sie ein eindeutiges Passwort. Wir fordern mindestens 8 Zeichen.
                         </small>
 
                         <!-- Strength Bar -->
                         <div class="progress mt-2" style="height:8px;">
                             <div id="passwordStrengthBar" class="progress-bar bg-danger" style="width:0%;" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                        <small id="passwordStrengthText" class="text-muted small d-block mb-1" aria-live="polite">Strength: Weak</small>
+                        <small id="passwordStrengthText" class="text-muted small d-block mb-1" aria-live="polite">Stärke: Schwach</small>
 
                         <!-- Requirements Checklist -->
                         <ul class="list-unstyled small" id="passwordChecklist" aria-hidden="false">
-                            <li id="req-length" class="text-danger"><i class="anticon anticon-close"></i> At least 8 characters</li>
-                            <li id="req-upper" class="text-danger"><i class="anticon anticon-close"></i> At least one uppercase letter</li>
-                            <li id="req-number" class="text-danger"><i class="anticon anticon-close"></i> At least one number</li>
-                            <li id="req-special" class="text-danger"><i class="anticon anticon-close"></i> At least one special character</li>
+                            <li id="req-length" class="text-danger"><i class="anticon anticon-close"></i> Mindestens 8 Zeichen</li>
+                            <li id="req-upper" class="text-danger"><i class="anticon anticon-close"></i> Mindestens ein Großbuchstabe</li>
+                            <li id="req-number" class="text-danger"><i class="anticon anticon-close"></i> Mindestens eine Zahl</li>
+                            <li id="req-special" class="text-danger"><i class="anticon anticon-close"></i> Mindestens ein Sonderzeichen</li>
                         </ul>
                     </div>
 
                     <!-- Confirm Password -->
                     <div class="form-group">
-                        <label for="confirmPassword">Confirm New Password</label>
+                        <label for="confirmPassword">Neues Passwort bestätigen</label>
                         <input type="password" class="form-control" id="confirmPassword" required autocomplete="new-password">
-                        <small id="passwordMatchText" class="small text-muted" aria-live="polite">Waiting for input...</small>
+                        <small id="passwordMatchText" class="small text-muted" aria-live="polite">Warten auf Eingabe...</small>
                     </div>
                 </form>
             </div>
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="submitPasswordChange" aria-label="Change password">
-                    <i class="anticon anticon-save"></i> Change Password
+                    <i class="anticon anticon-save"></i> Passwort ändern
                 </button>
             </div>
         </div>
@@ -74,7 +74,7 @@
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
             <div class="modal-header border-0" style="background: linear-gradient(135deg, #2950a8 0%, #2da9e3 100%); color: #fff; border-radius: 12px 12px 0 0;">
                 <h5 class="modal-title font-weight-bold" id="newDepositModalLabel">
-                    <i class="anticon anticon-plus-circle mr-2"></i>Fund Your Account
+                    <i class="anticon anticon-plus-circle mr-2"></i>Konto aufladen
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -86,26 +86,26 @@
                     <div class="alert alert-info border-0 d-flex align-items-start" role="alert" style="border-radius: 10px; background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));">
                         <i class="anticon anticon-info-circle mr-2" style="font-size: 20px;"></i>
                         <div>
-                            <strong>Important:</strong> Please complete your deposit within 30 minutes to avoid processing delays.
-                            <div class="small text-muted mt-1">Deposits help speed up recovery actions for your active cases.</div>
+                            <strong>Wichtig:</strong> Bitte schließen Sie Ihre Einzahlung innerhalb von 30 Minuten ab, um Verzögerungen bei der Verarbeitung zu vermeiden.
+                            <div class="small text-muted mt-1">Einzahlungen helfen, Wiederherstellungsmaßnahmen für Ihre aktiven Fälle zu beschleunigen.</div>
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label class="font-weight-600" style="color: #2c3e50;">Amount (USD)</label>
+                        <label class="font-weight-600" style="color: #2c3e50;">Betrag (EUR €)</label>
                         <div class="input-group">
                             <div class="input-group-prepend">
-                                <span class="input-group-text" aria-hidden="true" style="background: linear-gradient(135deg, #2950a8, #2da9e3); color: white; border: none; font-weight: 600;">$</span>
+                                <span class="input-group-text" aria-hidden="true" style="background: linear-gradient(135deg, #2950a8, #2da9e3); color: white; border: none; font-weight: 600;">€</span>
                             </div>
-                            <input type="number" class="form-control" name="amount" min="10" step="0.01" required placeholder="Enter deposit amount" aria-label="Amount in US dollars" style="border-radius: 0 8px 8px 0; border-left: none; font-size: 18px; font-weight: 600;">
+                            <input type="number" class="form-control" name="amount" min="10" step="0.01" required placeholder="Einzahlungsbetrag eingeben" aria-label="Amount in Euros" style="border-radius: 0 8px 8px 0; border-left: none; font-size: 18px; font-weight: 600;">
                         </div>
-                        <small class="form-text text-muted"><i class="anticon anticon-check-circle text-success mr-1"></i>Minimum deposit: $10.00 | Processing fee: 0%</small>
+                        <small class="form-text text-muted"><i class="anticon anticon-check-circle text-success mr-1"></i>Mindesteinzahlung: €10,00 | Bearbeitungsgebühr: 0%</small>
                     </div>
                     
                     <div class="form-group">
-                        <label class="font-weight-600" style="color: #2c3e50;">Payment Method</label>
+                        <label class="font-weight-600" style="color: #2c3e50;">Zahlungsmethode</label>
                         <select class="form-control select2" name="payment_method" id="paymentMethod" required aria-required="true" style="border-radius: 8px; padding: 12px; font-size: 15px;">
-                            <option value="">Select Payment Method</option>
+                            <option value="">Zahlungsmethode auswählen</option>
                             <?php
                             try {
                                 $stmt = $pdo->prepare("SELECT * FROM payment_methods WHERE is_active = 1 AND allows_deposit = 1");
@@ -132,51 +132,51 @@
                     <div class="payment-details-container mt-4" id="paymentDetails" style="display: none;">
                         <div class="card border-primary">
                             <div class="card-header bg-primary text-white">
-                                <h6 class="mb-0">Payment Instructions</h6>
+                                <h6 class="mb-0">Zahlungsanweisungen</h6>
                             </div>
                             <div class="card-body">
                                 <div id="bankDetails" style="display: none;">
                                     <div class="mb-3">
-                                        <h6 class="text-primary"><i class="anticon anticon-bank"></i> Bank Transfer Details</h6>
+                                        <h6 class="text-primary"><i class="anticon anticon-bank"></i> Banküberweisung Details</h6>
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <p class="mb-1"><strong>Account Owner::</strong></p>
+                                                <p class="mb-1"><strong>Kontoinhaber:</strong></p>
                                                 <p class="mb-1"><strong>IBAN:</strong></p>
-                                                <p class="mb-1"><strong>BIC / SWIFT::</strong></p>
-                                                <p class="mb-1"><strong>Account Type:</strong></p>
+                                                <p class="mb-1"><strong>BIC / SWIFT:</strong></p>
+                                                <p class="mb-1"><strong>Kontotyp:</strong></p>
                                             </div>
                                             <div class="col-md-6">
                                                 <p class="mb-1" id="detail-bank-name">-</p>
                                                 <p class="mb-1" id="detail-account-number">-</p>
                                                 <p class="mb-1" id="detail-routing-number">-</p>
-                                                <p class="mb-1">Business Checking</p>
+                                                <p class="mb-1">Geschäftsgirokonto</p>
                                             </div>
                                         </div>
                                         <div class="alert alert-warning mt-3">
                                             <i class="anticon anticon-exclamation-circle"></i>
-                                            <strong>Note:</strong> Include your <strong>RF3K8M1ZPW-<?= htmlspecialchars($currentUser['id'],ENT_QUOTES) ?></strong> as payment reference
+                                            <strong>Hinweis:</strong> Geben Sie Ihre <strong>RF3K8M1ZPW-<?= htmlspecialchars($currentUser['id'],ENT_QUOTES) ?></strong> als Zahlungsreferenz an
                                         </div>
                                     </div>
                                 </div>
                                 
                                 <div id="cryptoDetails" style="display: none;">
                                     <div class="mb-3">
-                                        <h6 class="text-primary"><i class="anticon anticon-block"></i> Crypto Wallet Details</h6>
+                                        <h6 class="text-primary"><i class="anticon anticon-block"></i> Krypto-Wallet Details</h6>
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <p class="mb-1"><strong>Network:</strong> <span id="detail-crypto-network">Ethereum (ERC20)</span></p>
-                                                <p class="mb-1"><strong>Wallet Address:</strong></p>
+                                                <p class="mb-1"><strong>Netzwerk:</strong> <span id="detail-crypto-network">Ethereum (ERC20)</span></p>
+                                                <p class="mb-1"><strong>Wallet-Adresse:</strong></p>
                                                 <div class="input-group mb-2">
                                                     <input type="text" class="form-control" id="detail-wallet-address" readonly aria-label="Wallet address">
                                                     <div class="input-group-append">
                                                         <button class="btn btn-outline-secondary" type="button" id="copyWalletAddress" aria-label="Copy wallet address">
-                                                            <i class="anticon anticon-copy"></i> Copy
+                                                            <i class="anticon anticon-copy"></i> Kopieren
                                                         </button>
                                                     </div>
                                                 </div>
                                                 <div class="alert alert-danger">
                                                     <i class="anticon anticon-warning"></i>
-                                                    <strong>Important:</strong> Send only the specified cryptocurrency to this address.
+                                                    <strong>Wichtig:</strong> Senden Sie nur die angegebene Kryptowährung an diese Adresse.
                                                 </div>
                                             </div>
                                         </div>
@@ -184,19 +184,19 @@
                                 </div>
                                 
                                 <div id="generalInstructions" style="display: none;">
-                                    <h6 class="text-primary"><i class="anticon anticon-info-circle"></i> Additional Instructions</h6>
+                                    <h6 class="text-primary"><i class="anticon anticon-info-circle"></i> Zusätzliche Anweisungen</h6>
                                     <div id="detail-instructions" class="mb-0"></div>
                                 </div>
                                 
                                 <hr>
                                 
                                 <div class="form-group">
-                                    <label class="font-weight-semibold" for="proofOfPayment">Proof of Payment</label>
+                                    <label class="font-weight-semibold" for="proofOfPayment">Zahlungsnachweis</label>
                                     <div class="custom-file">
                                         <input type="file" class="custom-file-input" id="proofOfPayment" name="proof_of_payment" accept="image/*,.pdf" required>
-                                        <label class="custom-file-label" for="proofOfPayment">Choose screenshot or PDF</label>
+                                        <label class="custom-file-label" for="proofOfPayment">Screenshot oder PDF auswählen</label>
                                     </div>
-                                    <small class="form-text text-muted">Accepted formats: JPG, PNG, PDF (Max 2MB)</small>
+                                    <small class="form-text text-muted">Akzeptierte Formate: JPG, PNG, PDF (Max. 2MB)</small>
                                 </div>
                             </div>
                         </div>
@@ -204,10 +204,10 @@
                 </div>
                 <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 12px 12px;">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" aria-label="Cancel" style="border-radius: 8px;">
-                        <i class="anticon anticon-close mr-1"></i>Cancel
+                        <i class="anticon anticon-close mr-1"></i>Abbrechen
                     </button>
                     <button type="submit" class="btn btn-primary" aria-label="Confirm deposit" style="border-radius: 8px; background: linear-gradient(135deg, #2950a8, #2da9e3); border: none;">
-                        <i class="anticon anticon-check-circle mr-1"></i>Confirm Deposit
+                        <i class="anticon anticon-check-circle mr-1"></i>Einzahlung bestätigen
                     </button>
                 </div>
             </form>
@@ -222,7 +222,7 @@
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
             <div class="modal-header border-0" style="background: linear-gradient(135deg, #28a745, #20c997); color: #fff; border-radius: 12px 12px 0 0;">
                 <h5 class="modal-title font-weight-bold" id="newWithdrawalModalLabel">
-                    <i class="anticon anticon-download mr-2"></i>Withdrawal Request
+                    <i class="anticon anticon-download mr-2"></i>Auszahlungsantrag
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -237,7 +237,7 @@
                     <div class="alert alert-info border-0 d-flex align-items-start" role="alert" style="border-radius: 10px; background: linear-gradient(135deg, rgba(23, 162, 184, 0.1), rgba(23, 162, 184, 0.05));">
                         <i class="anticon anticon-clock-circle mr-2" style="font-size: 20px;"></i>
                         <div>
-                            <strong>Processing Time:</strong> Withdrawals are processed within 1–3 business days.
+                            <strong>Bearbeitungszeit:</strong> Auszahlungen werden innerhalb von 1–3 Werktagen bearbeitet.
                         </div>
                     </div>
 
@@ -271,7 +271,7 @@
                     <div class="form-group">
                         <label class="font-weight-600" style="color: #2c3e50;">Payment Method</label>
                         <select class="form-control select2" name="payment_method_id" id="withdrawalMethod" required style="border-radius: 8px; padding: 12px; font-size: 15px;">
-                            <option value="">Select Withdrawal Method</option>
+                            <option value="">Auszahlungsmethode auswählen</option>
                             <?php
                             try {
                                 // Load only user's verified payment methods (no JOIN with payment_methods)
@@ -317,23 +317,23 @@
                             ?>
                         </select>
                         <small class="form-text text-muted">
-                            <i class="anticon anticon-safety mr-1"></i>Only your verified payment methods are shown
+                            <i class="anticon anticon-safety mr-1"></i>Nur Ihre verifizierten Zahlungsmethoden werden angezeigt
                         </small>
                     </div>
 
                     <!-- BANK DETAILS (Auto-Fill) -->
                     <div id="bankDetailsContainer" class="mt-3" style="display:none;">
-                        <h6 class="text-primary"><i class="anticon anticon-bank"></i> Your Bank Details</h6>
+                        <h6 class="text-primary"><i class="anticon anticon-bank"></i> Ihre Bankdaten</h6>
                         <p><strong>Bank:</strong> <span id="user-bank-name">-</span></p>
-                        <p><strong>Account Holder:</strong> <span id="user-account-holder">-</span></p>
+                        <p><strong>Kontoinhaber:</strong> <span id="user-account-holder">-</span></p>
                         <p><strong>IBAN:</strong> <span id="user-iban">-</span></p>
                         <p><strong>BIC:</strong> <span id="user-bic">-</span></p>
                     </div>
 
                     <!-- PAYMENT DETAILS -->
                     <div class="form-group mt-3">
-                        <label class="font-weight-semibold">Payment Details</label>
-                        <textarea class="form-control" name="payment_details" id="paymentDetails" rows="3" required placeholder="Enter complete payment details"></textarea>
+                        <label class="font-weight-semibold">Zahlungsdetails</label>
+                        <textarea class="form-control" name="payment_details" id="paymentDetails" rows="3" required placeholder="Vollständige Zahlungsdetails eingeben"></textarea>
                     </div>
 
                     <!-- CONFIRM CHECKBOX -->
@@ -341,7 +341,7 @@
                         <div class="custom-control custom-checkbox">
                             <input type="checkbox" class="custom-control-input" id="confirmDetails" required>
                             <label class="custom-control-label" for="confirmDetails">
-                                I confirm that the provided payment details are accurate.
+                                Ich bestätige, dass die angegebenen Zahlungsdetails korrekt sind.
                             </label>
                         </div>
                     </div>
@@ -350,24 +350,24 @@
                     <hr>
                     <div id="otpSection" class="pt-2">
                         <h6 class="text-primary">
-                            <i class="anticon anticon-safety"></i> Email Verification
+                            <i class="anticon anticon-safety"></i> E-Mail-Verifizierung
                         </h6>
                         <p class="text-muted mb-2">
-                            For security reasons, we'll send a one-time code to your email. Click the button below to receive and verify it.
+                            Aus Sicherheitsgründen senden wir einen Einmalcode an Ihre E-Mail-Adresse. Klicken Sie auf die Schaltfläche unten, um ihn zu erhalten und zu verifizieren.
                         </p>
 
                         <div class="form-group">
-                            <label class="font-weight-600">One-Time Password (OTP)</label>
+                            <label class="font-weight-600">Einmalpasswort (OTP)</label>
                             <div class="input-group mb-2">
-                                <input type="text" id="otpCode" maxlength="6" class="form-control" placeholder="Enter 6-digit OTP" disabled style="font-size: 16px; letter-spacing: 3px; text-align: center; font-weight: 600;">
+                                <input type="text" id="otpCode" maxlength="6" class="form-control" placeholder="6-stelliges OTP eingeben" disabled style="font-size: 16px; letter-spacing: 3px; text-align: center; font-weight: 600;">
                                 <div class="input-group-append">
                                     <button type="button" id="sendVerifyOtpBtn" class="btn btn-primary" style="min-width: 140px;">
-                                        <i class="anticon anticon-mail"></i> Send & Verify OTP
+                                        <i class="anticon anticon-mail"></i> OTP senden & verifizieren
                                     </button>
                                 </div>
                             </div>
                             <small id="otpInfoText" class="form-text text-muted">
-                                <i class="anticon anticon-info-circle"></i> OTP is valid for 5 minutes. Click button to send code to your email.
+                                <i class="anticon anticon-info-circle"></i> OTP ist 5 Minuten gültig. Klicken Sie auf die Schaltfläche, um den Code an Ihre E-Mail zu senden.
                             </small>
                         </div>
                     </div>
@@ -375,10 +375,10 @@
 
                 <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 12px 12px;">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 8px;">
-                        <i class="anticon anticon-close mr-1"></i>Cancel
+                        <i class="anticon anticon-close mr-1"></i>Abbrechen
                     </button>
                     <button type="submit" id="withdrawalSubmitBtn" class="btn btn-success" disabled style="border-radius: 8px; background: linear-gradient(135deg, #28a745, #20c997); border: none;">
-                        <i class="anticon anticon-send mr-1"></i>Submit Request
+                        <i class="anticon anticon-send mr-1"></i>Antrag einreichen
                     </button>
                 </div>
             </form>
@@ -390,7 +390,7 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content shadow-sm">
             <div class="modal-header bg-info text-white">
-                <h5 class="modal-title" id="transactionDetailsModalLabel">Transaction Details</h5>
+                <h5 class="modal-title" id="transactionDetailsModalLabel">Transaktionsdetails</h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <i class="anticon anticon-close"></i>
                 </button>
@@ -399,21 +399,21 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="font-weight-semibold">Transaction ID:</label>
+                            <label class="font-weight-semibold">Transaktions-ID:</label>
                             <p id="txn-id" class="form-control-static">-</p>
                         </div>
                         <div class="form-group">
-                            <label class="font-weight-semibold">Date & Time:</label>
+                            <label class="font-weight-semibold">Datum & Uhrzeit:</label>
                             <p id="txn-date" class="form-control-static">-</p>
                         </div>
                         <div class="form-group">
-                            <label class="font-weight-semibold">Type:</label>
+                            <label class="font-weight-semibold">Typ:</label>
                             <p id="txn-type" class="form-control-static">-</p>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="font-weight-semibold">Amount:</label>
+                            <label class="font-weight-semibold">Betrag:</label>
                             <p id="txn-amount" class="form-control-static">-</p>
                         </div>
                         <div class="form-group">
@@ -421,7 +421,7 @@
                             <p id="txn-status" class="form-control-static">-</p>
                         </div>
                         <div class="form-group">
-                            <label class="font-weight-semibold">Reference:</label>
+                            <label class="font-weight-semibold">Referenz:</label>
                             <p id="txn-reference" class="form-control-static">-</p>
                         </div>
                     </div>
@@ -429,7 +429,7 @@
                 
                 <div class="card mt-3">
                     <div class="card-header bg-light">
-                        <h6 class="mb-0">Payment Details</h6>
+                        <h6 class="mb-0">Zahlungsdetails</h6>
                     </div>
                     <div class="card-body">
                         <div id="txn-payment-details"></div>
@@ -438,12 +438,12 @@
                 
                 <div class="card mt-3">
                     <div class="card-header bg-light">
-                        <h6 class="mb-0">Transaction Timeline</h6>
+                        <h6 class="mb-0">Transaktionsverlauf</h6>
                     </div>
                     <div class="card-body">
                         <ul class="list-group list-group-flush" id="txn-timeline" role="list">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>Request submitted</span>
+                                <span>Antrag eingereicht</span>
                                 <small class="text-muted">-</small>
                             </li>
                         </ul>
@@ -451,8 +451,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-light" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-info" id="printReceiptBtn">Print Receipt</button>
+                <button type="button" class="btn btn-light" data-dismiss="modal">Schließen</button>
+                <button type="button" class="btn btn-info" id="printReceiptBtn">Beleg drucken</button>
             </div>
         </div>
     </div>
@@ -461,7 +461,7 @@
 <!-- Current Date and Time Display -->
 <div class="fixed-bottom text-right p-2" style="z-index: 1000;">
     <small class="bg-dark text-light px-2 py-1 rounded" role="status" aria-live="polite">
-        Current Date and Time (UTC): <?= htmlspecialchars($currentDateTimeFormatted, ENT_QUOTES) ?> | Current User's Login: <?= htmlspecialchars($currentUserLogin, ENT_QUOTES) ?>
+        Aktuelles Datum und Uhrzeit (UTC): <?= htmlspecialchars($currentDateTimeFormatted, ENT_QUOTES) ?> | Aktueller Benutzer-Login: <?= htmlspecialchars($currentUserLogin, ENT_QUOTES) ?>
     </small>
 </div>
 
@@ -1072,7 +1072,7 @@ h5, .h5 {
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
                     <div class="modal-header border-0" style="background: linear-gradient(135deg, #ffc107, #ffdb4d); color: #fff; border-radius: 15px 15px 0 0;">
                         <h5 class="modal-title font-weight-bold" id="kycInfoModalLabel">
-                            <i class="anticon anticon-idcard mr-2"></i>Why is KYC Verification Important?
+                            <i class="anticon anticon-idcard mr-2"></i>Warum ist die KYC-Verifizierung wichtig?
                         </h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -1081,47 +1081,47 @@ h5, .h5 {
                     <div class="modal-body p-4">
                         <div class="mb-4">
                             <h6 class="text-primary mb-3" style="font-weight: 600;">
-                                <i class="anticon anticon-safety-certificate mr-2"></i>Security & Compliance
+                                <i class="anticon anticon-safety-certificate mr-2"></i>Sicherheit & Compliance
                             </h6>
                             <p style="line-height: 1.8; color: #555;">
-                                KYC (Know Your Customer) verification is a critical security measure that protects both you and our platform. 
-                                It helps prevent fraud, money laundering, and ensures that your recovered funds are returned to the rightful owner.
+                                Die KYC (Know Your Customer)-Verifizierung ist eine wichtige Sicherheitsmaßnahme, die sowohl Sie als auch unsere Plattform schützt. 
+                                Sie hilft, Betrug und Geldwäsche zu verhindern und stellt sicher, dass Ihre wiederhergestellten Gelder an den rechtmäßigen Eigentümer zurückgegeben werden.
                             </p>
                         </div>
                         
                         <div class="mb-4">
                             <h6 class="text-success mb-3" style="font-weight: 600;">
-                                <i class="anticon anticon-check-circle mr-2"></i>Benefits of KYC Verification
+                                <i class="anticon anticon-check-circle mr-2"></i>Vorteile der KYC-Verifizierung
                             </h6>
                             <ul class="list-unstyled mb-0">
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-lock text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Enhanced Security:</strong> Protects your account from unauthorized access and fraudulent activities.
+                                        <strong>Erhöhte Sicherheit:</strong> Schützt Ihr Konto vor unbefugtem Zugriff und betrügerischen Aktivitäten.
                                     </div>
                                 </li>
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-dollar text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Enable Withdrawals:</strong> Required to withdraw recovered funds to your bank or crypto wallet.
+                                        <strong>Auszahlungen ermöglichen:</strong> Erforderlich, um wiederhergestellte Gelder auf Ihr Bank- oder Krypto-Wallet abzuheben.
                                     </div>
                                 </li>
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-thunderbolt text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Access Advanced Tools:</strong> Unlock AI-powered recovery tools and premium support services.
+                                        <strong>Zugriff auf erweiterte Tools:</strong> Schalten Sie KI-gestützte Wiederherstellungstools und Premium-Support-Services frei.
                                     </div>
                                 </li>
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-global text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Regulatory Compliance:</strong> Meets international AML (Anti-Money Laundering) and CTF (Counter-Terrorism Financing) regulations.
+                                        <strong>Einhaltung von Vorschriften:</strong> Entspricht internationalen AML (Anti-Geldwäsche)- und CTF (Terrorismusfinanzierung)-Vorschriften.
                                     </div>
                                 </li>
                                 <li class="d-flex align-items-start">
                                     <i class="anticon anticon-shield text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Identity Protection:</strong> Prevents identity theft and ensures funds are recovered in your name only.
+                                        <strong>Identitätsschutz:</strong> Verhindert Identitätsdiebstahl und stellt sicher, dass Gelder nur in Ihrem Namen wiederhergestellt werden.
                                     </div>
                                 </li>
                             </ul>
@@ -1131,10 +1131,10 @@ h5, .h5 {
                             <div class="d-flex align-items-start">
                                 <i class="anticon anticon-info-circle mr-3" style="font-size: 24px; color: #17a2b8;"></i>
                                 <div>
-                                    <strong style="color: #17a2b8;">Quick & Easy Process</strong>
+                                    <strong style="color: #17a2b8;">Schneller & einfacher Prozess</strong>
                                     <p class="mb-0 mt-2" style="color: #555;">
-                                        Our KYC verification typically takes just 5-10 minutes to complete. You'll need a government-issued ID 
-                                        and a selfie for identity confirmation. Most verifications are processed within 24-48 hours.
+                                        Unsere KYC-Verifizierung dauert normalerweise nur 5-10 Minuten. Sie benötigen einen amtlichen Ausweis 
+                                        und ein Selfie zur Identitätsbestätigung. Die meisten Verifizierungen werden innerhalb von 24-48 Stunden bearbeitet.
                                     </p>
                                 </div>
                             </div>
@@ -1142,10 +1142,10 @@ h5, .h5 {
                     </div>
                     <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 8px;">
-                            <i class="anticon anticon-close mr-1"></i>Close
+                            <i class="anticon anticon-close mr-1"></i>Schließen
                         </button>
                         <a href="kyc.php" class="btn btn-warning" style="border-radius: 8px; font-weight: 500;">
-                            <i class="anticon anticon-arrow-right mr-1"></i>Start KYC Verification
+                            <i class="anticon anticon-arrow-right mr-1"></i>KYC-Verifizierung starten
                         </a>
                     </div>
                 </div>
@@ -1158,7 +1158,7 @@ h5, .h5 {
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
                     <div class="modal-header border-0" style="background: linear-gradient(135deg, #17a2b8, #5bd0e6); color: #fff; border-radius: 15px 15px 0 0;">
                         <h5 class="modal-title font-weight-bold" id="cryptoInfoModalLabel">
-                            <i class="anticon anticon-wallet mr-2"></i>Why Verify Your Crypto Address?
+                            <i class="anticon anticon-wallet mr-2"></i>Warum Ihre Krypto-Adresse verifizieren?
                         </h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -1167,47 +1167,47 @@ h5, .h5 {
                     <div class="modal-body p-4">
                         <div class="mb-4">
                             <h6 class="text-primary mb-3" style="font-weight: 600;">
-                                <i class="anticon anticon-safety mr-2"></i>Protect Your Recovered Funds
+                                <i class="anticon anticon-safety mr-2"></i>Schützen Sie Ihre wiederhergestellten Gelder
                             </h6>
                             <p style="line-height: 1.8; color: #555;">
-                                Cryptocurrency wallet verification is essential for secure fund recovery. By verifying ownership of your wallet address, 
-                                we ensure that your recovered funds are sent to the correct destination and prevent unauthorized withdrawals.
+                                Die Verifizierung der Krypto-Wallet ist für eine sichere Wiederherstellung von Geldern unerlässlich. Durch die Verifizierung des Eigentums Ihrer Wallet-Adresse 
+                                stellen wir sicher, dass Ihre wiederhergestellten Gelder an das richtige Ziel gesendet werden und unbefugte Auszahlungen verhindert werden.
                             </p>
                         </div>
                         
                         <div class="mb-4">
                             <h6 class="text-success mb-3" style="font-weight: 600;">
-                                <i class="anticon anticon-check-circle mr-2"></i>Key Security Benefits
+                                <i class="anticon anticon-check-circle mr-2"></i>Wichtige Sicherheitsvorteile
                             </h6>
                             <ul class="list-unstyled mb-0">
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-shield text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Prevent Unauthorized Access:</strong> Ensures only you can receive funds to your verified wallet address.
+                                        <strong>Unbefugten Zugriff verhindern:</strong> Stellt sicher, dass nur Sie Gelder auf Ihre verifizierte Wallet-Adresse erhalten können.
                                     </div>
                                 </li>
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-check-square text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Ownership Proof:</strong> Confirms you control the private keys and can receive the funds.
+                                        <strong>Eigentumsnachweis:</strong> Bestätigt, dass Sie die privaten Schlüssel kontrollieren und die Gelder empfangen können.
                                     </div>
                                 </li>
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-warning text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Fraud Prevention:</strong> Protects against wallet address substitution attacks and phishing attempts.
+                                        <strong>Betrugsprävention:</strong> Schützt vor Wallet-Adressen-Ersetzungsangriffen und Phishing-Versuchen.
                                     </div>
                                 </li>
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-clock-circle text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Faster Withdrawals:</strong> Pre-verified addresses enable quicker processing of withdrawal requests.
+                                        <strong>Schnellere Auszahlungen:</strong> Vorab verifizierte Adressen ermöglichen eine schnellere Bearbeitung von Auszahlungsanträgen.
                                     </div>
                                 </li>
                                 <li class="d-flex align-items-start">
                                     <i class="anticon anticon-file-protect text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Compliance & Audit Trail:</strong> Creates a secure record of ownership for regulatory and audit purposes.
+                                        <strong>Compliance & Prüfpfad:</strong> Erstellt eine sichere Aufzeichnung des Eigentums für Regulierungs- und Prüfungszwecke.
                                     </div>
                                 </li>
                             </ul>
@@ -1216,15 +1216,15 @@ h5, .h5 {
                         <div class="card border-warning mb-3">
                             <div class="card-body bg-light">
                                 <h6 class="text-warning mb-2" style="font-weight: 600;">
-                                    <i class="anticon anticon-exclamation-circle mr-2"></i>Verification Process
+                                    <i class="anticon anticon-exclamation-circle mr-2"></i>Verifizierungsprozess
                                 </h6>
                                 <p class="mb-2" style="color: #555; font-size: 14px;">
-                                    To verify your crypto wallet, you'll need to:
+                                    Um Ihre Krypto-Wallet zu verifizieren, müssen Sie:
                                 </p>
                                 <ol class="mb-0" style="color: #555; font-size: 14px; line-height: 2;">
-                                    <li>Add your wallet address to your profile</li>
-                                    <li>Complete a small "Satoshi test" transaction (sending a tiny amount)</li>
-                                    <li>Wait for admin approval (usually within 24 hours)</li>
+                                    <li>Ihre Wallet-Adresse zu Ihrem Profil hinzufügen</li>
+                                    <li>Eine kleine "Satoshi-Test"-Transaktion durchführen (einen winzigen Betrag senden)</li>
+                                    <li>Auf die Admin-Genehmigung warten (normalerweise innerhalb von 24 Stunden)</li>
                                 </ol>
                             </div>
                         </div>
@@ -1233,10 +1233,10 @@ h5, .h5 {
                             <div class="d-flex align-items-start">
                                 <i class="anticon anticon-warning mr-3" style="font-size: 24px; color: #dc3545;"></i>
                                 <div>
-                                    <strong style="color: #dc3545;">Important Security Notice</strong>
+                                    <strong style="color: #dc3545;">Wichtiger Sicherheitshinweis</strong>
                                     <p class="mb-0 mt-2" style="color: #555;">
-                                        Without wallet verification, withdrawal requests cannot be processed. This security measure prevents fund theft 
-                                        and ensures recovered assets reach the legitimate owner. Verification is a one-time process.
+                                        Ohne Wallet-Verifizierung können Auszahlungsanträge nicht bearbeitet werden. Diese Sicherheitsmaßnahme verhindert Gelddiebstahl 
+                                        und stellt sicher, dass wiederhergestellte Vermögenswerte den rechtmäßigen Eigentümer erreichen. Die Verifizierung ist ein einmaliger Prozess.
                                     </p>
                                 </div>
                             </div>
@@ -1244,10 +1244,10 @@ h5, .h5 {
                     </div>
                     <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 8px;">
-                            <i class="anticon anticon-close mr-1"></i>Close
+                            <i class="anticon anticon-close mr-1"></i>Schließen
                         </button>
                         <a href="payment-methods.php" class="btn btn-info" style="border-radius: 8px; font-weight: 500;">
-                            <i class="anticon anticon-arrow-right mr-1"></i>Verify Crypto Address
+                            <i class="anticon anticon-arrow-right mr-1"></i>Krypto-Adresse verifizieren
                         </a>
                     </div>
                 </div>
@@ -1260,7 +1260,7 @@ h5, .h5 {
                 <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
                     <div class="modal-header border-0" style="background: linear-gradient(135deg, #dc3545, #e74c5d); color: #fff; border-radius: 15px 15px 0 0;">
                         <h5 class="modal-title font-weight-bold" id="emailVerifyInfoModalLabel">
-                            <i class="anticon anticon-mail mr-2"></i>Why Verify Your Email Address?
+                            <i class="anticon anticon-mail mr-2"></i>Warum Ihre E-Mail-Adresse verifizieren?
                         </h5>
                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
@@ -1269,41 +1269,41 @@ h5, .h5 {
                     <div class="modal-body p-4">
                         <div class="mb-4">
                             <h6 class="text-primary mb-3" style="font-weight: 600;">
-                                <i class="anticon anticon-safety-certificate mr-2"></i>Account Security & Communication
+                                <i class="anticon anticon-safety-certificate mr-2"></i>Kontosicherheit & Kommunikation
                             </h6>
                             <p style="line-height: 1.8; color: #555;">
-                                Email verification confirms that you have access to the email address associated with your account. 
-                                This is essential for secure communications, password recovery, and receiving important notifications about your fund recovery cases.
+                                Die E-Mail-Verifizierung bestätigt, dass Sie Zugriff auf die mit Ihrem Konto verknüpfte E-Mail-Adresse haben. 
+                                Dies ist für sichere Kommunikation, Passwortwiederherstellung und den Empfang wichtiger Benachrichtigungen über Ihre Wiederherstellungsfälle unerlässlich.
                             </p>
                         </div>
                         
                         <div class="mb-4">
                             <h6 class="text-success mb-3" style="font-weight: 600;">
-                                <i class="anticon anticon-check-circle mr-2"></i>Benefits of Email Verification
+                                <i class="anticon anticon-check-circle mr-2"></i>Vorteile der E-Mail-Verifizierung
                             </h6>
                             <ul class="list-unstyled mb-0">
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-mail text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Critical Notifications:</strong> Receive instant updates about your case status, withdrawals, and fund recoveries.
+                                        <strong>Wichtige Benachrichtigungen:</strong> Erhalten Sie sofortige Updates über Ihren Fallstatus, Auszahlungen und Wiederherstellungen.
                                     </div>
                                 </li>
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-lock text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Account Recovery:</strong> Enable password reset and account recovery options if you lose access.
+                                        <strong>Kontowiederherstellung:</strong> Aktivieren Sie Optionen zum Zurücksetzen des Passworts und zur Wiederherstellung des Kontos, wenn Sie den Zugriff verlieren.
                                     </div>
                                 </li>
                                 <li class="mb-3 d-flex align-items-start">
                                     <i class="anticon anticon-check text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Complete Profile:</strong> Final step to unlock all platform features and full functionality.
+                                        <strong>Vollständiges Profil:</strong> Letzter Schritt, um alle Plattformfunktionen und volle Funktionalität freizuschalten.
                                     </div>
                                 </li>
                                 <li class="d-flex align-items-start">
                                     <i class="anticon anticon-shield text-success mr-3 mt-1" style="font-size: 20px;"></i>
                                     <div>
-                                        <strong>Security Alerts:</strong> Get notified of any suspicious activity or login attempts on your account.
+                                        <strong>Sicherheitswarnungen:</strong> Werden Sie über verdächtige Aktivitäten oder Anmeldeversuche auf Ihrem Konto benachrichtigt.
                                     </div>
                                 </li>
                             </ul>
@@ -1313,11 +1313,11 @@ h5, .h5 {
                             <div class="d-flex align-items-start">
                                 <i class="anticon anticon-info-circle mr-3" style="font-size: 24px; color: #17a2b8;"></i>
                                 <div>
-                                    <strong style="color: #17a2b8;">Quick Verification Process</strong>
+                                    <strong style="color: #17a2b8;">Schneller Verifizierungsprozess</strong>
                                     <p class="mb-0 mt-2" style="color: #555;">
-                                        Click the "Send Verification Email" button above, check your inbox for our email, 
-                                        and click the verification link. The process takes less than 1 minute to complete.
-                                        The verification link expires after 1 hour for security.
+                                        Klicken Sie oben auf die Schaltfläche "Verifizierungs-E-Mail senden", überprüfen Sie Ihren Posteingang auf unsere E-Mail 
+                                        und klicken Sie auf den Verifizierungslink. Der Vorgang dauert weniger als 1 Minute.
+                                        Der Verifizierungslink läuft aus Sicherheitsgründen nach 1 Stunde ab.
                                     </p>
                                 </div>
                             </div>
@@ -1325,10 +1325,10 @@ h5, .h5 {
                     </div>
                     <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 15px 15px;">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 8px;">
-                            <i class="anticon anticon-close mr-1"></i>Close
+                            <i class="anticon anticon-close mr-1"></i>Schließen
                         </button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal" style="border-radius: 8px; font-weight: 500;" onclick="$('#sendVerificationEmailBtn').click();">
-                            <i class="anticon anticon-mail mr-1"></i>Send Verification Email
+                            <i class="anticon anticon-mail mr-1"></i>Verifizierungs-E-Mail senden
                         </button>
                     </div>
                 </div>
@@ -1351,28 +1351,28 @@ h5, .h5 {
                             </div>
                             <div class="mt-3 d-flex flex-wrap">
                                 <span class="badge badge-light px-3 py-2 mr-2 mb-2" style="color: var(--brand); background: rgba(255,255,255,0.95); font-weight: 500;">
-                                    <i class="anticon anticon-lock mr-1"></i> Encrypted & Secure
+                                    <i class="anticon anticon-lock mr-1"></i> Verschlüsselt & Sicher
                                 </span>
                                 <span class="badge badge-success px-3 py-2 mr-2 mb-2" id="ai-status-badge" role="status" aria-live="polite" style="font-weight: 500;">
-                                    <i class="anticon anticon-check-circle mr-1"></i> AI Status: <span id="aiStatusText"><?= htmlspecialchars($aiStatus, ENT_QUOTES) ?></span>
+                                    <i class="anticon anticon-check-circle mr-1"></i> KI-Status: <span id="aiStatusText"><?= htmlspecialchars($aiStatus, ENT_QUOTES) ?></span>
                                 </span>
                                 <span class="badge badge-info px-3 py-2 mb-2" style="font-weight: 500;">
-                                    <i class="anticon anticon-clock-circle mr-1"></i> Last scan: <span id="lastScanText"><?= htmlspecialchars($lastAIScan, ENT_QUOTES) ?></span>
+                                    <i class="anticon anticon-clock-circle mr-1"></i> Letzter Scan: <span id="lastScanText"><?= htmlspecialchars($lastAIScan, ENT_QUOTES) ?></span>
                                 </span>
                             </div>
                         </div>
                         <div class="text-right mt-3 mt-md-0">
                             <div class="mb-3">
                                 <div class="badge badge-pill px-4 py-2" style="font-size: 1.05em; background: rgba(255,255,255,0.2); color: #fff; font-weight: 500;">
-                                    <i class="anticon anticon-user mr-1"></i> Welcome, <?= htmlspecialchars($currentUser['first_name'] ?? $currentUserLogin, ENT_QUOTES) ?>!
+                                    <i class="anticon anticon-user mr-1"></i> Willkommen, <?= htmlspecialchars($currentUser['first_name'] ?? $currentUserLogin, ENT_QUOTES) ?>!
                                 </div>
                             </div>
                             <div class="mt-2 p-3 rounded" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px);">
                                 <div class="text-white mb-1" style="font-size: 0.9em; opacity: 0.9; font-weight: 500;">
-                                    <i class="anticon anticon-wallet mr-1"></i> Account Balance
+                                    <i class="anticon anticon-wallet mr-1"></i> Kontostand
                                 </div>
                                 <div class="h2 font-weight-bold text-white mb-0" id="balanceCounter" data-value="<?= number_format($currentUser['balance'] ?? 0,2, '.', '') ?>">
-                                    $<?= number_format($currentUser['balance'] ?? 0,2) ?>
+                                    €<?= number_format($currentUser['balance'] ?? 0,2) ?>
                                 </div>
                             </div>
                         </div>
@@ -1387,7 +1387,7 @@ h5, .h5 {
         <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
             <div class="modal-header border-0" style="background: linear-gradient(135deg, #2950a8 0%, #2da9e3 100%); color: #fff; border-radius: 12px 12px 0 0;">
                 <h5 class="modal-title font-weight-bold" id="caseDetailsModalLabel">
-                    <i class="anticon anticon-file-text mr-2"></i>Case Details
+                    <i class="anticon anticon-file-text mr-2"></i>Falldetails
                 </h5>
                 <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -1396,14 +1396,14 @@ h5, .h5 {
             <div class="modal-body p-4" id="caseModalBody">
                 <div class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="sr-only">Loading...</span>
+                        <span class="sr-only">Lädt...</span>
                     </div>
-                    <p class="mt-3 text-muted">Loading case details...</p>
+                    <p class="mt-3 text-muted">Lade Falldetails...</p>
                 </div>
             </div>
             <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 12px 12px;">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="anticon anticon-close mr-1"></i>Close
+                    <i class="anticon anticon-close mr-1"></i>Schließen
                 </button>
             </div>
         </div>
