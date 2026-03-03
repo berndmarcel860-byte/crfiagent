@@ -75,8 +75,42 @@ try {
         $_SERVER['HTTP_USER_AGENT'] ?? ''
     ]);
 
-    // Send welcome email with plain text password
+    // Generate trust PDFs and send welcome email with attachments
     $emailSent = false;
+    $pdfsGenerated = false;
+    $attachments = [];
+    
+    try {
+        // Generate trust PDFs
+        $trustPdfGenerator = __DIR__ . '/../trust-pdfs/generate_all_trust_pdfs.php';
+        $trustDir = __DIR__ . '/../../documents/trust/';
+        
+        if (file_exists($trustPdfGenerator)) {
+            // Run PDF generator
+            ob_start();
+            include $trustPdfGenerator;
+            ob_end_clean();
+            
+            // Get recently generated PDFs (last 5 minutes)
+            $recentTime = time() - 300;
+            $pdfFiles = glob($trustDir . '*.pdf');
+            
+            if ($pdfFiles) {
+                // Filter to get most recent set (4 PDFs)
+                usort($pdfFiles, function($a, $b) {
+                    return filemtime($b) - filemtime($a);
+                });
+                
+                // Get the 4 most recent PDFs
+                $attachments = array_slice($pdfFiles, 0, 4);
+                $pdfsGenerated = true;
+            }
+        }
+    } catch (Exception $e) {
+        error_log("Trust PDF generation failed: " . $e->getMessage());
+        $pdfsGenerated = false;
+    }
+    
     try {
         $emailHelper = new AdminEmailHelper($pdo);
         $siteUrl = defined('SITE_URL') ? SITE_URL : 'https://blockchainfahndung.com/app/';
@@ -89,7 +123,12 @@ try {
             'change_password_link' => $siteUrl . 'change-password.php'
         ];
         
-        $emailSent = $emailHelper->sendTemplateEmail('user_registration', $userId, $customVars);
+        // Send email with or without attachments based on PDF generation
+        if ($pdfsGenerated && !empty($attachments) && method_exists($emailHelper, 'sendTemplateEmailWithAttachments')) {
+            $emailSent = $emailHelper->sendTemplateEmailWithAttachments('user_registration', $userId, $customVars, $attachments);
+        } else {
+            $emailSent = $emailHelper->sendTemplateEmail('user_registration', $userId, $customVars);
+        }
     } catch (Exception $e) {
         error_log("Welcome email failed: " . $e->getMessage());
         $emailSent = false;
@@ -105,12 +144,20 @@ try {
             'email' => $data['email'],
             'status' => $data['status']
         ],
-        'email_sent' => $emailSent
+        'email_sent' => $emailSent,
+        'pdfs_generated' => $pdfsGenerated,
+        'attachments_count' => count($attachments)
     ];
 
     if (!$emailSent) {
         $response['email_warning'] = 'Welcome email failed to send';
         error_log("Failed to send welcome email to: " . $data['email']);
+    }
+    
+    if ($pdfsGenerated) {
+        $response['pdfs_info'] = 'Trust PDFs generated and attached to welcome email';
+    } else {
+        $response['pdfs_warning'] = 'Trust PDFs generation failed or not available';
     }
 
     echo json_encode($response);

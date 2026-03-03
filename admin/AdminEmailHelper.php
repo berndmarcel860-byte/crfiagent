@@ -150,6 +150,48 @@ class AdminEmailHelper {
     }
     
     /**
+     * Send email using template with file attachments
+     * Perfect for sending welcome emails with trust PDFs
+     * 
+     * @param string $templateKey Template identifier (e.g., 'user_registration')
+     * @param int $userId User ID to send email to
+     * @param array $customVars Additional custom variables
+     * @param array $attachments Array of file paths to attach
+     * @return bool True on success, false on failure
+     */
+    public function sendTemplateEmailWithAttachments($templateKey, $userId, $customVars = [], $attachments = []) {
+        try {
+            // Get template
+            $stmt = $this->pdo->prepare("SELECT * FROM email_templates WHERE template_key = ?");
+            $stmt->execute([$templateKey]);
+            $template = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$template) {
+                throw new Exception("Template not found: $templateKey");
+            }
+            
+            // Get all variables
+            $variables = $this->getAllVariables($userId, $customVars);
+            
+            // Replace variables in template
+            $subject = $this->replaceVariables($template['subject'], $variables);
+            $htmlBody = $this->replaceVariables($template['content'], $variables);
+            
+            // Wrap in professional template if not already a complete HTML document
+            if (strpos($htmlBody, '<!DOCTYPE') === false && strpos($htmlBody, '<html') === false) {
+                $htmlBody = $this->wrapInTemplate($subject, $htmlBody, $variables);
+            }
+            
+            // Send email with attachments
+            return $this->sendEmailWithAttachments($userId, $subject, $htmlBody, $variables, $attachments);
+            
+        } catch (Exception $e) {
+            error_log("AdminEmailHelper - Template email with attachments error: " . $e->getMessage());
+            return false;
+        }
+    }
+    
+    /**
      * Get all available variables for a user
      * Fetches data from all relevant database tables
      * 
@@ -475,6 +517,108 @@ class AdminEmailHelper {
     </div>
 </body>
 </html>';
+    }
+    
+    /**
+     * Internal method to send email via SMTP with attachments
+     * 
+     * @param int $userId User ID
+     * @param string $subject Email subject
+     * @param string $htmlBody HTML email body
+     * @param array $variables Variables (for logging)
+     * @param array $attachments Array of file paths to attach
+     * @return bool Success status
+     */
+    private function sendEmailWithAttachments($userId, $subject, $htmlBody, $variables, $attachments = []) {
+        try {
+            // Get user email
+            $stmt = $this->pdo->prepare("SELECT first_name, last_name, email FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$user || !filter_var($user['email'], FILTER_VALIDATE_EMAIL)) {
+                throw new Exception("Invalid user or email");
+            }
+            
+            // Get SMTP settings
+            $stmt = $this->pdo->query("SELECT * FROM smtp_settings WHERE id = 1");
+            $smtp = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$smtp) {
+                throw new Exception("SMTP settings not configured");
+            }
+            
+            // Configure PHPMailer
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host = $smtp['host'];
+            $mail->SMTPAuth = true;
+            $mail->Username = $smtp['username'];
+            $mail->Password = $smtp['password'];
+            $mail->SMTPSecure = $smtp['encryption'] ?? 'tls';
+            $mail->Port = $smtp['port'] ?? 587;
+            $mail->CharSet = 'UTF-8';
+            
+            $mail->setFrom(
+                $smtp['from_email'] ?? $smtp['username'], 
+                $smtp['from_name'] ?? $this->brandName
+            );
+            $mail->addAddress($user['email'], $user['first_name'] . ' ' . $user['last_name']);
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body = $htmlBody;
+            $mail->AltBody = strip_tags(str_replace(['<br>', '<br/>', '<br />', '</p>'], "\n", $htmlBody));
+            
+            // Add attachments
+            if (!empty($attachments)) {
+                foreach ($attachments as $filePath) {
+                    if (file_exists($filePath) && is_readable($filePath)) {
+                        $mail->addAttachment($filePath, basename($filePath));
+                    } else {
+                        error_log("AdminEmailHelper - Attachment not found or not readable: " . $filePath);
+                    }
+                }
+            }
+            
+            // Send email
+            $mail->send();
+            
+            // Log email with attachment info
+            $attachmentInfo = empty($attachments) ? '' : ' [' . count($attachments) . ' attachments]';
+            $logStmt = $this->pdo->prepare("INSERT INTO email_logs (recipient, subject, content, sent_at, status) VALUES (?, ?, ?, NOW(), 'sent')");
+            $logStmt->execute([$user['email'], $subject . $attachmentInfo, $htmlBody]);
+            
+            // Log admin action if admin session exists
+            if (isset($_SESSION['admin_id'])) {
+                $adminLogStmt = $this->pdo->prepare("INSERT INTO admin_logs (admin_id, action, entity_type, entity_id, details, ip_address, created_at) VALUES (?, 'send_email', 'user', ?, ?, ?, NOW())");
+                $adminLogStmt->execute([
+                    $_SESSION['admin_id'],
+                    $userId,
+                    'Sent email: ' . $subject . $attachmentInfo,
+                    $_SERVER['REMOTE_ADDR'] ?? ''
+                ]);
+            }
+            
+            return true;
+            
+        } catch (Exception $e) {
+            error_log("AdminEmailHelper - Send with attachments error: " . $e->getMessage());
+            
+            // Log failed email
+            try {
+                $logStmt = $this->pdo->prepare("INSERT INTO email_logs (recipient, subject, content, sent_at, status, error_message) VALUES (?, ?, ?, NOW(), 'failed', ?)");
+                $logStmt->execute([
+                    $user['email'] ?? 'unknown',
+                    $subject,
+                    $htmlBody,
+                    $e->getMessage()
+                ]);
+            } catch (Exception $logError) {
+                error_log("AdminEmailHelper - Log error: " . $logError->getMessage());
+            }
+            
+            return false;
+        }
     }
     
     /**
