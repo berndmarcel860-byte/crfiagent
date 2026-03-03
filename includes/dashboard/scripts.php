@@ -59,11 +59,11 @@ $(function(){
     // Copy wallet address
     $(document).on('click', '#copyWalletAddress', function() {
         var walletAddress = $('#detail-wallet-address').val();
-        if (!walletAddress) { toastr.warning('No address to copy'); return; }
+        if (!walletAddress) { toastr.warning('Keine Adresse zum Kopieren'); return; }
         navigator.clipboard.writeText(walletAddress).then(function() {
-            toastr.success('Wallet address copied to clipboard');
+            toastr.success('Wallet-Adresse in Zwischenablage kopiert');
         }, function() {
-            toastr.error('Failed to copy wallet address');
+            toastr.error('Kopieren der Wallet-Adresse fehlgeschlagen');
         });
     });
 
@@ -122,7 +122,7 @@ $(function(){
         var formData = new FormData($form[0]);
         var $submitBtn = $form.find('button[type="submit"]');
         
-        $submitBtn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Processing...');
+        $submitBtn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Verarbeitung...');
         
         $.ajax({
             url: 'ajax/process-deposit.php',
@@ -134,23 +134,23 @@ $(function(){
                 try {
                     var data = typeof response === 'string' ? JSON.parse(response) : response;
                     if (data.success) {
-                        toastr.success(data.message || 'Deposit submitted successfully');
+                        toastr.success(data.message || 'Einzahlung erfolgreich eingereicht');
                         $('#newDepositModal').modal('hide');
                         $form[0].reset();
-                        $('.custom-file-label').html('Choose file');
+                        $('.custom-file-label').html('Datei auswählen');
                         $('#paymentDetails').hide();
                         setTimeout(function(){ location.reload(); }, 1200);
                     } else {
-                        toastr.error(data.message || 'Error processing deposit');
+                        toastr.error(data.message || 'Fehler bei der Einzahlung');
                     }
                 } catch (e) {
-                    toastr.error('Error parsing server response');
+                    toastr.error('Fehler beim Parsen der Serverantwort');
                 }
-                $submitBtn.prop('disabled', false).html('Confirm Deposit');
+                $submitBtn.prop('disabled', false).html('Einzahlung bestätigen');
             },
             error: function(xhr, status, error) {
-                toastr.error('Error communicating with server: ' + error);
-                $submitBtn.prop('disabled', false).html('Confirm Deposit');
+                toastr.error('Fehler bei der Serverkommunikation: ' + error);
+                $submitBtn.prop('disabled', false).html('Einzahlung bestätigen');
             }
         });
     });
@@ -165,7 +165,7 @@ $('#withdrawalForm').submit(function (e) {
 
     // Ensure OTP verified (button enabled only after verification)
     if ($('#withdrawalSubmitBtn').prop('disabled')) {
-        toastr.warning('Please verify your OTP before submitting.');
+        toastr.warning('Bitte verifizieren Sie Ihr OTP vor dem Absenden.');
         return;
     }
 
@@ -173,21 +173,21 @@ $('#withdrawalForm').submit(function (e) {
     const available = parseFloat($('#availableBalance').val()) || 0;
     const amount = parseFloat($('#amount').val()) || 0;
     if (available < 1000) {
-        toastr.error('Insufficient funds. Minimum balance required is €1000.');
+        toastr.error('Unzureichendes Guthaben. Mindestguthaben erforderlich: €1000.');
         return;
     }
     if (amount < 1000) {
-        toastr.error('Minimum withdrawal amount is €1000.');
+        toastr.error('Mindestabhebung: €1000.');
         return;
     }
     if (amount > available) {
-        toastr.error('Insufficient balance. Available: €' + available.toFixed(2));
+        toastr.error('Unzureichendes Guthaben. Verfügbar: €' + available.toFixed(2));
         return;
     }
 
     // Send request
     $submitBtn.prop('disabled', true)
-        .html('<i class="anticon anticon-loading anticon-spin"></i> Processing...');
+        .html('<i class="anticon anticon-loading anticon-spin"></i> Verarbeitung...');
 
     $.ajax({
         url: 'ajax/process-withdrawal.php',
@@ -196,19 +196,19 @@ $('#withdrawalForm').submit(function (e) {
         dataType: 'json',
         success: function (response) {
             if (response.success) {
-                toastr.success(response.message || 'Withdrawal request submitted successfully');
+                toastr.success(response.message || 'Abhebungsantrag erfolgreich eingereicht');
                 $('#newWithdrawalModal').modal('hide');
                 $form[0].reset();
                 resetOtpFields();
                 setTimeout(() => location.reload(), 1200);
             } else {
-                toastr.error(response.message || 'Error processing withdrawal');
+                toastr.error(response.message || 'Fehler bei der Abhebung');
                 if (response.message && response.message.includes('OTP')) resetOtpFields();
             }
         },
         error: function (xhr, status, error) {
             console.error('Withdrawal error:', xhr.status, xhr.responseText);
-            let errorMsg = 'Server communication error: ' + error;
+            let errorMsg = 'Fehler bei der Serverkommunikation: ' + error;
             
             // Try to parse error response
             try {
@@ -219,18 +219,18 @@ $('#withdrawalForm').submit(function (e) {
             } catch (e) {
                 // If response isn't JSON, use status text
                 if (xhr.status === 400) {
-                    errorMsg = 'Bad Request - Please check your input fields';
+                    errorMsg = 'Ungültige Anfrage - Bitte überprüfen Sie Ihre Eingabefelder';
                 } else if (xhr.status === 403) {
-                    errorMsg = 'Security error - Please refresh the page';
+                    errorMsg = 'Sicherheitsfehler - Bitte laden Sie die Seite neu';
                 } else if (xhr.status === 401) {
-                    errorMsg = 'Session expired - Please login again';
+                    errorMsg = 'Sitzung abgelaufen - Bitte melden Sie sich erneut an';
                 }
             }
             
             toastr.error(errorMsg);
         },
         complete: function () {
-            $submitBtn.prop('disabled', false).html('Submit Request');
+            $submitBtn.prop('disabled', false).html('Antrag einreichen');
         }
     });
 });
@@ -247,7 +247,7 @@ $('#withdrawalMethod').change(function () {
     // Auto-fill payment details textarea with user's verified address/account
     if (details) {
         $('textarea[name="payment_details"]').val(details);
-        toastr.success('Payment details auto-filled with your verified ' + (type === 'crypto' ? 'address' : 'account'));
+        toastr.success('Zahlungsdetails automatisch ausgefüllt mit Ihrer verifizierten ' + (type === 'crypto' ? 'Adresse' : 'Kontonummer'));
     } else {
         $('textarea[name="payment_details"]').val('');
     }
@@ -271,7 +271,7 @@ $('#amount').on('input', function () {
         $(this).closest('.form-group').append(`
             <div id="insufficientFundsWarning" class="alert alert-danger mt-2 p-2 mb-0">
                 <i class="anticon anticon-warning"></i>
-                You need at least €1000 available to withdraw. Current balance: €${available.toFixed(2)}
+                Sie benötigen mindestens €1000 verfügbar zum Abheben. Aktuelles Guthaben: €${available.toFixed(2)}
             </div>
         `);
         $('#sendVerifyOtpBtn, #withdrawalSubmitBtn').prop('disabled', true);
@@ -283,7 +283,7 @@ $('#amount').on('input', function () {
         $(this).closest('.form-group').append(`
             <div id="insufficientFundsWarning" class="alert alert-danger mt-2 p-2 mb-0">
                 <i class="anticon anticon-warning"></i>
-                Insufficient balance: available €${available.toFixed(2)}
+                Unzureichendes Guthaben: verfügbar €${available.toFixed(2)}
             </div>
         `);
         $('#sendVerifyOtpBtn, #withdrawalSubmitBtn').prop('disabled', true);
@@ -295,7 +295,7 @@ $('#amount').on('input', function () {
         $(this).closest('.form-group').append(`
             <div id="insufficientFundsWarning" class="alert alert-warning mt-2 p-2 mb-0">
                 <i class="anticon anticon-info-circle"></i>
-                Minimum withdrawal amount is €1000.
+                Mindestabhebung: €1000.
             </div>
         `);
         $('#sendVerifyOtpBtn, #withdrawalSubmitBtn').prop('disabled', true);
@@ -319,7 +319,7 @@ $('#sendVerifyOtpBtn').click(function () {
     
     // Step 1: Send OTP if not sent yet
     if (!otpSent) {
-        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Sending OTP...');
+        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> OTP wird gesendet...');
         $.ajax({
             url: 'ajax/otp-handler.php',
             method: 'POST',
@@ -330,20 +330,20 @@ $('#sendVerifyOtpBtn').click(function () {
             dataType: 'json',
             success: function (r) {
                 if (r.success) {
-                    toastr.success(r.message || 'OTP sent to your email');
+                    toastr.success(r.message || 'OTP erfolgreich gesendet');
                     $otpInput.prop('disabled', false).focus();
                     otpSent = true;
-                    $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> Verify OTP');
-                    $('#otpInfoText').html('<i class="anticon anticon-clock-circle"></i> OTP sent! Enter the code and click "Verify OTP" button.');
+                    $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> OTP verifizieren');
+                    $('#otpInfoText').html('<i class="anticon anticon-clock-circle"></i> OTP gesendet! Geben Sie den Code ein und klicken Sie auf "OTP verifizieren".');
                 } else {
-                    toastr.error(r.message || 'Failed to send OTP');
-                    $btn.prop('disabled', false).html('<i class="anticon anticon-mail"></i> Send & Verify OTP');
+                    toastr.error(r.message || 'OTP konnte nicht gesendet werden');
+                    $btn.prop('disabled', false).html('<i class="anticon anticon-mail"></i> OTP senden & verifizieren');
                 }
             },
             error: function (xhr, status, error) {
                 console.error('OTP send error:', xhr.status, xhr.responseText);
-                toastr.error('Failed to send OTP. Please try again.');
-                $btn.prop('disabled', false).html('<i class="anticon anticon-mail"></i> Send & Verify OTP');
+                toastr.error('OTP konnte nicht gesendet werden. Bitte versuchen Sie es erneut.');
+                $btn.prop('disabled', false).html('<i class="anticon anticon-mail"></i> OTP senden & verifizieren');
             }
         });
     } 
@@ -351,11 +351,11 @@ $('#sendVerifyOtpBtn').click(function () {
     else {
         const code = $otpInput.val().trim();
         if (!code || code.length !== 6) {
-            toastr.error('Please enter the 6-digit OTP code.');
+            toastr.error('Bitte geben Sie den 6-stelligen OTP-Code ein.');
             return;
         }
         
-        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Verifying...');
+        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Überprüfung...');
         $.ajax({
             url: 'ajax/otp-handler.php',
             method: 'POST',
@@ -367,20 +367,20 @@ $('#sendVerifyOtpBtn').click(function () {
             dataType: 'json',
             success: function (r) {
                 if (r.success) {
-                    toastr.success(r.message || 'OTP verified successfully');
+                    toastr.success(r.message || 'OTP erfolgreich verifiziert');
                     $('#withdrawalSubmitBtn').prop('disabled', false);
                     $otpInput.prop('disabled', true);
-                    $btn.prop('disabled', true).html('<i class="anticon anticon-check"></i> Verified').removeClass('btn-primary').addClass('btn-success');
-                    $('#otpInfoText').html('<i class="anticon anticon-check-circle text-success"></i> Email verified! You can now submit your withdrawal request.');
+                    $btn.prop('disabled', true).html('<i class="anticon anticon-check"></i> Verifiziert').removeClass('btn-primary').addClass('btn-success');
+                    $('#otpInfoText').html('<i class="anticon anticon-check-circle text-success"></i> E-Mail verifiziert! Sie können jetzt Ihren Abhebungsantrag einreichen.');
                 } else {
-                    toastr.error(r.message || 'Invalid OTP code');
-                    $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> Verify OTP');
+                    toastr.error(r.message || 'Ungültiger OTP-Code');
+                    $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> OTP verifizieren');
                 }
             },
             error: function (xhr, status, error) {
                 console.error('OTP verify error:', xhr.status, xhr.responseText);
-                toastr.error('OTP verification failed. Please try again.');
-                $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> Verify OTP');
+                toastr.error('OTP-Verifizierung fehlgeschlagen. Bitte versuchen Sie es erneut.');
+                $btn.prop('disabled', false).html('<i class="anticon anticon-check-circle"></i> OTP verifizieren');
             }
         });
     }
@@ -396,16 +396,16 @@ $('#newWithdrawalModal').on('hidden.bs.modal', function () {
 
 function resetOtpFields() {
     $('#otpCode').val('').prop('disabled', true);
-    $('#sendVerifyOtpBtn').prop('disabled', false).html('<i class="anticon anticon-mail"></i> Send & Verify OTP').removeClass('btn-success').addClass('btn-primary');
+    $('#sendVerifyOtpBtn').prop('disabled', false).html('<i class="anticon anticon-mail"></i> OTP senden & verifizieren').removeClass('btn-success').addClass('btn-primary');
     $('#withdrawalSubmitBtn').prop('disabled', true);
-    $('#otpInfoText').html('<i class="anticon anticon-info-circle"></i> OTP is valid for 5 minutes. Click button to send code to your email.');
+    $('#otpInfoText').html('<i class="anticon anticon-info-circle"></i> OTP ist 5 Minuten gültig. Klicken Sie auf den Button, um den Code an Ihre E-Mail zu senden.');
     otpSent = false;
 }
 
     // Refresh algorithm
     $('#refresh-algorithm').click(function() {
         var $btn = $(this);
-        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Refreshing...');
+        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Aktualisierung...');
         
         setTimeout(function() {
             $.ajax({
@@ -419,19 +419,19 @@ function resetOtpFields() {
                                 $('.algorithm-progress .progress-bar').css('width', data.recoveryPercentage + '%');
                                 $('.count[data-value="<?= htmlspecialchars($recoveryPercentage, ENT_QUOTES) ?>"]').text(data.recoveryPercentage + '%');
                             }
-                            toastr.success('Status refreshed successfully');
+                            toastr.success('Status erfolgreich aktualisiert');
                         } else {
-                            toastr.error(data.message || 'Error refreshing status');
+                            toastr.error(data.message || 'Fehler beim Aktualisieren des Status');
                         }
                     } catch (e) {
-                        toastr.error('Error parsing server response');
+                        toastr.error('Fehler beim Parsen der Serverantwort');
                     }
                 },
                 error: function(xhr, status, error) {
-                    toastr.error('Error communicating with server: ' + error);
+                    toastr.error('Fehler bei der Serverkommunikation: ' + error);
                 },
                 complete: function() {
-                    $btn.prop('disabled', false).html('<i class="anticon anticon-sync"></i> Refresh Status');
+                    $btn.prop('disabled', false).html('<i class="anticon anticon-sync"></i> Status aktualisieren');
                 }
             });
         }, 400);
@@ -495,16 +495,16 @@ function resetOtpFields() {
         let colorClass, label;
         switch (score) {
             case 0:
-            case 1: colorClass = 'bg-danger'; label = 'Weak'; break;
-            case 2: colorClass = 'bg-warning'; label = 'Fair'; break;
-            case 3: colorClass = 'bg-info'; label = 'Good'; break;
-            case 4: colorClass = 'bg-success'; label = 'Strong'; break;
+            case 1: colorClass = 'bg-danger'; label = 'Schwach'; break;
+            case 2: colorClass = 'bg-warning'; label = 'Ausreichend'; break;
+            case 3: colorClass = 'bg-info'; label = 'Gut'; break;
+            case 4: colorClass = 'bg-success'; label = 'Stark'; break;
         }
 
         $bar.removeClass('bg-danger bg-warning bg-info bg-success')
             .addClass(colorClass)
             .css('width', width + '%');
-        $text.text('Strength: ' + label);
+        $text.text('Stärke: ' + label);
 
         $('#confirmPassword').trigger('input');
     });
@@ -515,14 +515,14 @@ function resetOtpFields() {
         const $match = $('#passwordMatchText');
 
         if (!confirm) {
-            $match.text('Waiting for input...').removeClass('text-success text-danger').addClass('text-muted');
+            $match.text('Warte auf Eingabe...').removeClass('text-success text-danger').addClass('text-muted');
             return;
         }
 
         if (confirm === newPass) {
-            $match.text('Passwords match ✅').removeClass('text-danger text-muted').addClass('text-success');
+            $match.text('Passwörter stimmen überein ✅').removeClass('text-danger text-muted').addClass('text-success');
         } else {
-            $match.text('Passwords do not match ❌').removeClass('text-success text-muted').addClass('text-danger');
+            $match.text('Passwörter stimmen nicht überein ❌').removeClass('text-success text-muted').addClass('text-danger');
         }
     });
 
@@ -532,16 +532,16 @@ function resetOtpFields() {
         const confirmPassword = $('#confirmPassword').val();
 
         if (!currentPassword || !newPassword || !confirmPassword) {
-            toastr.error('All fields are required');
+            toastr.error('Alle Felder sind erforderlich');
             return;
         }
         if (newPassword !== confirmPassword) {
-            toastr.error('New passwords do not match');
+            toastr.error('Neue Passwörter stimmen nicht überein');
             return;
         }
 
         const $btn = $(this);
-        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Processing...');
+        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin"></i> Verarbeitung...');
 
         $.ajax({
             url: 'change_password.php',
@@ -556,18 +556,18 @@ function resetOtpFields() {
             },
             success: function(data) {
                 if (data.success) {
-                    toastr.success(data.message || 'Password changed successfully');
+                    toastr.success(data.message || 'Passwort erfolgreich geändert');
                     $('#passwordChangeModal').modal('hide');
                     $('.modal-backdrop').remove();
                     setTimeout(function(){ location.reload(); }, 800);
                 } else {
-                    toastr.error(data.message || 'Error changing password');
+                    toastr.error(data.message || 'Fehler beim Ändern des Passworts');
                 }
-                $btn.prop('disabled', false).html('<i class="anticon anticon-save"></i> Change Password');
+                $btn.prop('disabled', false).html('<i class="anticon anticon-save"></i> Passwort ändern');
             },
             error: function(xhr, status, error) {
-                toastr.error('Server error: ' + error);
-                $btn.prop('disabled', false).html('<i class="anticon anticon-save"></i> Change Password');
+                toastr.error('Serverfehler: ' + error);
+                $btn.prop('disabled', false).html('<i class="anticon anticon-save"></i> Passwort ändern');
             }
         });
     });
@@ -597,9 +597,9 @@ function resetOtpFields() {
         $modalBody.html(`
             <div class="text-center py-5">
                 <div class="spinner-border text-primary" role="status">
-                    <span class="sr-only">Loading...</span>
+                    <span class="sr-only">Lädt...</span>
                 </div>
-                <p class="mt-3 text-muted">Loading case details...</p>
+                <p class="mt-3 text-muted">Lade Falldetails...</p>
             </div>
         `);
         
@@ -652,20 +652,20 @@ function resetOtpFields() {
                                 <div class="card border-0 mb-4" style="background: linear-gradient(135deg, rgba(41, 80, 168, 0.05), rgba(45, 169, 227, 0.05));">
                                     <div class="card-body">
                                         <h5 class="mb-3" style="color: #2c3e50; font-weight: 600;">
-                                            <i class="anticon anticon-dollar mr-2" style="color: var(--brand);"></i>Financial Overview
+                                            <i class="anticon anticon-dollar mr-2" style="color: var(--brand);"></i>Finanzübersicht
                                         </h5>
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
-                                                <div class="text-muted mb-1" style="font-size: 13px;">Reported Amount</div>
-                                                <h4 class="mb-0 font-weight-bold text-danger">$${parseFloat(c.reported_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h4>
+                                                <div class="text-muted mb-1" style="font-size: 13px;">Gemeldeter Betrag</div>
+                                                <h4 class="mb-0 font-weight-bold text-danger">€${parseFloat(c.reported_amount || 0).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h4>
                                             </div>
                                             <div class="col-md-6 mb-3">
-                                                <div class="text-muted mb-1" style="font-size: 13px;">Recovered Amount</div>
-                                                <h3 class="mb-2 font-weight-bold" style="color: #2c3e50;">$${parseFloat(c.recovered_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
+                                                <div class="text-muted mb-1" style="font-size: 13px;">Wiedererlangter Betrag</div>
+                                                <h3 class="mb-2 font-weight-bold" style="color: #2c3e50;">€${parseFloat(c.recovered_amount || 0).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</h3>
                                                 <div class="progress mb-2" style="height: 8px; border-radius: 10px; background: #e9ecef;">
                                                     <div class="progress-bar" style="width: ${progress}%; background: linear-gradient(90deg, #2950a8 0%, #2da9e3 100%);"></div>
                                                 </div>
-                                                <small class="text-muted">${progress}% of $${parseFloat(c.reported_amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</small>
+                                                <small class="text-muted">${progress}% von €${parseFloat(c.reported_amount || 0).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</small>
                                             </div>
                                         </div>
                                     </div>
@@ -677,10 +677,10 @@ function resetOtpFields() {
                                         <div class="card border-0 h-100">
                                             <div class="card-body">
                                                 <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
-                                                    <i class="anticon anticon-global mr-2" style="color: var(--brand);"></i>Platform Information
+                                                    <i class="anticon anticon-global mr-2" style="color: var(--brand);"></i>Plattforminformationen
                                                 </h6>
-                                                <p class="mb-2"><strong>Platform:</strong> ${c.platform_name || 'N/A'}</p>
-                                                <p class="mb-0"><strong>Created:</strong> ${c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : 'N/A'}</p>
+                                                <p class="mb-2"><strong>Plattform:</strong> ${c.platform_name || 'N/A'}</p>
+                                                <p class="mb-0"><strong>Erstellt:</strong> ${c.created_at ? new Date(c.created_at).toLocaleDateString('de-DE', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : 'N/A'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -688,10 +688,10 @@ function resetOtpFields() {
                                         <div class="card border-0 h-100">
                                             <div class="card-body">
                                                 <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
-                                                    <i class="anticon anticon-clock-circle mr-2" style="color: var(--brand);"></i>Timeline
+                                                    <i class="anticon anticon-clock-circle mr-2" style="color: var(--brand);"></i>Zeitlinie
                                                 </h6>
-                                                <p class="mb-2"><strong>Last Updated:</strong> ${c.updated_at ? new Date(c.updated_at).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : 'N/A'}</p>
-                                                <p class="mb-0"><strong>Days Active:</strong> ${c.created_at ? Math.floor((new Date() - new Date(c.created_at)) / (1000 * 60 * 60 * 24)) : 0} days</p>
+                                                <p class="mb-2"><strong>Zuletzt aktualisiert:</strong> ${c.updated_at ? new Date(c.updated_at).toLocaleDateString('de-DE', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : 'N/A'}</p>
+                                                <p class="mb-0"><strong>Aktive Tage:</strong> ${c.created_at ? Math.floor((new Date() - new Date(c.created_at)) / (1000 * 60 * 60 * 24)) : 0} Tage</p>
                                             </div>
                                         </div>
                                     </div>
@@ -702,7 +702,7 @@ function resetOtpFields() {
                                 <div class="card border-0 mb-4">
                                     <div class="card-body">
                                         <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
-                                            <i class="anticon anticon-file-text mr-2" style="color: var(--brand);"></i>Case Description
+                                            <i class="anticon anticon-file-text mr-2" style="color: var(--brand);"></i>Fallbeschreibung
                                         </h6>
                                         <p class="mb-0" style="line-height: 1.6;">${c.description}</p>
                                     </div>
@@ -714,24 +714,24 @@ function resetOtpFields() {
                                 <div class="card border-0 mb-4">
                                     <div class="card-body">
                                         <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
-                                            <i class="anticon anticon-transaction mr-2" style="color: var(--brand);"></i>Recovery Transactions
+                                            <i class="anticon anticon-transaction mr-2" style="color: var(--brand);"></i>Wiedererlangungstransaktionen
                                         </h6>
                                         <div class="table-responsive">
                                             <table class="table table-sm table-hover mb-0">
                                                 <thead style="background: rgba(41, 80, 168, 0.05);">
                                                     <tr>
-                                                        <th>Date</th>
-                                                        <th>Amount</th>
-                                                        <th>Method</th>
-                                                        <th>Reference</th>
-                                                        <th>Processed By</th>
+                                                        <th>Datum</th>
+                                                        <th>Betrag</th>
+                                                        <th>Methode</th>
+                                                        <th>Referenz</th>
+                                                        <th>Bearbeitet von</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     ${data.recoveries.map(r => `
                                                         <tr>
-                                                            <td>${r.transaction_date ? new Date(r.transaction_date).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'}) : 'N/A'}</td>
-                                                            <td><strong class="text-success">$${parseFloat(r.amount || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
+                                                            <td>${r.transaction_date ? new Date(r.transaction_date).toLocaleDateString('de-DE', {year: 'numeric', month: 'short', day: 'numeric'}) : 'N/A'}</td>
+                                                            <td><strong class="text-success">€${parseFloat(r.amount || 0).toLocaleString('de-DE', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></td>
                                                             <td>${r.method || 'N/A'}</td>
                                                             <td><small class="text-muted">${r.transaction_reference || 'N/A'}</small></td>
                                                             <td>${r.admin_first_name && r.admin_last_name ? `${r.admin_first_name} ${r.admin_last_name}` : 'System'}</td>
@@ -749,7 +749,7 @@ function resetOtpFields() {
                                 <div class="card border-0 mb-4">
                                     <div class="card-body">
                                         <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
-                                            <i class="anticon anticon-paper-clip mr-2" style="color: var(--brand);"></i>Case Documents
+                                            <i class="anticon anticon-paper-clip mr-2" style="color: var(--brand);"></i>Falldokumente
                                         </h6>
                                         <div class="list-group">
                                             ${data.documents.map(d => `
@@ -757,10 +757,10 @@ function resetOtpFields() {
                                                     <div class="d-flex justify-content-between align-items-center">
                                                         <div>
                                                             <i class="anticon anticon-file mr-2" style="color: var(--brand);"></i>
-                                                            <strong>${d.document_type || 'Document'}</strong>
-                                                            ${d.verified ? '<span class="badge badge-success badge-sm ml-2"><i class="anticon anticon-check"></i> Verified</span>' : ''}
+                                                            <strong>${d.document_type || 'Dokument'}</strong>
+                                                            ${d.verified ? '<span class="badge badge-success badge-sm ml-2"><i class="anticon anticon-check"></i> Verifiziert</span>' : ''}
                                                         </div>
-                                                        <small class="text-muted">${d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'}) : ''}</small>
+                                                        <small class="text-muted">${d.uploaded_at ? new Date(d.uploaded_at).toLocaleDateString('de-DE', {year: 'numeric', month: 'short', day: 'numeric'}) : ''}</small>
                                                     </div>
                                                 </div>
                                             `).join('')}
@@ -774,7 +774,7 @@ function resetOtpFields() {
                                 <div class="card border-0 mb-4">
                                     <div class="card-body">
                                         <h6 class="mb-3" style="color: #2c3e50; font-weight: 600;">
-                                            <i class="anticon anticon-history mr-2" style="color: var(--brand);"></i>Status History
+                                            <i class="anticon anticon-history mr-2" style="color: var(--brand);"></i>Statusverlauf
                                         </h6>
                                         <div class="timeline">
                                             ${data.history.map((h, idx) => `
@@ -782,11 +782,11 @@ function resetOtpFields() {
                                                     <div class="timeline-marker ${idx === 0 ? 'bg-primary' : 'bg-secondary'}"></div>
                                                     <div class="timeline-content">
                                                         <div class="d-flex justify-content-between align-items-start mb-1">
-                                                            <strong>${h.new_status ? h.new_status.replace(/_/g, ' ').toUpperCase() : 'Status Change'}</strong>
-                                                            <small class="text-muted">${h.created_at ? new Date(h.created_at).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : ''}</small>
+                                                            <strong>${h.new_status ? h.new_status.replace(/_/g, ' ').toUpperCase() : 'Statusänderung'}</strong>
+                                                            <small class="text-muted">${h.created_at ? new Date(h.created_at).toLocaleDateString('de-DE', {year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : ''}</small>
                                                         </div>
                                                         ${h.comments ? `<p class="mb-1 text-muted small">${h.comments}</p>` : ''}
-                                                        ${h.first_name && h.last_name ? `<small class="text-muted">By: ${h.first_name} ${h.last_name}</small>` : ''}
+                                                        ${h.first_name && h.last_name ? `<small class="text-muted">Von: ${h.first_name} ${h.last_name}</small>` : ''}
                                                     </div>
                                                 </div>
                                             `).join('')}
@@ -798,7 +798,7 @@ function resetOtpFields() {
                                 <!-- Actions -->
                                 <div class="text-center mt-4">
                                     <a href="cases.php" class="btn btn-primary">
-                                        <i class="anticon anticon-folder-open mr-1"></i>View All Cases
+                                        <i class="anticon anticon-folder-open mr-1"></i>Alle Fälle anzeigen
                                     </a>
                                 </div>
                             </div>
@@ -812,14 +812,14 @@ function resetOtpFields() {
                             $modalBody.html(html);
                         }
                         if ($modalLabel.length) {
-                            $modalLabel.html(`<i class="anticon anticon-file-text mr-2"></i>Case #${c.case_number || 'Details'}`);
+                            $modalLabel.html(`<i class="anticon anticon-file-text mr-2"></i>Fall #${c.case_number || 'Details'}`);
                         }
                     } else {
                         const $modalBody = $('#caseModalBody');
                         if ($modalBody.length) {
                             $modalBody.html(`
                                 <div class="alert alert-danger">
-                                    <i class="anticon anticon-close-circle mr-2"></i>${data.message || 'Unable to load case details'}
+                                    <i class="anticon anticon-close-circle mr-2"></i>${data.message || 'Falldaten konnten nicht geladen werden'}
                                 </div>
                             `);
                         }
@@ -829,7 +829,7 @@ function resetOtpFields() {
                     if ($modalBody.length) {
                         $modalBody.html(`
                             <div class="alert alert-danger">
-                                <i class="anticon anticon-close-circle mr-2"></i>Error parsing case data
+                                <i class="anticon anticon-close-circle mr-2"></i>Fehler beim Parsen der Falldaten
                             </div>
                         `);
                     }
@@ -841,7 +841,7 @@ function resetOtpFields() {
                 if ($modalBody.length) {
                     $modalBody.html(`
                         <div class="alert alert-danger">
-                            <i class="anticon anticon-close-circle mr-2"></i>Error loading case details: ${error}
+                            <i class="anticon anticon-close-circle mr-2"></i>Fehler beim Laden der Falldaten: ${error}
                         </div>
                     `);
                 }
@@ -869,7 +869,7 @@ function resetOtpFields() {
             
             // Format based on whether it's a decimal or integer
             if (element.classList.contains('money')) {
-                element.textContent = '$' + current.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                element.textContent = '€' + current.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             } else if (element.classList.contains('percent')) {
                 element.textContent = current.toFixed(1) + '%';
             } else {
@@ -948,7 +948,7 @@ function resetOtpFields() {
         const originalBtnText = $btn.html();
         
         // Disable button and show loading
-        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin mr-1"></i>Sending...');
+        $btn.prop('disabled', true).html('<i class="anticon anticon-loading anticon-spin mr-1"></i>Wird gesendet...');
         $statusDiv.empty();
         
         $.ajax({
@@ -966,7 +966,7 @@ function resetOtpFields() {
                     // Set cooldown for 60 seconds
                     emailVerificationCooldown = true;
                     let countdown = 60;
-                    $btn.html(`<i class="anticon anticon-clock-circle mr-1"></i>Resend in ${countdown}s`);
+                    $btn.html(`<i class="anticon anticon-clock-circle mr-1"></i>Erneut senden in ${countdown}s`);
                     
                     const countdownInterval = setInterval(() => {
                         countdown--;
@@ -975,7 +975,7 @@ function resetOtpFields() {
                             emailVerificationCooldown = false;
                             $btn.prop('disabled', false).html(originalBtnText);
                         } else {
-                            $btn.html(`<i class="anticon anticon-clock-circle mr-1"></i>Resend in ${countdown}s`);
+                            $btn.html(`<i class="anticon anticon-clock-circle mr-1"></i>Erneut senden in ${countdown}s`);
                         }
                     }, 1000);
                 } else {
@@ -990,7 +990,7 @@ function resetOtpFields() {
             error: function(xhr, status, error) {
                 $statusDiv.html(`
                     <div class="alert alert-danger alert-sm border-0 mt-2" style="font-size: 13px;">
-                        <i class="anticon anticon-close-circle mr-1"></i>Error sending email. Please try again later.
+                        <i class="anticon anticon-close-circle mr-1"></i>Fehler beim Senden der E-Mail. Bitte versuchen Sie es später erneut.
                     </div>
                 `);
                 $btn.prop('disabled', false).html(originalBtnText);
@@ -1008,7 +1008,7 @@ function checkWithdrawalEligibility(event) {
     // Check KYC status (escaped for security)
     const kycStatus = <?php echo json_encode($kyc_status); ?>;
     if (kycStatus !== 'verified' && kycStatus !== 'approved') {
-        toastr.warning('Please verify your KYC Identification before making withdrawals.', 'KYC Verification Required', {
+        toastr.warning('Bitte verifizieren Sie Ihre KYC-Identifikation bevor Sie Abhebungen vornehmen.', 'KYC-Verifizierung erforderlich', {
             timeOut: 5000,
             closeButton: true,
             progressBar: true,
@@ -1022,7 +1022,7 @@ function checkWithdrawalEligibility(event) {
     // Check for verified payment method
     const hasVerifiedPayment = <?php echo json_encode($hasVerifiedPaymentMethod ?? false); ?>;
     if (!hasVerifiedPayment) {
-        toastr.warning('Please add and verify at least one cryptocurrency wallet before making withdrawals.', 'Payment Method Verification Required', {
+        toastr.warning('Bitte fügen Sie mindestens eine verifizierte Kryptowährungs-Wallet hinzu, bevor Sie Abhebungen vornehmen.', 'Zahlungsmethoden-Verifizierung erforderlich', {
             timeOut: 5000,
             closeButton: true,
             progressBar: true,
