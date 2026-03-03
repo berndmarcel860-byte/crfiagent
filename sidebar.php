@@ -20,7 +20,7 @@
                         <span class="icon-holder">
                             <i class="anticon anticon-folder-open"></i>
                         </span>
-                        <span class="title">My Cases</span>
+                        <span class="title">Meine Fälle</span>
                     </a>
                 </li>
 
@@ -30,7 +30,7 @@
                         <span class="icon-holder">
                             <i class="anticon anticon-wallet"></i>
                         </span>
-                        <span class="title">Transactions</span>
+                        <span class="title">Transaktionen</span>
                     </a>
                 </li>
 
@@ -62,7 +62,7 @@
                         <span class="icon-holder">
                             <i class="anticon anticon-credit-card"></i>
                         </span>
-                        <span class="title">Payment Methods</span>
+                        <span class="title">Zahlungsmethoden</span>
                     </a>
                 </li>
 
@@ -72,7 +72,7 @@
                         <span class="icon-holder">
                             <i class="anticon anticon-safety-certificate"></i>
                         </span>
-                        <span class="title">KYC Verification</span>
+                        <span class="title">KYC-Verifizierung</span>
                         <?php 
                         $stmt = $pdo->prepare("SELECT status FROM kyc_verification_requests WHERE user_id = ? ORDER BY created_at DESC LIMIT 1");
                         $stmt->execute([$_SESSION['user_id']]);
@@ -98,19 +98,19 @@
                         <li>
                             <a href="profile.php" title="View and Edit Profile">
                                 <i class="anticon anticon-user m-r-10"></i>
-                                My Profile
+                                Mein Profil
                             </a>
                         </li>
                         <li>
                             <a href="settings.php" title="Account Settings">
                                 <i class="anticon anticon-setting m-r-10"></i>
-                                Settings
+                                Einstellungen
                             </a>
                         </li>
                         <li>
                             <a href="logout.php" title="Sign Out">
                                 <i class="anticon anticon-logout m-r-10"></i>
-                                Logout
+                                Abmelden
                             </a>
                         </li>
                     </ul>

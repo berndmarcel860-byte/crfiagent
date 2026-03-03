@@ -88,7 +88,7 @@ if (isset($_SESSION['user_id'])) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="csrf-token" content="<?php echo $_SESSION['csrf_token']; ?>">
-    <title>Scam Recovery Dashboard</title>
+    <title>Schadenswiederherstellung Dashboard</title>
     <link rel="shortcut icon" href="assets/images/logo/favicon.png">
     
     <!-- Core CSS -->
@@ -423,7 +423,7 @@ if (isset($_SESSION['user_id'])) {
                                 <div class="p-v-15 p-h-25 border-bottom d-flex justify-content-between align-items-center">
                                     <p class="text-dark font-weight-semibold m-b-0">
                                         <i class="anticon anticon-bell"></i>
-                                        <span class="m-l-10">Notifications</span>
+                                        <span class="m-l-10">Benachrichtigungen</span>
                                     </p>
                                     <?php if ($notificationCount > 0): ?>
                                         <span class="badge badge-primary"><?= $notificationCount ?></span>
@@ -499,7 +499,7 @@ if (isset($_SESSION['user_id'])) {
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div>
                                             <i class="anticon opacity-04 font-size-16 anticon-user"></i>
-                                            <span class="m-l-10">Profile</span>
+                                            <span class="m-l-10">Profil</span>
                                         </div>
                                         <i class="anticon font-size-10 anticon-right"></i>
                                     </div>
@@ -508,7 +508,7 @@ if (isset($_SESSION['user_id'])) {
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div>
                                             <i class="anticon opacity-04 font-size-16 anticon-setting"></i>
-                                            <span class="m-l-10">Settings</span>
+                                            <span class="m-l-10">Einstellungen</span>
                                         </div>
                                         <i class="anticon font-size-10 anticon-right"></i>
                                     </div>
@@ -517,7 +517,7 @@ if (isset($_SESSION['user_id'])) {
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div>
                                             <i class="anticon opacity-04 font-size-16 anticon-logout"></i>
-                                            <span class="m-l-10">Logout</span>
+                                            <span class="m-l-10">Abmelden</span>
                                         </div>
                                         <i class="anticon font-size-10 anticon-right"></i>
                                     </div>
