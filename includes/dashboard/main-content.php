@@ -626,36 +626,10 @@
     </div>
 </div>
 
-<!-- Professional Case Details Modal -->
-<div class="modal fade" id="caseDetailsModal" tabindex="-1" role="dialog" aria-labelledby="caseDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
-            <div class="modal-header border-0" style="background: linear-gradient(135deg, #2950a8 0%, #2da9e3 100%); color: #fff; border-radius: 12px 12px 0 0;">
-                <h5 class="modal-title font-weight-bold" id="caseDetailsModalLabel">
-                    <i class="anticon anticon-file-text mr-2"></i>Case Details
-                </h5>
-                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body p-4" id="caseModalBody">
-                <div class="text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <p class="mt-3 text-muted">Loading case details...</p>
-                </div>
-            </div>
-            <div class="modal-footer border-0 bg-light" style="border-radius: 0 0 12px 12px;">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                    <i class="anticon anticon-close mr-1"></i>Close
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <?php
+// Note: Case Details Modal is defined in includes/dashboard/modals.php
+// to maintain proper separation of concerns and avoid duplicate IDs
+?><?php
 // include footer safely
 if (file_exists(__DIR__ . '/footer.php')) {
     include __DIR__ . '/footer.php';
