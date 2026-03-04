@@ -855,6 +855,16 @@ function dismissAlert(button) {
 </section>
 
 <style>
+/* Ensure stats section is always visible */
+#stats {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+#stats * {
+  color: white !important; /* Force all text to be white */
+}
+
 .stat-card {
   background: rgba(255,255,255,0.1);
   border-radius: 16px;
@@ -862,7 +872,13 @@ function dismissAlert(button) {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.2);
   transition: all 0.3s ease;
-  color: white; /* Ensure text is visible */
+  color: white !important; /* Ensure text is visible */
+}
+.stat-card h2, .stat-card p, .stat-card span {
+  color: white !important; /* Force white text on all elements */
+}
+.stat-card .stat-icon i {
+  color: white !important;
 }
 .stat-card:hover {
   background: rgba(255,255,255,0.15);
