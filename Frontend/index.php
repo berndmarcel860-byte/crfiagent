@@ -111,11 +111,121 @@ include 'includes/navbar.php';
         font-size: 0.95rem;
         margin-bottom: 0;
     }
+
+    /* ========== ANIMATED VISUAL ENHANCEMENTS ========== */
+    
+    /* Particle canvas background */
+    #particles-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        pointer-events: none;
+    }
+    
+    /* Floating crypto icons */
+    .crypto-float {
+        position: absolute;
+        font-size: 2.5rem;
+        opacity: 0.15;
+        animation: float 20s infinite ease-in-out;
+        z-index: 2;
+        pointer-events: none;
+        filter: drop-shadow(0 0 10px currentColor);
+    }
+    .crypto-float:nth-child(2) { animation: float-slow 25s infinite ease-in-out; animation-delay: -5s; }
+    .crypto-float:nth-child(3) { animation: float 18s infinite ease-in-out; animation-delay: -10s; }
+    .crypto-float:nth-child(4) { animation: float-slow 22s infinite ease-in-out; animation-delay: -15s; }
+    
+    /* Floating animations */
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(20px, -30px) rotate(5deg); }
+        50% { transform: translate(-15px, -60px) rotate(-5deg); }
+        75% { transform: translate(30px, -40px) rotate(3deg); }
+    }
+    @keyframes float-slow {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(-25px, -35px) rotate(-5deg); }
+        50% { transform: translate(20px, -70px) rotate(5deg); }
+        75% { transform: translate(-30px, -45px) rotate(-3deg); }
+    }
+    
+    /* Pulse effect for statistics */
+    @keyframes pulse-subtle {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+    .stat-pulse {
+        animation: pulse-subtle 3s ease-in-out infinite;
+    }
+    
+    /* Shimmer effect */
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    .shimmer-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+    .shimmer-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 3s infinite;
+    }
+    
+    /* Fade in up animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-on-scroll {
+        opacity: 0;
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+    
+    /* Gradient shift animation */
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    .animated-gradient {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7, #37a0ff, #0d6efd);
+        background-size: 300% 300%;
+        animation: gradientShift 15s ease infinite;
+    }
 </style>
 
 <!-- Hero Section -->
-<header class="hero-section text-center">
-    <div class="container">
+<header class="hero-section text-center" style="position: relative; overflow: hidden;">
+    <!-- Animated Particle Background -->
+    <canvas id="particles-canvas"></canvas>
+    
+    <!-- Floating Crypto Icons -->
+    <div class="crypto-float" style="top: 10%; left: 5%; color: #f7931a;">₿</div>
+    <div class="crypto-float" style="top: 70%; left: 8%; color: #627eea;">Ξ</div>
+    <div class="crypto-float" style="top: 40%; right: 10%; color: #26a17b;">₮</div>
+    <div class="crypto-float" style="top: 15%; right: 5%; color: #f3ba2f;">B</div>
+    <div class="crypto-float" style="top: 60%; right: 15%; color: #0033ad;">₳</div>
+    <div class="crypto-float" style="top: 25%; left: 12%; color: #00ffa3;">◎</div>
+    <div class="crypto-float" style="top: 80%; right: 20%; color: #23292f;">✕</div>
+    <div class="crypto-float" style="top: 35%; left: 88%; color: #e6007a;">●</div>
+    
+    <div class="container" style="position: relative; z-index: 10;">
         <h1 class="display-4 fw-bold mb-4">Sichere Krypto-Wiederherstellung<br>
             <span class="text-primary">für rechtmäßige Eigentümer</span>
         </h1>
@@ -353,7 +463,7 @@ include 'includes/navbar.php';
 <!-- ========================================================= -->
 <!-- 📊 SECTION: ERFOLGE IN ZAHLEN (AI STATISTICS) -->
 <!-- ========================================================= -->
-<section id="statistics" class="section" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);">
+<section id="stats" class="section animated-gradient">
   <div class="container text-center text-white">
     <h2 class="section-title text-white mb-4">Unsere Erfolge in Zahlen</h2>
     <p class="section-subtitle text-white opacity-90 mb-5">
@@ -363,7 +473,7 @@ include 'includes/navbar.php';
     <div class="row g-4 mb-5">
       <!-- Clients -->
       <div class="col-md-6 col-lg-3">
-        <div class="stat-card">
+        <div class="stat-card stat-pulse shimmer-wrapper">
           <div class="stat-icon">
             <i class="fas fa-users"></i>
           </div>
@@ -375,7 +485,7 @@ include 'includes/navbar.php';
 
       <!-- Success Rate -->
       <div class="col-md-6 col-lg-3">
-        <div class="stat-card">
+        <div class="stat-card stat-pulse shimmer-wrapper">
           <div class="stat-icon">
             <i class="fas fa-chart-line"></i>
           </div>
@@ -387,7 +497,7 @@ include 'includes/navbar.php';
 
       <!-- Amount Recovered -->
       <div class="col-md-6 col-lg-3">
-        <div class="stat-card">
+        <div class="stat-card shimmer-wrapper">
           <div class="stat-icon">
             <i class="fas fa-euro-sign"></i>
           </div>
@@ -399,7 +509,7 @@ include 'includes/navbar.php';
 
       <!-- Processing Time -->
       <div class="col-md-6 col-lg-3">
-        <div class="stat-card">
+        <div class="stat-card shimmer-wrapper">
           <div class="stat-icon">
             <i class="fas fa-clock"></i>
           </div>
@@ -653,6 +763,15 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 .stat-card {
   padding: 40px 20px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+}
+.stat-card:hover {
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-5px);
 }
 .stat-icon {
   width: 80px;
@@ -665,6 +784,19 @@ document.addEventListener('DOMContentLoaded', function() {
   margin: 0 auto 20px;
   font-size: 32px;
   border: 2px solid rgba(255,255,255,0.3);
+}
+.badge-item {
+  text-align: center;
+  padding: 20px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.badge-item:hover {
+  transform: scale(1.05) rotate(2deg);
+  background: rgba(255,255,255,0.15);
 }
 .feature-icon-lg {
   width: 100px;
@@ -752,6 +884,151 @@ document.addEventListener('DOMContentLoaded', function() {
         <a href="https://novalnet-ai.de/app" class="btn btn-light btn-lg fw-bold px-5 py-3">Konto erstellen</a>
     </div>
 </section>
+
+<!-- JavaScript for Animations -->
+<script>
+// ========== Particle Network Animation ==========
+(function() {
+    const canvas = document.getElementById('particles-canvas');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+    
+    const particles = [];
+    const particleCount = 30;
+    const connectionDistance = 120;
+    
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 0.5;
+            this.vy = (Math.random() - 0.5) * 0.5;
+            this.radius = 2;
+        }
+        
+        update() {
+            this.x += this.vx;
+            this.y += this.vy;
+            
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+        }
+        
+        draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(13, 110, 253, 0.5)';
+            ctx.fill();
+        }
+    }
+    
+    // Create particles
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+    
+    // Animation loop
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Update and draw particles
+        particles.forEach(particle => {
+            particle.update();
+            particle.draw();
+        });
+        
+        // Draw connections
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                const dx = particles[i].x - particles[j].x;
+                const dy = particles[i].y - particles[j].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < connectionDistance) {
+                    ctx.beginPath();
+                    ctx.moveTo(particles[i].x, particles[i].y);
+                    ctx.lineTo(particles[j].x, particles[j].y);
+                    ctx.strokeStyle = `rgba(13, 110, 253, ${0.15 * (1 - distance / connectionDistance)})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            }
+        }
+        
+        requestAnimationFrame(animate);
+    }
+    
+    animate();
+    
+    // Resize handler
+    window.addEventListener('resize', () => {
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+    });
+})();
+
+// ========== Scroll-Based Animations ==========
+(function() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('animate-on-scroll');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    // Observe sections for animation
+    document.querySelectorAll('.section').forEach(section => {
+        observer.observe(section);
+    });
+})();
+
+// ========== Enhanced Statistics Counter ==========
+(function() {
+    const statsSection = document.querySelector('#stats');
+    if (!statsSection) return;
+    
+    let animated = false;
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting && !animated) {
+                animated = true;
+                
+                // Animate counters
+                const counters = [
+                    { el: document.querySelector('[data-count="727"]'), target: 727 },
+                    { el: document.querySelector('[data-count="87"]'), target: 87 },
+                    { el: document.querySelector('[data-count="47"]'), target: 47 },
+                    { el: document.querySelector('[data-count="14"]'), target: 14 }
+                ];
+                
+                counters.forEach(counter => {
+                    if (!counter.el) return;
+                    let current = 0;
+                    const increment = counter.target / 60;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= counter.target) {
+                            counter.el.textContent = counter.target;
+                            clearInterval(timer);
+                        } else {
+                            counter.el.textContent = Math.floor(current);
+                        }
+                    }, 33);
+                });
+                
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.3 });
+    
+    observer.observe(statsSection);
+})();
+</script>
 
 <!-- Footer -->
 <!-- ========================================================= -->
