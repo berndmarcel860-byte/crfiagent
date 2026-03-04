@@ -862,6 +862,7 @@ function dismissAlert(button) {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.2);
   transition: all 0.3s ease;
+  color: white; /* Ensure text is visible */
 }
 .stat-card:hover {
   background: rgba(255,255,255,0.15);
