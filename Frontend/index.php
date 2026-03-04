@@ -351,98 +351,339 @@ include 'includes/navbar.php';
 
 
 <!-- ========================================================= -->
-<!-- 💼 SECTION: PAKET-DIENSTLEISTUNGEN -->
+<!-- 📊 SECTION: ERFOLGE IN ZAHLEN (AI STATISTICS) -->
 <!-- ========================================================= -->
-<section id="packages" class="section bg-light">
-  <div class="container text-center">
-    <h2 class="section-title">Unsere Paket-Dienstleistungen</h2>
-    <p class="section-subtitle mb-5">
-      Wählen Sie das passende Wiederherstellungspaket für Ihren Fall – transparent, professionell und effizient.
+<section id="statistics" class="section" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);">
+  <div class="container text-center text-white">
+    <h2 class="section-title text-white mb-4">Unsere Erfolge in Zahlen</h2>
+    <p class="section-subtitle text-white opacity-90 mb-5">
+      Vertrauen durch nachweisbare Ergebnisse – KI-gestützte Wiederherstellung mit messbarem Erfolg
     </p>
 
-    <div class="row g-4">
-      <!-- BASIC -->
+    <div class="row g-4 mb-5">
+      <!-- Clients -->
       <div class="col-md-6 col-lg-3">
-        <div class="card h-100 shadow-sm border-0">
-          <div class="card-body">
-            <h5 class="fw-bold text-primary mb-2">Basic Recovery</h5>
-            <p class="text-muted small mb-3">Essential recovery services for small cases</p>
-            <h3 class="fw-bold mb-3">399 €</h3>
-            <ul class="list-unstyled text-start mb-4">
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Case assessment</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Basic document review</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Email support</li>
-            </ul>
-            <p class="small text-muted mb-1"><strong>Dauer:</strong> 4–6 Wochen</p>
-            <p class="small text-muted mb-3"><strong>Support:</strong> Email (48h)</p>
-            <a href="https://novalnet-ai.de/app" class="btn btn-outline-primary w-100">Jetzt wählen</a>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-users"></i>
           </div>
+          <h2 class="display-3 fw-bold mb-2" data-count="727">0</h2>
+          <p class="h5 mb-0">Zufriedene Klienten</p>
+          <p class="small opacity-75 mt-2">Weltweit vertrauen uns</p>
         </div>
       </div>
 
-      <!-- STANDARD -->
+      <!-- Success Rate -->
       <div class="col-md-6 col-lg-3">
-        <div class="card h-100 shadow-sm border-0">
-          <div class="card-body">
-            <h5 class="fw-bold text-primary mb-2">Standard Recovery</h5>
-            <p class="text-muted small mb-3">Comprehensive recovery package</p>
-            <h3 class="fw-bold mb-3">779 €</h3>
-            <ul class="list-unstyled text-start mb-4">
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Priority case handling</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Full document review</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Dedicated case manager</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Phone & email support</li>
-            </ul>
-            <p class="small text-muted mb-1"><strong>Dauer:</strong> 2–4 Wochen</p>
-            <p class="small text-muted mb-3"><strong>Support:</strong> Telefon & E-Mail</p>
-            <a href="https://novalnet-ai.de/app" class="btn btn-outline-primary w-100">Jetzt wählen</a>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
           </div>
+          <h2 class="display-3 fw-bold mb-2"><span data-count="87">0</span>%</h2>
+          <p class="h5 mb-0">Erfolgsquote</p>
+          <p class="small opacity-75 mt-2">Bei Identifizierung</p>
         </div>
       </div>
 
-      <!-- PREMIUM -->
+      <!-- Amount Recovered -->
       <div class="col-md-6 col-lg-3">
-        <div class="card h-100 shadow-sm border-0 border-primary">
-          <div class="card-body">
-            <div class="badge bg-primary text-white mb-2">Beliebt</div>
-            <h5 class="fw-bold text-primary mb-2">Premium Recovery</h5>
-            <p class="text-muted small mb-3">Advanced recovery with legal support</p>
-            <h3 class="fw-bold mb-3">1 880 €</h3>
-            <ul class="list-unstyled text-start mb-4">
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Expedited processing</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Legal document preparation</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Direct attorney access</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> 24/7 support</li>
-            </ul>
-            <p class="small text-muted mb-1"><strong>Dauer:</strong> 1–2 Wochen</p>
-            <p class="small text-muted mb-3"><strong>Support:</strong> 24/7 Priority</p>
-            <a href="https://novalnet-ai.de/app" class="btn btn-primary w-100 text-white">Jetzt wählen</a>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-euro-sign"></i>
           </div>
+          <h2 class="display-3 fw-bold mb-2">€<span data-count="47">0</span>M</h2>
+          <p class="h5 mb-0">Wiederhergestellt</p>
+          <p class="small opacity-75 mt-2">Gesamtvolumen</p>
         </div>
       </div>
 
-      <!-- VIP -->
+      <!-- Processing Time -->
       <div class="col-md-6 col-lg-3">
-        <div class="card h-100 shadow-sm border-0">
-          <div class="card-body">
-            <h5 class="fw-bold text-primary mb-2">VIP Recovery</h5>
-            <p class="text-muted small mb-3">Complete recovery solution for large cases</p>
-            <h3 class="fw-bold mb-3">2 730 €</h3>
-            <ul class="list-unstyled text-start mb-4">
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Immediate case assignment</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Senior recovery specialist</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Legal team engagement</li>
-              <li><i class="fa-solid fa-check text-primary me-2"></i> Personal account manager</li>
-            </ul>
-            <p class="small text-muted mb-1"><strong>Dauer:</strong> 3–7 Tage</p>
-            <p class="small text-muted mb-3"><strong>Support:</strong> Persönlicher Manager</p>
-            <a href="https://novalnet-ai.de/app" class="btn btn-outline-primary w-100">Jetzt wählen</a>
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <h2 class="display-3 fw-bold mb-2"><span data-count="14">0</span></h2>
+          <p class="h5 mb-0">Tage Durchschnitt</p>
+          <p class="small opacity-75 mt-2">Bearbeitungszeit</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trust Badges -->
+    <div class="row justify-content-center mt-5">
+      <div class="col-auto">
+        <div class="d-flex align-items-center gap-4 flex-wrap justify-content-center">
+          <div class="badge-item">
+            <i class="fas fa-shield-alt fa-2x mb-2"></i>
+            <p class="small mb-0">BaFin-Lizenziert</p>
+            <p class="small mb-0 opacity-75">FCA Ref: 122702</p>
+          </div>
+          <div class="badge-item">
+            <i class="fas fa-lock fa-2x mb-2"></i>
+            <p class="small mb-0">256-Bit SSL</p>
+            <p class="small mb-0 opacity-75">Verschlüsselt</p>
+          </div>
+          <div class="badge-item">
+            <i class="fas fa-check-circle fa-2x mb-2"></i>
+            <p class="small mb-0">GDPR Konform</p>
+            <p class="small mb-0 opacity-75">EU-Standard</p>
+          </div>
+          <div class="badge-item">
+            <i class="fas fa-robot fa-2x mb-2"></i>
+            <p class="small mb-0">KI-Technologie</p>
+            <p class="small mb-0 opacity-75">Advanced ML</p>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<style>
+.stat-card {
+  background: rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 40px 20px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  transition: all 0.3s ease;
+}
+.stat-card:hover {
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-5px);
+}
+.stat-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 28px;
+}
+.badge-item {
+  background: rgba(255,255,255,0.1);
+  padding: 20px 30px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+</style>
+
+<script>
+// Animated counter effect
+document.addEventListener('DOMContentLoaded', function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const counters = entry.target.querySelectorAll('[data-count]');
+        counters.forEach(counter => {
+          const target = parseInt(counter.getAttribute('data-count'));
+          const duration = 2000;
+          const steps = 60;
+          const increment = target / steps;
+          let current = 0;
+          
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              counter.textContent = target;
+              clearInterval(timer);
+            } else {
+              counter.textContent = Math.floor(current);
+            }
+          }, duration / steps);
+        });
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const statsSection = document.getElementById('statistics');
+  if (statsSection) observer.observe(statsSection);
+});
+</script>
+
+
+<!-- ========================================================= -->
+<!-- 🤖 SECTION: KI-GESTÜTZTE FUNKTIONEN -->
+<!-- ========================================================= -->
+<section id="ai-features" class="section bg-light">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="section-title">KI-gestützte Blockchain-Analyse</h2>
+      <p class="section-subtitle">
+        Modernste Technologie für maximale Erfolgschancen bei der Wiederherstellung Ihrer Krypto-Guthaben
+      </p>
+    </div>
+
+    <div class="row g-4 mb-5">
+      <!-- AI Feature 1: Machine Learning -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon-lg mb-4">
+            <i class="fas fa-brain fa-3x text-primary"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Deep Learning Algorithmen</h4>
+          <p class="text-muted">
+            Unsere KI analysiert Millionen von Blockchain-Transaktionen in Echtzeit und erkennt Betrugsmuster mit einer Genauigkeit von 94%.
+          </p>
+          <ul class="list-unstyled text-start mt-3">
+            <li><i class="fas fa-check-circle text-success me-2"></i> Mustererkennung in Transaktionen</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Verhaltensanalyse von Wallets</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Betrugserkennung in Echtzeit</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- AI Feature 2: Blockchain Tracking -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon-lg mb-4">
+            <i class="fas fa-project-diagram fa-3x text-primary"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Multi-Chain Tracking</h4>
+          <p class="text-muted">
+            Verfolgen Sie Ihre Kryptowährungen über 15+ Blockchains hinweg. Unsere KI identifiziert verdächtige Transaktionen und verfolgt Geldflüsse.
+          </p>
+          <ul class="list-unstyled text-start mt-3">
+            <li><i class="fas fa-check-circle text-success me-2"></i> Bitcoin, Ethereum, BSC, Polygon</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Cross-Chain Analyse</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Mixer & Tumbler Erkennung</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- AI Feature 3: Fraud Detection -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon-lg mb-4">
+            <i class="fas fa-shield-alt fa-3x text-primary"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Betrugs-Identifikation</h4>
+          <p class="text-muted">
+            Mit über 100.000 bekannten Betrugsfällen trainiert, identifiziert unsere KI neue Betrugsmaschen und schützt Ihr Vermögen.
+          </p>
+          <ul class="list-unstyled text-start mt-3">
+            <li><i class="fas fa-check-circle text-success me-2"></i> Phishing-Erkennung</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Ponzi-Schema Analyse</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Exit-Scam Früherkennung</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- AI Feature 4: Risk Assessment -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon-lg mb-4">
+            <i class="fas fa-chart-bar fa-3x text-primary"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Risiko-Bewertung</h4>
+          <p class="text-muted">
+            Automatische Bewertung Ihrer Wiederherstellungschancen basierend auf historischen Daten und aktuellen Blockchain-Informationen.
+          </p>
+          <ul class="list-unstyled text-start mt-3">
+            <li><i class="fas fa-check-circle text-success me-2"></i> Erfolgswahrscheinlichkeit</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Zeitschätzung</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Kostenprognose</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- AI Feature 5: Automated Reports -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon-lg mb-4">
+            <i class="fas fa-file-alt fa-3x text-primary"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Automatische Berichte</h4>
+          <p class="text-muted">
+            Erhalten Sie detaillierte Analyseberichte automatisch generiert durch unsere KI – transparent und nachvollziehbar für Behörden.
+          </p>
+          <ul class="list-unstyled text-start mt-3">
+            <li><i class="fas fa-check-circle text-success me-2"></i> Transaktionsanalyse</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Wallet-Verbindungen</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Beweissicherung</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- AI Feature 6: Real-Time Monitoring -->
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon-lg mb-4">
+            <i class="fas fa-eye fa-3x text-primary"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Echtzeit-Überwachung</h4>
+          <p class="text-muted">
+            24/7 Blockchain-Monitoring durch KI. Werden verdächtige Bewegungen erkannt, werden Sie sofort informiert.
+          </p>
+          <ul class="list-unstyled text-start mt-3">
+            <li><i class="fas fa-check-circle text-success me-2"></i> Automatische Benachrichtigungen</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Wallet-Bewegungen tracken</li>
+            <li><i class="fas fa-check-circle text-success me-2"></i> Sofortige Alerts</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Technology Highlight -->
+    <div class="row justify-content-center">
+      <div class="col-lg-10">
+        <div class="ai-highlight-box">
+          <div class="row align-items-center">
+            <div class="col-md-2 text-center mb-3 mb-md-0">
+              <i class="fas fa-microchip fa-4x opacity-75"></i>
+            </div>
+            <div class="col-md-10 text-start">
+              <h4 class="fw-bold mb-3">Modernste KI-Technologie im Einsatz</h4>
+              <p class="mb-0 opacity-90">
+                Unsere proprietären Machine-Learning-Algorithmen wurden mit über 100.000 Betrugsfällen trainiert und können selbst komplexeste Geldflüsse über mehrere Blockchains hinweg verfolgen. Mit einer Identifizierungsrate von 87% und kontinuierlichem Lernen aus neuen Fällen bieten wir die fortschrittlichste Lösung zur Krypto-Wiederherstellung auf dem Markt.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.stat-card {
+  padding: 40px 20px;
+}
+.stat-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 32px;
+  border: 2px solid rgba(255,255,255,0.3);
+}
+.feature-icon-lg {
+  width: 100px;
+  height: 100px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #e7f3ff 0%, #cfe8ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+.ai-highlight-box {
+  background: rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 40px;
+  border: 2px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+}
+</style>
 
 
 <!-- FAQ -->
