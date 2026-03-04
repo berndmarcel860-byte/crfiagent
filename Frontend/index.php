@@ -915,7 +915,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }, { threshold: 0.3 });
 
-  const statsSection = document.getElementById('statistics');
+  const statsSection = document.getElementById('stats');
   if (statsSection) observer.observe(statsSection);
 });
 </script>
