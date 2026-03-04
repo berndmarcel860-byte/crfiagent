@@ -239,29 +239,333 @@ include 'includes/navbar.php';
     </div>
 </header>
 
-<!-- Trusted Partners -->
-<section class="trusted-by">
+<!-- Security Alerts & Fraud Warnings -->
+<section id="security-alerts" class="section bg-light">
     <div class="container">
-        <h3 class="mb-4">Vertrauensvolle Partner & Datenquellen</h3>
-        <div class="logo-grid">
-            <div class="logo-item">
-                <img src="https://tradiascrypto.de/assets/binance-logo-120x40-DwqZd-HJ.png" alt="Binance" style="max-height:100%;width:auto;">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">Aktuelle Sicherheitswarnungen & Betrugswarnungen</h2>
+            <p class="lead text-muted">Bleiben Sie informiert über aktuelle Betrugsmaschen und schützen Sie sich vor Krypto-Betrügern</p>
+        </div>
+        
+        <div class="row g-4">
+            <!-- Alert 1: Platform Scam Shutdown -->
+            <div class="col-lg-4">
+                <div class="alert-card alert-danger-custom">
+                    <div class="alert-header">
+                        <div class="alert-icon bg-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="alert-meta">
+                            <span class="badge bg-danger">KRITISCH</span>
+                            <small class="text-muted">Vor 2 Tagen</small>
+                        </div>
+                        <button class="alert-dismiss" onclick="dismissAlert(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <h5 class="alert-title">
+                        <i class="fas fa-building me-2"></i>
+                        "CryptoXchange Pro" als Betrug identifiziert
+                    </h5>
+                    <p class="alert-description">
+                        Die Plattform wurde als Betrug entlarvt und geschlossen. Über 380 Investoren verloren insgesamt 4,2 Millionen Euro. 
+                        <strong>Seien Sie vorsichtig bei ähnlichen Plattformen</strong> mit unrealistischen Renditeversprechen.
+                    </p>
+                    <div class="alert-footer">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        <small>Unsere KI hat diesen Betrug frühzeitig erkannt</small>
+                    </div>
+                </div>
             </div>
-            <div class="logo-item">
-                <img src="https://tradiascrypto.de/assets/coingecko-logo-120x40-D2Np8XW0.png" alt="CoinGecko" style="max-height:100%;width:auto;">
+
+            <!-- Alert 2: Phishing Campaign -->
+            <div class="col-lg-4">
+                <div class="alert-card alert-warning-custom">
+                    <div class="alert-header">
+                        <div class="alert-icon bg-warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="alert-meta">
+                            <span class="badge bg-warning text-dark">WARNUNG</span>
+                            <small class="text-muted">Vor 1 Woche</small>
+                        </div>
+                        <button class="alert-dismiss" onclick="dismissAlert(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <h5 class="alert-title">
+                        <i class="fas fa-envelope-open-text me-2"></i>
+                        Neue Phishing-E-Mail-Kampagne aktiv
+                    </h5>
+                    <p class="alert-description">
+                        Gefälschte E-Mails geben sich als bekannte Banken und Krypto-Börsen aus. 
+                        <strong>Klicken Sie nicht auf Links</strong> und geben Sie keine persönlichen Daten ein. 
+                        Überprüfen Sie immer die Absenderadresse sorgfältig.
+                    </p>
+                    <div class="alert-footer">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <small>Tipp: Echte Banken fragen nie per E-Mail nach Passwörtern</small>
+                    </div>
+                </div>
             </div>
-            <div class="logo-item">
-               <!-- <img src="https://tradiascrypto.de/assets/sepa-logo-120x40-DYeyGrJW.png" alt="SEPA" style="max-height:100%;width:auto;"> -->
+
+            <!-- Alert 3: Fake Social Media -->
+            <div class="col-lg-4">
+                <div class="alert-card alert-warning-custom">
+                    <div class="alert-header">
+                        <div class="alert-icon bg-warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="alert-meta">
+                            <span class="badge bg-warning text-dark">WARNUNG</span>
+                            <small class="text-muted">Vor 3 Tagen</small>
+                        </div>
+                        <button class="alert-dismiss" onclick="dismissAlert(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <h5 class="alert-title">
+                        <i class="fas fa-users-slash me-2"></i>
+                        Gefälschte Social-Media-Konten entdeckt
+                    </h5>
+                    <p class="alert-description">
+                        Betrüger erstellen gefälschte Konten, die sich als legitime Krypto-Börsen ausgeben. 
+                        <strong>Überprüfen Sie immer offizielle Verifizierungs-Badges</strong> und melden Sie verdächtige Konten.
+                    </p>
+                    <div class="alert-footer">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <small>Offizielle Accounts haben blaue Verifizierungs-Häkchen</small>
+                    </div>
+                </div>
             </div>
-            <div class="logo-item">
-                <img src="https://tradiascrypto.de/assets/bafin-logo-120x40-CM2mkusB.png" alt="BaFin" style="max-height:100%;width:auto;">
+
+            <!-- Alert 4: WhatsApp/Telegram Scams -->
+            <div class="col-lg-4">
+                <div class="alert-card alert-info-custom">
+                    <div class="alert-header">
+                        <div class="alert-icon bg-info">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="alert-meta">
+                            <span class="badge bg-info">TIPP</span>
+                            <small class="text-muted">Vor 5 Tagen</small>
+                        </div>
+                        <button class="alert-dismiss" onclick="dismissAlert(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <h5 class="alert-title">
+                        <i class="fab fa-whatsapp me-2"></i>
+                        WhatsApp/Telegram Investment-Gruppen
+                    </h5>
+                    <p class="alert-description">
+                        99% der Investment-Gruppen auf WhatsApp und Telegram sind Betrug! 
+                        <strong>Investieren Sie niemals</strong> basierend auf Nachrichten in solchen Gruppen. 
+                        Typische Maschen: Pump & Dump, Schneeballsysteme.
+                    </p>
+                    <div class="alert-footer">
+                        <i class="fas fa-ban me-2"></i>
+                        <small>Seriöse Anbieter werben nicht in Chat-Gruppen</small>
+                    </div>
+                </div>
             </div>
-            <div class="logo-item">
-                <img src="https://tradiascrypto.de/assets/ssl-logo-120x40-CVsSBkas.png" alt="SSL" style="max-height:100%;width:auto;">
+
+            <!-- Alert 5: NFT Phishing -->
+            <div class="col-lg-4">
+                <div class="alert-card alert-info-custom">
+                    <div class="alert-header">
+                        <div class="alert-icon bg-info">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="alert-meta">
+                            <span class="badge bg-info">PRÄVENTION</span>
+                            <small class="text-muted">Vor 1 Woche</small>
+                        </div>
+                        <button class="alert-dismiss" onclick="dismissAlert(this)">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <h5 class="alert-title">
+                        <i class="fas fa-image me-2"></i>
+                        NFT-Phishing und gefälschte Airdrops
+                    </h5>
+                    <p class="alert-description">
+                        Gefälschte NFT-Websites und Airdrop-Seiten stehlen Wallet-Zugangsdaten. 
+                        <strong>Verbinden Sie Ihr Wallet niemals</strong> mit unbekannten Websites. 
+                        Überprüfen Sie URLs sehr genau vor der Verbindung.
+                    </p>
+                    <div class="alert-footer">
+                        <i class="fas fa-lock me-2"></i>
+                        <small>Prüfen Sie immer die Domain-URL auf Rechtschreibfehler</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert 6: General Security Tips -->
+            <div class="col-lg-4">
+                <div class="alert-card alert-success-custom">
+                    <div class="alert-header">
+                        <div class="alert-icon bg-success">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="alert-meta">
+                            <span class="badge bg-success">SCHUTZ-TIPPS</span>
+                            <small class="text-muted">Aktualisiert</small>
+                        </div>
+                    </div>
+                    <h5 class="alert-title">
+                        <i class="fas fa-user-shield me-2"></i>
+                        So schützen Sie sich effektiv
+                    </h5>
+                    <p class="alert-description">
+                        <strong>✓</strong> Aktivieren Sie 2-Faktor-Authentifizierung<br>
+                        <strong>✓</strong> Nutzen Sie Hardware-Wallets<br>
+                        <strong>✓</strong> Prüfen Sie URLs vor dem Zugriff<br>
+                        <strong>✓</strong> Seien Sie skeptisch bei hohen Renditen<br>
+                        <strong>✓</strong> Recherchieren Sie vor Investitionen
+                    </p>
+                    <div class="alert-footer">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <small>Prävention ist der beste Schutz</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
+
+<style>
+/* Security Alerts Styling */
+.alert-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+    position: relative;
+    border-left: 4px solid;
+}
+
+.alert-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    transform: translateY(-2px);
+}
+
+.alert-danger-custom {
+    border-left-color: #dc3545;
+    background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+}
+
+.alert-warning-custom {
+    border-left-color: #ffc107;
+    background: linear-gradient(135deg, #fff 0%, #fffef5 100%);
+}
+
+.alert-info-custom {
+    border-left-color: #0dcaf0;
+    background: linear-gradient(135deg, #fff 0%, #f0fcff 100%);
+}
+
+.alert-success-custom {
+    border-left-color: #198754;
+    background: linear-gradient(135deg, #fff 0%, #f0fff5 100%);
+}
+
+.alert-header {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    gap: 0.75rem;
+}
+
+.alert-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.alert-meta {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.alert-dismiss {
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.alert-dismiss:hover {
+    color: #dc3545;
+}
+
+.alert-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #212529;
+}
+
+.alert-description {
+    color: #495057;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.alert-footer {
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    color: #6c757d;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Animation for alert dismissal */
+@keyframes fadeOutUp {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+.dismissing {
+    animation: fadeOutUp 0.3s ease forwards;
+}
+</style>
+
+<script>
+// Dismiss alert functionality
+function dismissAlert(button) {
+    const alertCard = button.closest('.col-lg-4');
+    alertCard.classList.add('dismissing');
+    setTimeout(() => {
+        alertCard.style.display = 'none';
+    }, 300);
+}
+</script>
 
 <!-- Security Section -->
 <section id="process" class="section bg-light anchor-offset">
