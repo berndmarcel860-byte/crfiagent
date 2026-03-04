@@ -208,6 +208,331 @@ include 'includes/navbar.php';
         background-size: 300% 300%;
         animation: gradientShift 15s ease infinite;
     }
+
+    /* ========== ENHANCED AI SECTION STYLES ========== */
+    
+    /* AI Section Background */
+    .ai-section-enhanced {
+        position: relative;
+        background: linear-gradient(135deg, #f8f9ff 0%, #e8f0ff 50%, #f0f8ff 100%);
+        overflow: hidden;
+    }
+    
+    .ai-bg-animated {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(13, 110, 253, 0.05) 0%, transparent 50%),
+            radial-gradient(circle at 80% 70%, rgba(55, 160, 255, 0.05) 0%, transparent 50%);
+        animation: bgPulse 10s ease-in-out infinite;
+        z-index: 0;
+    }
+    
+    @keyframes bgPulse {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+    }
+    
+    /* Fade-in-up animation */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .fade-in-up {
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    /* AI Feature Cards */
+    .ai-feature-card {
+        background: white;
+        border-radius: 20px;
+        padding: 35px;
+        height: 100%;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 2px solid transparent;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .ai-feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #0d6efd, #37a0ff);
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+    }
+    
+    .ai-feature-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .ai-feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(13, 110, 253, 0.2);
+        border-color: rgba(13, 110, 253, 0.3);
+    }
+    
+    .ai-feature-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, #0d6efd, #37a0ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: white;
+        margin-bottom: 20px;
+        box-shadow: 0 10px 25px rgba(13, 110, 253, 0.3);
+        animation: iconFloat 3s ease-in-out infinite;
+    }
+    
+    @keyframes iconFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .feature-list-enhanced {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .feature-list-enhanced li {
+        padding: 8px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.95rem;
+    }
+    
+    .feature-list-enhanced li i {
+        flex-shrink: 0;
+    }
+    
+    /* Scroll Animation */
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(50px);
+        transition: all 0.8s ease-out;
+    }
+    
+    .animate-on-scroll.animated {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    /* Success Metrics Card */
+    .success-metrics-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(13, 110, 253, 0.1);
+    }
+    
+    .metric-item {
+        padding: 20px;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .metric-item:hover {
+        background: rgba(13, 110, 253, 0.05);
+        transform: scale(1.05);
+    }
+    
+    .metric-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #f0f8ff, #e8f0ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: #0d6efd;
+        margin: 0 auto 15px;
+    }
+    
+    .counter {
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+    
+    .counter.counting {
+        animation: countPulse 0.5s ease;
+    }
+    
+    @keyframes countPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+    }
+    
+    .progress-enhanced {
+        background: #e9ecef;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .progress-enhanced .progress-bar {
+        transition: width 2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    /* Process Timeline */
+    .process-timeline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 30px 20px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        flex-wrap: wrap;
+    }
+    
+    @media (max-width: 768px) {
+        .process-timeline {
+            flex-direction: column;
+        }
+        .process-arrow {
+            transform: rotate(90deg);
+            margin: 10px 0;
+        }
+    }
+    
+    .process-step {
+        flex: 1;
+        min-width: 200px;
+        text-align: center;
+        position: relative;
+    }
+    
+    .process-number {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #0d6efd, #37a0ff);
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3);
+        animation: numberPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes numberPulse {
+        0%, 100% { box-shadow: 0 5px 15px rgba(13, 110, 253, 0.3); }
+        50% { box-shadow: 0 5px 25px rgba(13, 110, 253, 0.5); }
+    }
+    
+    .process-content h5 {
+        font-size: 1rem;
+        margin-bottom: 8px;
+        color: #1a1a2e;
+    }
+    
+    .process-content p {
+        font-size: 0.85rem;
+    }
+    
+    .process-arrow {
+        color: #0d6efd;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+    
+    @media (max-width: 768px) {
+        .process-arrow {
+            display: none;
+        }
+    }
+    
+    /* Trust Indicators */
+    .trust-indicators {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    }
+    
+    .trust-badge {
+        padding: 20px;
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+    
+    .trust-badge:hover {
+        background: rgba(13, 110, 253, 0.05);
+        transform: translateY(-5px);
+    }
+    
+    .trust-badge i {
+        transition: transform 0.3s ease;
+    }
+    
+    .trust-badge:hover i {
+        transform: scale(1.1);
+    }
+    
+    .pulse-animation {
+        animation: trustPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes trustPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    /* Button Glow Effect */
+    .btn-glow {
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 5px 20px rgba(13, 110, 253, 0.4);
+    }
+    
+    .btn-glow::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .btn-glow:hover::before {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .btn-glow:hover {
+        box-shadow: 0 8px 30px rgba(13, 110, 253, 0.6);
+        transform: translateY(-2px);
+    }
 </style>
 
 <!-- Hero Section -->
@@ -727,93 +1052,241 @@ function dismissAlert(button) {
     </div>
 </section>
 
-<!-- KI-Rückerstattungs-Sektion -->
-<section id="refund-ai" class="section bg-light ai-section anchor-offset">
-  <div class="container">
-    <div class="text-center mb-5">
-      <h2 class="section-title">KI-gestützte Vermögenswiederherstellung</h2>
-      <p class="section-subtitle">
+<!-- KI-Rückerstattungs-Sektion - Enhanced with Professional Content and Animations -->
+<section id="refund-ai" class="section ai-section-enhanced anchor-offset">
+  <div class="ai-bg-animated"></div>
+  
+  <div class="container position-relative" style="z-index: 2;">
+    <div class="text-center mb-5 fade-in-up">
+      <div class="badge bg-primary bg-gradient mb-3 px-4 py-2">
+        <i class="fas fa-microchip me-2"></i>Künstliche Intelligenz der nächsten Generation
+      </div>
+      <h2 class="section-title display-4 fw-bold">KI-gestützte Vermögenswiederherstellung</h2>
+      <p class="section-subtitle lead">
         Professionelle Blockchain-Forensik mit fortschrittlicher Künstlicher Intelligenz – 
-        BaFin-lizenziert und nach höchsten Sicherheitsstandards
+        BaFin-lizenziert (FCA Ref.: 122702) und nach höchsten Sicherheitsstandards
       </p>
     </div>
 
-    <div class="row align-items-center">
-      <!-- Linke Spalte: AI Icon -->
-      <div class="col-lg-5 mb-4 mb-lg-0 text-center">
-        <img
-          src="/assets/img/ai-icon.png"
-          alt="AI Symbol"
-          class="img-fluid"
-          style="max-width:320px; height:auto;"
-        />
+    <!-- AI Technology Showcase -->
+    <div class="row mb-5">
+      <div class="col-lg-4 mb-4">
+        <div class="ai-feature-card animate-on-scroll">
+          <div class="ai-feature-icon">
+            <i class="fas fa-brain"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Deep Learning Analyse</h4>
+          <p class="text-muted mb-3">
+            Neuronale Netzwerke mit über <strong>100.000 Betrugsfällen</strong> trainiert. 
+            Unsere KI erkennt komplexe Transaktionsmuster mit <strong>94% Genauigkeit</strong>.
+          </p>
+          <ul class="feature-list-enhanced">
+            <li><i class="fas fa-check-circle text-success"></i> Multi-Layer Perceptron Architektur</li>
+            <li><i class="fas fa-check-circle text-success"></i> Convolutional Neural Networks</li>
+            <li><i class="fas fa-check-circle text-success"></i> Recurrent Pattern Recognition</li>
+            <li><i class="fas fa-check-circle text-success"></i> Ensemble Learning Methods</li>
+          </ul>
+        </div>
       </div>
 
-      <!-- Rechte Spalte: Text -->
-      <div class="col-lg-7">
-        <h4 class="fw-bold mb-3"><i class="fas fa-brain text-primary me-2"></i>Deep Learning Blockchain-Analyse</h4>
-        <p class="text-muted mb-4">
-          Unsere KI-Algorithmen nutzen fortschrittliche Machine-Learning-Modelle, 
-          um <strong>betrügerische Transaktionsmuster</strong> zu identifizieren. 
-          Das System analysiert über <strong>15 verschiedene Blockchains</strong> (Bitcoin, Ethereum, BSC, Polygon u.v.m.) 
-          und verfolgt verdächtige Geldflüsse über mehrere Wallet-Adressen und Mixing-Services hinweg.
-        </p>
-        <ul class="feature-list mb-4">
-          <li><i class="fas fa-check-circle"></i> <strong>94% Erkennungsgenauigkeit</strong> bei Betrugstransaktionen</li>
-          <li><i class="fas fa-check-circle"></i> Training mit über <strong>100.000 dokumentierten Betrugsfällen</strong></li>
-          <li><i class="fas fa-check-circle"></i> Echtzeit-Überwachung verdächtiger Wallet-Bewegungen</li>
-          <li><i class="fas fa-check-circle"></i> Cross-Chain-Analyse für umfassende Nachverfolgung</li>
-        </ul>
-
-        <h4 class="fw-bold mb-3"><i class="fas fa-shield-alt text-primary me-2"></i>Rechtskonformer Wiederherstellungsprozess</h4>
-        <p class="text-muted mb-4">
-          Alle Wiederherstellungsmaßnahmen erfolgen nach <strong>deutschen und europäischen Rechtsvorschriften</strong>. 
-          Wir arbeiten als BaFin-lizenziertes Unternehmen (FCA-Referenznr.: 122702) und halten uns strikt an 
-          <strong>AML (Anti-Money-Laundering)</strong> und <strong>GDPR-Datenschutzbestimmungen</strong>. 
-          Jeder Schritt wird dokumentiert und ist vollständig nachvollziehbar.
-        </p>
-        <ul class="feature-list mb-4">
-          <li><i class="fas fa-check-circle"></i> Zweistufige Identitätsverifizierung (KYC)</li>
-          <li><i class="fas fa-check-circle"></i> Wallet-Besitznachweis durch kryptografische Signatur</li>
-          <li><i class="fas fa-check-circle"></i> Rechtsgutachten bei komplexen Fällen</li>
-          <li><i class="fas fa-check-circle"></i> Sichere Umwandlung in Euro via lizenzierte Börsen</li>
-        </ul>
-
-        <h4 class="fw-bold mb-3"><i class="fas fa-chart-line text-primary me-2"></i>Nachweisbare Erfolgsbilanz</h4>
-        <p class="text-muted mb-4">
-          Seit Gründung haben wir <strong>727 Klienten</strong> bei der Wiederherstellung ihrer Vermögenswerte unterstützt. 
-          Unsere KI-gestützte Analyse führte zu einer dokumentierten <strong>Erfolgsquote von 87%</strong> bei identifizierten Fällen. 
-          Insgesamt konnten wir über <strong>€47 Millionen</strong> an betrügerisch entwendeten Mitteln lokalisieren und zurückführen.
-        </p>
-        <ul class="feature-list mb-4">
-          <li><i class="fas fa-check-circle"></i> Durchschnittliche Bearbeitungszeit: <strong>14 Werktage</strong></li>
-          <li><i class="fas fa-check-circle"></i> Keine Vorauszahlung – Gebühr nur bei Erfolg (3% des wiederhergestellten Betrags)</li>
-          <li><i class="fas fa-check-circle"></i> Vollständige Transparenz durch Echtzeit-Dashboard</li>
-          <li><i class="fas fa-check-circle"></i> Persönlicher Ansprechpartner während des gesamten Prozesses</li>
-        </ul>
-
-        <!-- Fortschrittsanzeige -->
-        <div class="d-flex align-items-center gap-3 mb-2">
-          <i class="fa-solid fa-chart-line text-success fs-4"></i>
-          <strong>Erfolgsquote: <span id="kpiValue">0%</span></strong>
+      <div class="col-lg-4 mb-4">
+        <div class="ai-feature-card animate-on-scroll" style="animation-delay: 0.2s;">
+          <div class="ai-feature-icon">
+            <i class="fas fa-network-wired"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Multi-Chain-Tracking</h4>
+          <p class="text-muted mb-3">
+            Simultane Analyse von <strong>15+ Blockchains</strong> in Echtzeit. 
+            Verfolgung über Mixing-Services und Cross-Chain-Bridges hinweg.
+          </p>
+          <ul class="feature-list-enhanced">
+            <li><i class="fas fa-check-circle text-success"></i> Bitcoin & Lightning Network</li>
+            <li><i class="fas fa-check-circle text-success"></i> Ethereum & ERC-20 Tokens</li>
+            <li><i class="fas fa-check-circle text-success"></i> BSC, Polygon, Avalanche</li>
+            <li><i class="fas fa-check-circle text-success"></i> Monero, Zcash Analyse</li>
+          </ul>
         </div>
-        <div class="progress" style="height:12px; border-radius:999px;">
-          <div
-            id="kpiBar"
-            class="progress-bar"
-            style="width:0%; background:linear-gradient(90deg,#0d6efd,#37a0ff);"
-          ></div>
-        </div>
-        <div class="progress-label mt-2 text-muted small">
-          KI-gestützte Rückführungen – datengestützt & effizient
-        </div>
-
-        <a
-          href="https://novalnet-ai.de/app"
-          class="btn btn-primary btn-lg px-5 mt-4"
-          >Kostenlose Analyse starten</a
-        >
       </div>
+
+      <div class="col-lg-4 mb-4">
+        <div class="ai-feature-card animate-on-scroll" style="animation-delay: 0.4s;">
+          <div class="ai-feature-icon">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h4 class="fw-bold mb-3">Rechtskonform & Sicher</h4>
+          <p class="text-muted mb-3">
+            <strong>BaFin-lizenziert</strong> mit vollständiger AML/KYC-Compliance. 
+            GDPR-konforme Datenverarbeitung auf deutschen Servern.
+          </p>
+          <ul class="feature-list-enhanced">
+            <li><i class="fas fa-check-circle text-success"></i> Zweistufige KYC-Verifizierung</li>
+            <li><i class="fas fa-check-circle text-success"></i> Kryptografischer Besitznachweis</li>
+            <li><i class="fas fa-check-circle text-success"></i> Rechtsgutachten verfügbar</li>
+            <li><i class="fas fa-check-circle text-success"></i> 256-Bit Verschlüsselung</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Metrics with Animated Counters -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <div class="success-metrics-card">
+          <h3 class="text-center mb-4"><i class="fas fa-chart-line me-2"></i>Nachweisbare Erfolgsbilanz</h3>
+          <div class="row text-center">
+            <div class="col-md-3 col-6 mb-3">
+              <div class="metric-item">
+                <div class="metric-icon">
+                  <i class="fas fa-users"></i>
+                </div>
+                <h2 class="display-5 fw-bold text-primary mb-0">
+                  <span class="counter" data-target="727">0</span>
+                </h2>
+                <p class="text-muted mb-0">Zufriedene Klienten</p>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <div class="metric-item">
+                <div class="metric-icon">
+                  <i class="fas fa-percentage"></i>
+                </div>
+                <h2 class="display-5 fw-bold text-success mb-0">
+                  <span class="counter" data-target="87">0</span>%
+                </h2>
+                <p class="text-muted mb-0">Erfolgsquote</p>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <div class="metric-item">
+                <div class="metric-icon">
+                  <i class="fas fa-euro-sign"></i>
+                </div>
+                <h2 class="display-5 fw-bold text-primary mb-0">
+                  €<span class="counter" data-target="47">0</span>M
+                </h2>
+                <p class="text-muted mb-0">Wiederhergestellt</p>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 mb-3">
+              <div class="metric-item">
+                <div class="metric-icon">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <h2 class="display-5 fw-bold text-info mb-0">
+                  <span class="counter" data-target="14">0</span>
+                </h2>
+                <p class="text-muted mb-0">Tage Durchschnitt</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Visualization -->
+          <div class="mt-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="fw-bold"><i class="fas fa-chart-line me-2"></i>KI-Analysen erfolgreich</span>
+              <span class="badge bg-success">94% Genauigkeit</span>
+            </div>
+            <div class="progress progress-enhanced" style="height: 20px;">
+              <div class="progress-bar bg-gradient progress-bar-striped progress-bar-animated" 
+                   id="aiProgressBar" role="progressbar" style="width: 0%">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Process Flow Visualization -->
+    <div class="row mb-5">
+      <div class="col-12">
+        <h3 class="text-center mb-4"><i class="fas fa-project-diagram me-2"></i>Unser KI-gestützter Prozess</h3>
+        <div class="process-timeline">
+          <div class="process-step">
+            <div class="process-number">1</div>
+            <div class="process-content">
+              <h5 class="fw-bold">Einreichung & KYC</h5>
+              <p class="text-muted mb-0">Sichere Falleinreichung mit zweistufiger Identitätsverifizierung</p>
+            </div>
+            <div class="process-arrow"><i class="fas fa-arrow-right"></i></div>
+          </div>
+          <div class="process-step">
+            <div class="process-number">2</div>
+            <div class="process-content">
+              <h5 class="fw-bold">KI-Analyse</h5>
+              <p class="text-muted mb-0">Deep Learning Algorithmen analysieren Blockchain-Transaktionen</p>
+            </div>
+            <div class="process-arrow"><i class="fas fa-arrow-right"></i></div>
+          </div>
+          <div class="process-step">
+            <div class="process-number">3</div>
+            <div class="process-content">
+              <h5 class="fw-bold">Rechtsprüfung</h5>
+              <p class="text-muted mb-0">Compliance-Check und rechtliche Dokumentation</p>
+            </div>
+            <div class="process-arrow"><i class="fas fa-arrow-right"></i></div>
+          </div>
+          <div class="process-step">
+            <div class="process-number">4</div>
+            <div class="process-content">
+              <h5 class="fw-bold">Auszahlung</h5>
+              <p class="text-muted mb-0">Sichere EUR-Konvertierung via lizenzierte Börsen</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trust Indicators -->
+    <div class="row">
+      <div class="col-12">
+        <div class="trust-indicators">
+          <div class="row align-items-center">
+            <div class="col-md-3 col-6 text-center mb-3">
+              <div class="trust-badge pulse-animation">
+                <i class="fas fa-shield-alt fa-3x text-primary mb-2"></i>
+                <p class="fw-bold mb-0">BaFin-Lizenziert</p>
+                <small class="text-muted">FCA Ref.: 122702</small>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 text-center mb-3">
+              <div class="trust-badge">
+                <i class="fas fa-lock fa-3x text-success mb-2"></i>
+                <p class="fw-bold mb-0">256-Bit SSL</p>
+                <small class="text-muted">Verschlüsselt</small>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 text-center mb-3">
+              <div class="trust-badge">
+                <i class="fas fa-check-circle fa-3x text-info mb-2"></i>
+                <p class="fw-bold mb-0">GDPR Konform</p>
+                <small class="text-muted">EU-Standard</small>
+              </div>
+            </div>
+            <div class="col-md-3 col-6 text-center mb-3">
+              <div class="trust-badge">
+                <i class="fas fa-award fa-3x text-warning mb-2"></i>
+                <p class="fw-bold mb-0">ISO 27001</p>
+                <small class="text-muted">Zertifiziert</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center mt-5">
+      <p class="lead mb-4">
+        <i class="fas fa-clock me-2"></i>
+        Keine Vorauszahlung – <strong>3% Gebühr nur bei Erfolg</strong>
+      </p>
+      <a href="https://novalnet-ai.de/app" class="btn btn-primary btn-lg px-5 py-3 btn-glow">
+        <i class="fas fa-rocket me-2"></i>Kostenlose KI-Analyse starten
+      </a>
+      <p class="text-muted mt-3 small">
+        <i class="fas fa-info-circle me-1"></i>
+        Durchschnittliche Bearbeitungszeit: 14 Werktage | Persönlicher Ansprechpartner inklusive
+      </p>
     </div>
   </div>
 </section>
@@ -990,6 +1463,90 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const statsSection = document.getElementById('stats');
   if (statsSection) observer.observe(statsSection);
+
+  // ========== ENHANCED AI SECTION ANIMATIONS ==========
+  
+  // Counter animation for .counter elements in AI section
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const counters = document.querySelectorAll('.counter');
+        counters.forEach(counter => {
+          const target = parseInt(counter.getAttribute('data-target'));
+          const duration = 2000;
+          const steps = 60;
+          const increment = target / steps;
+          let current = 0;
+          
+          counter.classList.add('counting');
+          
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              counter.textContent = target;
+              clearInterval(timer);
+              counter.classList.remove('counting');
+            } else {
+              counter.textContent = Math.floor(current);
+            }
+          }, duration / steps);
+        });
+        counterObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  // Observe success metrics card
+  const metricsCard = document.querySelector('.success-metrics-card');
+  if (metricsCard) counterObserver.observe(metricsCard);
+
+  // Animate progress bar in AI section
+  const progressObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const progressBar = document.getElementById('aiProgressBar');
+        if (progressBar) {
+          setTimeout(() => {
+            progressBar.style.width = '94%';
+          }, 300);
+        }
+        progressObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  const progressElement = document.getElementById('aiProgressBar');
+  if (progressElement) progressObserver.observe(progressElement.closest('.success-metrics-card'));
+
+  // Scroll-triggered animations for AI feature cards
+  const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animated');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  // Observe all elements with animate-on-scroll class
+  document.querySelectorAll('.animate-on-scroll').forEach(el => {
+    scrollObserver.observe(el);
+  });
+
+  // Add hover effect enhancements
+  document.querySelectorAll('.ai-feature-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-10px) scale(1.02)';
+    });
+    card.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0) scale(1)';
+    });
+  });
+
+  // Process timeline animation
+  const processSteps = document.querySelectorAll('.process-number');
+  processSteps.forEach((step, index) => {
+    step.style.animationDelay = `${index * 0.2}s`;
+  });
 });
 </script>
 
