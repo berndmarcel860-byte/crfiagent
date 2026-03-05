@@ -6,6 +6,7 @@
 
 require_once '../../config.php';
 require_once '../admin_session.php';
+require_once '../AdminEmailHelper.php';
 
 header('Content-Type: application/json');
 
@@ -24,8 +25,8 @@ try {
         throw new Exception('Rejection reason is required');
     }
     
-    // Get wallet details
-    $stmt = $pdo->prepare("SELECT id, user_id, cryptocurrency, verification_status
+    // Get wallet details including verification_txid
+    $stmt = $pdo->prepare("SELECT id, user_id, cryptocurrency, verification_status, verification_txid
                            FROM user_payment_methods 
                            WHERE id = ? AND type = 'crypto'");
     $stmt->execute([$wallet_id]);
@@ -41,7 +42,7 @@ try {
     }
     
     // Begin transaction
-    $conn->begin_transaction();
+    $pdo->beginTransaction();
     
     try {
         // Update wallet status to failed and clear verification data
@@ -71,7 +72,22 @@ try {
             'reason' => $reason
         ]);
         
-        // TODO: Send notification to user (email/SMS)
+        // Send notification email to user
+        try {
+            $emailHelper = new AdminEmailHelper($pdo);
+            
+            $customVars = [
+                'cryptocurrency' => $wallet['cryptocurrency'],
+                'verification_txid' => $wallet['verification_txid'] ?? 'N/A',
+                'wallet_id' => $wallet_id,
+                'rejection_reason' => $reason,
+                'rejection_date' => date('Y-m-d H:i:s')
+            ];
+            
+            $emailHelper->sendTemplateEmail('wallet_rejected', $wallet['user_id'], $customVars);
+        } catch (Exception $e) {
+            error_log("Wallet rejection email failed: " . $e->getMessage());
+        }
         
     } catch (Exception $e) {
         $pdo->rollBack();
