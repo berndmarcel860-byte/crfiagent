@@ -1,6 +1,7 @@
 <?php
 require_once 'config.php';
 
+$brandName = htmlspecialchars($systemSettings['brand_name'] ?? 'Scam Recovery');
 $message = '';
 $token = $_GET['token'] ?? '';
 
@@ -32,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Passwort zurücksetzen | Scam Recovery Dashboard</title>
+<title>Passwort zurücksetzen | <?= $brandName ?> Dashboard</title>
 <link href="assets/css/app.min.css" rel="stylesheet">
 <style>
 .login-container{min-height:100vh;background:linear-gradient(135deg,#f5f7fa,#c3cfe2);}
@@ -49,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="col-md-5">
 <div class="card login-card">
 <div class="card-body p-4">
-<div class="login-logo"><img src="assets/images/logo/logo.png" alt="Scam Recovery"></div>
+<div class="login-logo"><img src="assets/images/logo/logo.png" alt="<?= $brandName ?>"></div>
 <h4 class="text-center mb-4">Neues Passwort festlegen</h4>
 <?= $message ?>
 <?php if(empty($message) || str_contains($message,'Ungültig')===false): ?>

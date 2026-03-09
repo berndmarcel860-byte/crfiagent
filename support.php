@@ -69,7 +69,7 @@ try {
                                 </div>
                                 <div>
                                     <div class="text-muted" style="font-size: 12px;">Email</div>
-                                    <strong>support@kryptox.co.uk</strong>
+                                    <strong><?= htmlspecialchars($systemSettings['contact_email'] ?? 'support@kryptox.co.uk') ?></strong>
                                 </div>
                             </li>
                             <li class="d-flex align-items-center mb-2">

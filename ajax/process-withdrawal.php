@@ -207,7 +207,7 @@ function sendWithdrawalConfirmationEmail($pdo, $user, $amount, $reference, $paym
         '{site_name}' => $system['brand_name'] ?? 'KryptoX',
         '{support_email}' => $system['contact_email'] ?? 'support@kryptox.co.uk',
         '{current_year}' => date('Y'),
-        '{site_url}' => $system['domain'] ?? 'https://kryptox.co.uk'
+        '{site_url}' => $system['site_url'] ?? 'https://kryptox.co.uk'
     ];
 
     foreach ($replacements as $k => $v) {
