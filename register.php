@@ -1,9 +1,14 @@
+<?php
+require_once 'config.php';
+$brandName = htmlspecialchars($systemSettings['brand_name'] ?? 'KryptoX');
+$contactEmail = htmlspecialchars($systemSettings['contact_email'] ?? 'support@kryptox.co.uk');
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up | KryptoX</title>
+    <title>Sign Up | <?= $brandName ?></title>
     <link href="assets/css/app.min.css" rel="stylesheet">
     <style>
         body {
@@ -47,14 +52,14 @@
         <div class="card login-card">
             <div class="card-body p-4">
                 <div class="login-logo">
-                    <img src="assets/images/logo/logo.png" alt="KryptoX">
+                    <img src="assets/images/logo/logo.png" alt="<?= $brandName ?>">
                 </div>
                 <h4 class="text-center mb-4">Registration Temporarily Closed</h4>
                 <p class="text-content">
                     Sorry, unfortunately we are not accepting direct registrations at this moment.<br><br>
                     We currently only accept a small number of new clients through private invitations.<br><br>
                     Please contact our support team for inquiries:<br>
-                    <span class="highlight">support@kryptox.co.uk</span>
+                    <span class="highlight"><?= $contactEmail ?></span>
                 </p>
             </div>
         </div>

@@ -30,4 +30,13 @@ try {
 
 // Define base URL
 define('BASE_URL', 'http://' . $_SERVER['HTTP_HOST'] . str_replace('/login.php', '', $_SERVER['SCRIPT_NAME']));
+
+// Fetch system settings (brand_name, contact_email, etc.) for use across all pages
+$systemSettings = [];
+try {
+    $stmt = $pdo->query("SELECT brand_name, contact_email, contact_phone, site_url FROM system_settings LIMIT 1");
+    $systemSettings = $stmt->fetch() ?: [];
+} catch (PDOException $e) {
+    // Silently fail; pages will use their own defaults
+}
 ?>

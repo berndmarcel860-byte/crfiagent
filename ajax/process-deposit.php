@@ -257,7 +257,7 @@ function sendDepositConfirmationEmail($pdo, $user, $amount, $reference, $payment
             '{payment_method}' => $paymentMethod,
             '{date}' => date('Y-m-d H:i:s'),
             '{current_year}' => date('Y'),
-            '{site_name}' => 'Fundtracer AI',
+            '{site_name}' => $systemSettings['brand_name'] ?? 'Fundtracer AI',
             '{site_url}' => $systemSettings['site_url'] ?? 'https://your-site.com',
             '{support_email}' => $systemSettings['contact_email'] ?? 'support@your-site.com',
             '{brand_name}' => $systemSettings['brand_name'] ?? 'Fundtracer AI',
@@ -394,7 +394,7 @@ function getDefaultDepositTemplate() {
             </div>
             <div class="content">
                 <h3>Dear {first_name} {last_name},</h3>
-                <p>Thank you for your deposit submission to <strong>Fundtracer AI</strong> - Next-Generation Scam Recovery & Fund Tracing platform. We have received your deposit request and it is currently being processed by our financial team.</p>
+                <p>Thank you for your deposit submission to <strong>{site_name}</strong> - Next-Generation Scam Recovery & Fund Tracing platform. We have received your deposit request and it is currently being processed by our financial team.</p>
                 
                 <div class="details">
                     <h4>💳 Transaction Details:</h4>
@@ -424,9 +424,9 @@ function getDefaultDepositTemplate() {
                 
                 <p>Need assistance? Our support team is available 24/7 to help with any questions about your deposit or account.</p>
                 
-                <p style="margin-bottom: 0;">Thank you for choosing <strong>Fundtracer AI</strong> for your fund recovery needs!</p>
+                <p style="margin-bottom: 0;">Thank you for choosing <strong>{site_name}</strong> for your fund recovery needs!</p>
                 
-                <p style="margin-bottom: 0;"><strong>Best regards,</strong><br>The Fundtracer AI Team<br>Next-Generation Scam Recovery & Fund Tracing</p>
+                <p style="margin-bottom: 0;"><strong>Best regards,</strong><br>The {site_name} Team<br>Next-Generation Scam Recovery & Fund Tracing</p>
             </div>
             <div class="footer">
                 <p>&copy; {current_year} {site_name}. All rights reserved.</p>

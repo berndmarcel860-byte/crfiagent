@@ -2,6 +2,7 @@
 require_once 'config.php';
 require_once __DIR__ . '/mailer/password_reset_mailer.php';
 
+$brandName = htmlspecialchars($systemSettings['brand_name'] ?? 'Scam Recovery');
 $message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -35,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Passwort vergessen | Scam Recovery Dashboard</title>
+<title>Passwort vergessen | <?= $brandName ?> Dashboard</title>
 <link href="assets/css/app.min.css" rel="stylesheet">
 <style>
 .login-container{min-height:100vh;background:linear-gradient(135deg,#f5f7fa 0%,#c3cfe2 100%);}
@@ -54,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="card login-card">
 <div class="card-body p-4">
 <div class="login-logo">
-<img src="assets/images/logo/logo.png" alt="Scam Recovery">
+<img src="assets/images/logo/logo.png" alt="<?= $brandName ?>">
 </div>
 <h4 class="text-center mb-4">Passwort vergessen?</h4>
 <?= $message ?>

@@ -45,7 +45,7 @@ $currentDateTimeFormatted = $currentDateTime->format('Y-m-d H:i:s');
 
 // Branding - Already loaded from header.php but ensure defaults if not set
 if (!isset($appName)) {
-    $appName = "Fundtracer AI";
+    $appName = $systemSettings['brand_name'] ?? 'Fundtracer AI';
 }
 if (!isset($appTagline)) {
     $appTagline = "Next-Generation Scam Recovery & Fund Tracing";

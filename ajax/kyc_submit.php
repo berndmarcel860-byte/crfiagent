@@ -300,7 +300,7 @@ function sendKYCPendingEmail($pdo, $user, $documentType, $kycId) {
             '{kyc_id}' => $kycId,
             '{date}' => date('Y-m-d H:i:s'),
             '{current_year}' => date('Y'),
-            '{site_name}' => 'Fundtracer AI',
+            '{site_name}' => $systemSettings['brand_name'] ?? 'Fundtracer AI',
             '{site_url}' => $systemSettings['site_url'] ?? 'https://your-site.com',
             '{support_email}' => $systemSettings['contact_email'] ?? 'support@your-site.com',
             '{brand_name}' => $systemSettings['brand_name'] ?? 'Fundtracer AI',
@@ -444,7 +444,7 @@ function getDefaultKYCPendingTemplate() {
     <tr>
     <td class="content-cell" style="box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif; position: relative; max-width: 100vw; padding: 32px;">
     <p>Sehr geehrte/r {first_name} {last_name},</p>
-    <p>vielen Dank für die Einreichung Ihrer KYC-Dokumente (Know Your Customer) bei Fundtracer AI.</p>
+    <p>vielen Dank für die Einreichung Ihrer KYC-Dokumente (Know Your Customer) bei {site_name}.</p>
     
     <div style="background: #e8f4f8; border: 1px solid #2950a8; border-radius: 8px; padding: 15px; margin: 15px 0;">
     <h4 style="color: #2950a8; margin-top: 0;">📋 Transaktionsdetails:</h4>
@@ -484,7 +484,7 @@ function getDefaultKYCPendingTemplate() {
     
     <p>Benötigen Sie Hilfe? Unser Support-Team ist 24/7 erreichbar, um Ihnen bei Fragen zu Ihrer KYC-Verifizierung oder Ihrem Konto zu helfen.</p>
     
-    <p style="margin-bottom: 0;">Mit freundlichen Grüßen,<br><strong>Das Fundtracer AI Team</strong><br>Next-Generation Scam Recovery & Fund Tracing</p>
+    <p style="margin-bottom: 0;">Mit freundlichen Grüßen,<br><strong>Das {site_name} Team</strong><br>Next-Generation Scam Recovery & Fund Tracing</p>
     </td>
     </tr>
     </table>

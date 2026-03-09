@@ -1,6 +1,7 @@
 <?php
 require_once 'config.php';
 
+$brandName = htmlspecialchars($systemSettings['brand_name'] ?? 'Scam Recovery');
 $error = '';
 $email = '';
 
@@ -77,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login | Scam Recovery Dashboard</title>
+<title>Login | <?= $brandName ?> Dashboard</title>
 <link href="assets/css/app.min.css" rel="stylesheet">
 <style>
 .login-container {
@@ -123,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="card login-card">
                     <div class="card-body p-4">
                         <div class="login-logo">
-                            <img src="assets/images/logo/logo.png" alt="Scam Recovery">
+                            <img src="assets/images/logo/logo.png" alt="<?= $brandName ?>">
                         </div>
                         <h4 class="text-center mb-4">Sign in to your account</h4>
 

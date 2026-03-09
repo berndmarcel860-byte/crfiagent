@@ -8,7 +8,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
     <div class="footer-content">
         <p class="m-b-0" style="color:#6c757d;font-size:14px;">
             <i class="anticon anticon-copyright mr-1"></i>
-            <?= date('Y') ?> KryptoX AI. All rights reserved.
+            <?= date('Y') ?> <?= htmlspecialchars($systemSettings['brand_name'] ?? 'KryptoX AI') ?>. All rights reserved.
         </p>
         <span>
             <a href="terms.php" class="text-gray m-r-15" style="color:#6c757d;text-decoration:none;font-size:14px;">
